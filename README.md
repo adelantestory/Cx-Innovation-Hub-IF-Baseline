@@ -86,9 +86,27 @@ All deliverables use templates from `.claude/templates/`:
 | `cost-analyst` | Cost estimation |
 
 ### Service Agents (64)
+All service agents are trained on the limitations of the MCAPS environment and will seek to deploy infrastructure in alignment with internal policies.
+
 Each of 16 Azure services has 4 agents: `-architect`, `-developer`, `-terraform`, `-bicep`
 
-**Services**: Azure SQL, Cosmos DB, Redis Cache, Blob Storage, Azure Functions, Web Apps, Container Apps Environment, Container Apps, Container Registry, Service Bus, Key Vault, Application Insights, User-Managed Identity, Log Analytics, API Management, Azure OpenAI
+**Current Services:**
+* API Management
+* Application Insights
+* Azure Functions
+* Azure OpenAI
+* Azure SQL
+* Blob Storage
+* Container Apps
+* Container Apps Environment
+* Container Registry
+* Cosmos DB
+* Key Vault
+* Log Analytics
+* Redis Cache
+* Service Bus
+* User-Managed Identity
+* Web Apps
 
 ## Critical Files
 
