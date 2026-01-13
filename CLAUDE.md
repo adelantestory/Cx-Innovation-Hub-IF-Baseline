@@ -144,8 +144,6 @@ All standard project documentation **MUST** use the templates provided. Where th
 
 The process is defined in the subsections below. Some of this process, especially the initial stages, will require significant human interaction. This interaction is necessary to maximize clarify and alignment with the customer's objectives while minimizing confusion in the implementation during the latter stages.
 
-The subsections are smaller components of the larger delivery pipeline of the Innovation Factory.
-
 | Phase | Process Stage |
 | ---   | ---           |
 | Phase 1: Strategy Briefing / A Day in the Life (1 day) | Stage 1: Customer Discovery <br /> Stage 2. Scope of Work Generation <br /> Stage 3. Customer Sign-Off and Approval |
@@ -166,35 +164,30 @@ Human performs discovery with the customer. This may involve whiteboarding sessi
 
 All discovery material, including transcripts, other documentation, images, etc., will be placed in the artifacts folder so that agents can reference it at any time during the process.
 
-**Deliverables:**
-- Transcripts
-- Images
-- Any additional documentation
+**Deliverables:** Transcripts, Images, Any additional documentation
 
 ### 2. Scope of Work Generation
 At this stage, the human will interact with the `project-manager`, `business-analyst`, `cloud-architect`, and other service agents, based on the project requirements, to craft a scope of work.
 
 The agents will examine all artifacts provided (in the `artifacts/` folder) to understand what the customer is seeking to implement. Based on the content, the agents will engage with the human to generate a scope of work. The engagement will remain high-level to flush out any major gaps in the agents' understanding. The agents will seek to specifically identify objects, the scope of the project (including what's in and out of scope), deliverables, responsibilities (for both Microsoft and the customer), assumptions, dependencies, and success criteria. The `business-analyst` will also craft an executive summary based on the findings.
 
-This process is iterative but should take no more than an hour or so to complete. The responsible agents should seek to thoroughly understand the scope of work. At this stage, the technical implementation isn't highly important. Instead, it's simply defining the scope of work, which should mostly be gathered from the provided artifacts. While the agents can ask questions, those questions should only be for purpose of clarifying desired outcomes. So, the questions should not be all-encompassing.
+This process is iterative but should take no more than an hour or so to complete. The responsible agents should seek to thoroughly understand the scope of work. At this stage, the technical implementation isn't highly important. Instead, it's simply defining the scope of work, which should mostly be gathered from the provided artifacts. While the agents can ask questions, those questions should only be for purpose of clarifying desired outcomes.
 
 Once all necessary information is obtained, the agents will communicate their findings to the `document-writer` who will capture it in the designated sections of the `.claude/templates/SCOPE_OF_WORK.md` and save it as a new file: `deliverables/SCOPE_OF_WORK.md`.
 
-**Deliverables:**
-- Scope of Work (`deliverables/SCOPE_OF_WORK.md`)
+**Deliverables:** Scope of Work (`deliverables/SCOPE_OF_WORK.md`)
 
 ### 3. Customer Sign-Off and Approval
 The scope of work is transferred by a human to a formal Word document and shared with the customer. The customer and the human work together to ensure there is an alignment in expectations. This may require some modifications to the scope of work generated in step 2, but all of these changes will be captured in the formal Word document (the `deliverables/SCOPE_OF_WORK.md` will remain unchanged). Once alignment has been reached, the document is finalized, and the customer has approved the scope of work, the Word document will be stored in the `deliverables/` folder. The document could be named anything, but the _preferred_ naming convention is `MM-dd <customer>.docx`.
 
 At this stage, there is nothing needed from the agents.
 
-**Deliverables:**
-- A formal scope of work document in Word format that has been agreed upon by the customer and Microsoft
+**Deliverables:** A formal scope of work document in Word format that has been agreed upon by the customer and Microsoft
 
 ### 4. Agent Discovery
 This is stage is highly iterative, and the discussion between the agents and the human is in-depth. At this stage, the `project-manager`, `business-analyst`, and `cloud-architect` will examine all documents in the `artifacts/` folder. This will include the formal scope of work document completed in stage 3. After doing so, the team will engage the human and ask very specific questions regarding the product that perhaps are not covered in the documentation. These questions can range from technical to functional requirements, as well as any business requirements. Based on the discovered content, the team should engage other agents to ask questions within their domain of expertise. There are no questions considered irrelevant. The team **MUST** ask any pertinent questions and identify all gaps within the project.
 
-During this time, the `project-manager` and `business-analyst` will coordinate with the `spec-kit-expert` to capture all specifications in _Git Spec Kit_ format. Accordingly the `spec-kit-expert` will identify and capture all specifications and document them per Spec Kit's guidelines. They will be stored in the `concept/.specify/` folder. It should be noted that the "constitution" for Spec Kit is already in the folder.
+During this time, the `project-manager` and `business-analyst` will coordinate with the `spec-kit-expert` to capture all specifications in _Git Spec Kit_ format. Accordingly the `spec-kit-expert` will identify and capture all specifications and document them per Spec Kit's guidelines. They will be stored in the `concept/.specify/` folder.
 
 **Deliverables:**
 - Agents must possess a clear understanding of what is being built
@@ -203,19 +196,18 @@ During this time, the `project-manager` and `business-analyst` will coordinate w
 ### 5. Design Architecture
 Upon the completion of discovery, agents will create and propose a comprehensive architecture for the solution. The human will engage with the agents to adjust the architecture to human and customer preferences. The architecture must satisfy all business requirements as well as function within the security constraints of the Microsoft Azure tenant. Any functionality that does not meet the requirements of security constraints must be rejected.
 
-Agents must prefer simplicity in design. However, they must not sacrifice functionality. When there is a set of comparable solutions, agents must present these solutions to the human, along with pros and cons of each solution, to allow the human to decide. In some cases, qualifying questions may need to be asked by either the human or agent or both in order to determine the best approach. Agents should ask the human for as much information required to determine the best solution.
+Agents must prefer simplicity in design. However, they must not sacrifice functionality. When there is a set of comparable solutions, agents must present these solutions to the human, along with pros and cons of each solution, to allow the human to decide.
 
 Once the architecture has been determined, the `cloud-architect` will engage the `document-writer` to create a an architecture document (`concept/docs/ARCHITECTURE.md`) that captures the high-level architecture, workflow pipelines, application life cycles, Azure services infrastructure, data storage architecture, service dependencies, scaling and disaster recovery, error handling and retry logic, interactivity between systems, and reasons why specific solutions were chosen. The high-level architecture should include a mermaid diagram showing dependencies and connections between components.
 
 **Deliverables:**
 - An architecture document (`concept/docs/ARCHITECTURE.md`) describing the architecture and functionality of the project.
-- A cost estimate (`deliverables/COST_ESTIMATE.md`) describing all services in Azure based on three tiers of utilization: low, medium, and high. For each tier, the estimate should include any assumptions, limitations, and concerns while operating at the specific tier, as well as considerations for improvements and cost optimization.
+- A cost estimate (`deliverables/COST_ESTIMATE.md`) describing all services in Azure based on three tiers of utilization: low, medium, and high.
 
 ### 6. Create Deployment Plan
 Once the architecture document has been developed, the `cloud-architect` will engage all agent experts to craft the detailed configuration document (`concept/docs/CONFIGURATION.md`) through the `document-writer`. The guide must be meticulous and comprehensive, and it should describe the full configuration and implementation of the required Azure services. Ensure all configuration (e.g., environment variables) are included.
 
-**Deliverables:**
-- The configuration and implementation guide of the required Azure services (`concept/docs/CONFIGURATION.md`)
+**Deliverables:** The configuration and implementation guide of the required Azure services (`concept/docs/CONFIGURATION.md`)
 
 ### 7. Build Infrastructure & Applications
 
@@ -236,52 +228,45 @@ The `cloud-architect` will also construct a deployment script (`concept/infrastr
 
 **CRITICAL:** All resource labels should include stage, environment, and purpose (e.g., data, functions, etc.)
 
-**CRITICAL:** Deployment script must reference the Azure configuration JSON file (`concept/AZURE_CONFIG.json`) for all stages as well as update the file upon each deployment with the appropriate values. The base schema is below, but the `cloud-architect` may add additional properties as needed, based on the project requirements. Deployment scripts can use `jq` for querying values.
+**CRITICAL:** Deployment script must reference the Azure configuration JSON file (`concept/AZURE_CONFIG.json`) for all stages as well as update the file upon each deployment with the appropriate values.
 
 #### Applications
 
-An this stage, the `cloud-architect` will also engage all necessary agents to write the code for the applications. The code **MUST** follow all DRY and SOLID design principles. Absolutely, no monolithic code is acceptable. Additionally, all methods, functions, and procedures must follow a single-responsibility design. Code simplicity, readability, and maintainability are HIGH priority.
+At this stage, the `cloud-architect` will also engage all necessary agents to write the code for the applications. The code **MUST** follow all DRY and SOLID design principles. Absolutely, no monolithic code is acceptable. Additionally, all methods, functions, and procedures must follow a single-responsibility design. Code simplicity, readability, and maintainability are HIGH priority.
 
-All apps should be developed as independent solutions in the `concept/apps/` folder. Furthermore, they should have the capacity to be deployed individually (except in specific situations requiring them to be deployed collectively, as in containerization). If a set of apps are part of a containerized workload, the workload should be developed as its own independent solution.
+All apps should be developed as independent solutions in the `concept/apps/` folder. Furthermore, they should have the capacity to be deployed individually (except in specific situations requiring them to be deployed collectively, as in containerization).
 
-The `cloud-architect` must plan a **STAGED** deployment process in that apps are deployed together in accordance with like domain, application layer, or purpose. This is to ensure that a specific stage's apps can be redeployed at any time without requiring a full redeployment of the application architecture
+The `cloud-architect` must plan a **STAGED** deployment process in that apps are deployed together in accordance with like domain, application layer, or purpose.
 
 Additionally, should the applications require any form of relational database, the `cloud-architect` must engage the appropriate database agent to build the scripts necessary for constructing the data repository. These scripts should include tables, views, procedures, seed data, etc. In the folder structure above, an example has been given the SQL. However, the `cloud-architect` should instruct the appropriate database developer to follow the model for other repositories (e.g., sql, postgres, mysql, mongo, databricks).
 
-The `cloud-architect` must instruct all agents to communicate any application-specific critical notes to the `document-writer` so that they are captured in the development guide (`concept/docs/DEVELOPMENT.md`).
+Upon completion of building the scripts, modules, and applications, the `cloud-architect` will engage the `document-writer` to build a comprehensive, step-by-step deployment guide (`concept/docs/DEPLOYMENT.md`) that informs and instructs the human how to deploy the environment, including any manual steps. From this point forward, should the deployment process or configuration change, it is **CRITICAL** that the `cloud-architect` informs:
+- the `document-writer` so that guides can be updated appropriately
+- the appropriate terraform/bicep developers so that modules can be updated
+- the appropriate service developers so that source code can be updated
+- the appropriate database developers so that database scripts can be updated
 
-Finally, upon completion of building the scripts and the modules (Terraform and Bicep), applications, etc., the `cloud-architect` will engage the `document-writer` to build a comprehensive, step-by-step deployment guide (`concept/docs/DEPLOYMENT.md`) that informs and instructs the human how to deploy the environment, including any manual steps. The deployment guide will start with infrastructure then follow with the applications. Furthermore, from this point forward, should the deployment process or configuration for the infrastructure or applications change, it is **CRITICAL** that the `cloud-architect` informs:
-- the `document-writer` so that the deployment guide can be updated appropriately
-- the appropriate terraform developer for the service that has changed so that the terraform module can be updated
-- the appropriate bicep developer for the service that has changed so that the bicep module can be updated
-- the appropriate service developer(s) can update any necessary source code
-- the appropriate database developer(s) can update any database scripts.
-
-**It is ABSOLUTELY CRITICAL that all documentation, scripts, and source code remain up-to-date AT ALL TIMES. There is NO EXCEPTION to this rule.**
+**It is ABSOLUTELY CRITICAL that all documentation, scripts, and source code remain up-to-date AT ALL TIMES.**
 
 **Deliverables:**
-- A comprehensive, step-by-step deployment guide that instructs the human how to deploy the Azure service infrastructure (`concept/docs/DEPLOYMENT.md`)
-- A deployment script that enables the human to deploy stages independently (`concept/infrastructure/deploy.sh`)
-- Terraform modules for deploying the infrastructure (`concept/infrastructure/terraform/`)
-- Bicep modules for deploying the infrastructure (`concept/infrastructure/bicep/`)
-- All applications as independent solutions (`concept/apps/`)
-- Any additional development guides or important notes (`concept/docs/DEVELOPMENT.md`)
-- Step-by-step instructions on deploying all services and application components (`concept/docs/DEPLOYMENT.md`)
-- (OPTIONAL) any DDL scripts. These should be created according to path and file structure above, with DDL scripts numbered and dedicated to each purpose (`concept/sql/`)
-
-In all guides, include all necessary steps, and each guide must maintain awareness of dependencies (e.g., ensure that services and deployments take place in an order that honors dependencies).
+- Deployment guide (`concept/docs/DEPLOYMENT.md`)
+- Development guide (`concept/docs/DEVELOPMENT.md`)
+- Deployment script (`concept/infrastructure/deploy.sh`)
+- Terraform modules (`concept/infrastructure/terraform/`)
+- Bicep modules (`concept/infrastructure/bicep/`)
+- Applications (`concept/apps/`)
+- (OPTIONAL) DDL scripts (`concept/sql/`)
 
 ### 8. Deploy Infrastructure
-After the scripts and modules have been developed, human will use the deployment script to deploy each stage of the infrastructure and appropriate services. This process will ensure two things:
-1. All services are deployed fully with the necessary resources available for a region (some regions have limited resource availability)
+After the scripts and modules have been developed, human will use the deployment script to deploy each stage of the infrastructure. This process will ensure:
+1. All services are deployed fully with the necessary resources available for a region
 2. All services are deployed in accordance with Microsoft's security policies
 
-In the case that either requirement fails, the scripts can be modified, if needed, and ran in a different region.
+In the case that either requirement fails, the scripts can be modified and ran in a different region.
 
-Human will be responsible for **manually** deploying the environment using the script and modules provided by the agents. If an issue arises (misconfiguration, service incompatibility, etc.), the human will engage the `cloud-architect` to assign the appropriate agent to adjust the configuration where needed. Additionally, the `cloud-architect` will communicate any necessary changes to documentation to the `document-writer`.
+Human will be responsible for **manually** deploying the environment using the script and modules provided by the agents. If an issue arises, the human will engage the `cloud-architect` to assign the appropriate agent to adjust the configuration. Additionally, the `cloud-architect` will communicate any necessary changes to documentation to the `document-writer`.
 
 **Rollback Procedure:**
-If deployment fails or causes issues:
 1. Document the failure in detail
 2. Use `-stage` flag to redeploy only the affected stage
 3. If rollback is needed, delete the resource group for that stage and redeploy
@@ -290,65 +275,56 @@ If deployment fails or causes issues:
 **Deliverables:**
 - The human will deploy the environment to Azure using the scripts and modules
 - The appropriate agents will update the scripts, as directed by the `cloud-architect`, to accommodate any necessary changes
-- The `document-writer` will update the deployment guide (`concept/docs/DEPLOYMENT.md`), as directed by the `cloud-architect`, to accommodate any necessary changes
+- The `document-writer` will update the deployment guide, as directed by the `cloud-architect`, to accommodate any necessary changes
 
 ### 9. Deploy Application Components
-After the applications have been developed, human will use the deployment and development guides to deploy each application component. This process will ensure two things:
-1. All applications are deployed fully with the correct configuration
-2. All applications are deployed in accordance with Microsoft's security policies
-
-In the case that either requirement fails, the application source can be modified, if needed, and deployed again.
-
-Human will be responsible for **manually** deploying the applications using the development and deployment guides. If an issue arises (bug, misconfiguration, incompatibility, etc.), the human will engage the `cloud-architect` to assign the appropriate agent to adjust the application where needed. Additionally, the `cloud-architect` will communicate any necessary changes to documentation to the `document-writer`.
+After the applications have been developed, human will use the deployment and development guides to deploy each application component. If an issue arises, the human will engage the `cloud-architect` to assign the appropriate agent to adjust the application. Additionally, the `cloud-architect` will communicate any necessary changes to documentation to the `document-writer`.
 
 **Deliverables:**
 - The human will deploy the applications to Azure using the deployment and development guides
-- The appropriate agents will update the source code, as directed by the `cloud-architect`, to accommodate any necessary changes
-- The `document-writer` will update the deployment guide (`concept/docs/DEPLOYMENT.md`) and/or development guide (`concept/docs/DEVELOPMENT.md`), as directed by the `cloud-architect`, to accommodate any necessary changes
+- The appropriate agents will update the source code, as directed by the `cloud-architect`
+- The `document-writer` will update the guides, as directed by the `cloud-architect`
 
 ### 10. Testing & Validation
-Once the application has been built and is functioning, the human will inform the customer. At this time, the customer will test the application's features and functionality through manual interaction and validation. The customer will document and communicate any shortcomings, missing or failed feature implementations, etc. of the POC. The human will gather this feedback.
+Once the application has been built and is functioning, the human will inform the customer. The customer will test the application's features through manual interaction and validation, documenting any shortcomings. The human gathers this feedback.
 
 While the customer performs manual testing, agents can assist by:
 - `business-analyst` prepares a validation checklist based on success criteria from SOW
 - `document-writer` documents any issues reported by the customer
-- Agents remain available for quick clarifications on expected behavior
 
-**Deliverables:**
-- Customer will communicate additional requirements, changes, etc. to human
+**Deliverables:** Customer will communicate additional requirements, changes, etc. to human
 
 ### 11. Refactoring & Improvement
-Human will engage agents to improve the solution based on the customer feedback. The `project-manager`, `business-analyst`, and `cloud-architect` should engage in a conversation with the human to adequately understand the changes and to construct a plan to implement those changes. During this time, those agents **MUST** ask pertinent questions to the changes requested, especially if said changes require modifications to the infrastructure or application architecture. Furthermore, those agents **MUST** communicate to the human the level and breadth of impact that implementing those changes will make on the underlying system.
+Human will engage agents to improve the solution based on customer feedback. The `project-manager`, `business-analyst`, and `cloud-architect` should engage in a conversation with the human to adequately understand the changes and to construct a plan to implement those changes. Those agents **MUST** communicate to the human the level and breadth of impact that implementing those changes will make on the underlying system.
 
 Once the changes have been identified, the following **MUST** occur:
-1. the `document-writer` must capture all relevant changes in the applicable documentation, whether that are the architecture diagrams, configuration guides, or deployment and development guides
-2. the `spec-kit-expert` must _append_ requirements to the Spec Kit documentation so that human stakeholders can see the evolution of changes over time
-3. the `cloud-architect` must assign updates to deployment scripts, whether that includes terraform and/or bicep, and the `cloud-architect` must update the `concept/infrastructure/deploy.sh` script, if necessary
-4. the `cloud-architect` must assign additional relevant work to the appropriate agents as defined in the delegate rules below
+1. the `document-writer` must capture all relevant changes in the applicable documentation
+2. the `spec-kit-expert` must _append_ requirements to the Spec Kit documentation
+3. the `cloud-architect` must assign updates to deployment scripts
+4. the `cloud-architect` must assign additional relevant work to the appropriate agents
 
 **Deliverables:**
-- All documentation changes, including but not limited architecture diagrams, configuration guides, or deployment and development guides updated by the `document-writer`
+- All documentation changes updated by the `document-writer`
 - All new requirements captured in the Spec Kit documentation by the `spec-kit-expert`
-- All deployment scripts, including terraform and bicep, have been updated by the `cloud-architect` or the service agents responsible for their respective service's terraform and bicep scripts
-- Any additional code changes or implementation changes have been completed by agents as assigned by the `cloud-architect`
+- All deployment scripts have been updated by the `cloud-architect` or the service agents
+- Any additional code changes have been completed by agents as assigned by the `cloud-architect`
 
 ### 12. Prepare Final Deliverables
-At this final stage, the `project-manager` and `cloud-architect` will engage the `document-writer` to produce two documents ("as-built" and post-mortem) as deliverables to the customer. The `project-manager`, `business-analyst`, and `cloud-architect` will examine the two documents to understand what content is required. They will complete the sections based on their knowledge and feedback from other agents. Then, for any questions or gaps in information, the `project-manager`, `business-analyst`, and `cloud-architect` ask the human for any clarification or further guidance. The `document-writer` should adequately capture all information and place that information in the appropriate sections of the documents.
+At this final stage, the `project-manager` and `cloud-architect` will engage the `document-writer` to produce two documents ("as-built" and post-mortem) as deliverables to the customer. The `project-manager`, `business-analyst`, and `cloud-architect` will examine the two documents to understand what content is required. They will complete the sections based on their knowledge and feedback from other agents. Then, for any questions or gaps in information, they will ask the human for clarification. The `document-writer` should capture all information in the appropriate sections.
 
-These templates for these documents can be found in `.claude/templates` but should be copied to the `deliverables/` folder before updating.
+These templates can be found in `.claude/templates` but should be copied to the `deliverables/` folder before updating.
 
-- `/deliverables/AS_BUILT.md` - based on the provided template, an as-built document describing the current, final state of the application and its supporting architecture
-- `/deliverables/POST_MORTEM.md` - based on the provided template, a detailed analysis of what was built, specific gaps, why those gaps exist, how to improve, and additional details for learning from the POC
+- `/deliverables/AS_BUILT.md` - as-built document describing the current, final state of the application and its supporting architecture
+- `/deliverables/POST_MORTEM.md` - detailed analysis of what was built, specific gaps, why those gaps exist, how to improve, and additional details for learning from the POC
 
 ### Phase 6: Hand Off
 The handoff phase is ongoing and managed by the human with Microsoft Customer Success and/or the customer's preferred partner. Agents are not directly involved but may be engaged if questions arise during handoff.
 
-**Pre-Handoff Checklist (Stage 12 deliverables):**
+**Pre-Handoff Checklist:**
 - `/deliverables/AS_BUILT.md` is complete and accurate
 - `/deliverables/POST_MORTEM.md` is complete with all learnings captured
 - All source code is in the repository with README files
 - `/concept/docs/DEPLOYMENT.md` contains all steps needed to recreate the environment
-- (IF NEEDED) `/concept/docs/DEVELOPMENT.md` contains any critical development notes
 - `/concept/AZURE_CONFIG.json` reflects the final deployed state
 - All known limitations are documented
 
@@ -415,103 +391,33 @@ Each service has four agents: `-architect`, `-developer`, `-terraform`, `-bicep`
 
 ## AZURE_CONFIG.json Schema
 
-The `cloud-architect` owns this file and, alongside the deployment scripts, maintains this file with all project configuration. The base schema with sample data is below. The agents must copy the `AZURE_CONFIG.json` file from `.claude/templates/` to `concept/` and use the copied file for maintaining all configuration settings.
-
-NOTE: Below is a sample file definition. It is not valid JSON but is intended for illustrative purpose. Not all objects are required. Only those objects in the template file are absolutely required. Additionally, when capturing information for deployed resources, name and unique resource id are required, but any additional pertinent information (e.g., sku, configuration) should be included.
+The `cloud-architect` owns this file and, alongside the deployment scripts, maintains it with all project configuration. Copy from `.claude/templates/AZURE_CONFIG.json` to `concept/`. Resources require `name`, `id`, `resourceGroup` at minimum; add SKU, configuration as needed.
 
 ```json
 {
-  "project": {
-    "name": "My App",
-    "customer": "Contoso",
-    "environment": "dev",
-    "createdDate": "2026-01-01",
-    "lastModified": "2026-01-01"
-  },
-  "subscription": {
-    "id": "00000000-0000-0000-0000-000000000000",
-    "name": "Development",
-    "tenantId": "00000000-0000-0000-0000-000000000000",
-    "resourceProviders": [
-      "Microsoft.Compute"
-    ]
-  },
-  "tags": {
-    "required": ["Environment", "Stage", "Purpose"],
-    "optional": []
-  },
+  "project": { "name": "", "customer": "", "environment": "dev", "createdDate": "", "lastModified": "" },
+  "subscription": { "id": "", "name": "", "tenantId": "", "resourceProviders": [] },
+  "tags": { "required": ["Environment", "Stage", "Purpose"], "optional": [] },
   "stages": {
     "stage1": {
       "name": "Foundation",
-      "description": "Deploys foundational components for the environment",
+      "description": "Foundational components",
       "resourceGroups": {
-        "group1": {
-          "name": "rg-my-app-foundation",
-          "location": "eastus",
-          "tags": {
-            "Environment": "Dev",
-            "Stage": "Stage 1",
-            "Purpose": "Foundation"
-          }
-        }
+        "group1": { "name": "rg-{uid}-foundation", "location": "eastus", "tags": {} }
       },
       "managedIdentities": {},
       "resources": {
-        "keyVault": {
-          "name": "",
-          "id": "",
-          "resourceGroup": "",
-          ...
-        },
-        "appInsights": {
-          "name": "",
-          "id": "",
-          "resourceGroup": "",
-          ...
-        },
-        "logAnalytics": {
-          "name": "",
-          "id": "",
-          "resourceGroup": "",
-          ...
-        }
+        "keyVault": { "name": "", "id": "", "resourceGroup": "" },
+        "appInsights": { "name": "", "id": "", "resourceGroup": "" },
+        "logAnalytics": { "name": "", "id": "", "resourceGroup": "" }
       }
     },
     "stage2": {
       "name": "Data",
-      "description": "Deploys database components for the application",
-      "resourceGroups": {
-        "group1": {
-          "name": "rg-my-app-data",
-          "location": "eastus",
-          "tags": {
-            "Environment": "Dev",
-            "Stage": "Stage 2",
-            "Purpose": "Data"
-          }
-        }
-      },
+      "description": "Database components",
+      "resourceGroups": { "group1": { "name": "rg-{uid}-data", "location": "eastus", "tags": {} } },
       "managedIdentities": {},
-      "resources": {
-        "azureSql": {
-          "name": "",
-          "id": "",
-          "resourceGroup": "",
-          ...
-        },
-        "cosmosDb": {
-          "name": "",
-          "id": "",
-          "resourceGroup": "",
-          ...
-        },
-        "redisCache": {
-          "name": "",
-          "id": "",
-          "resourceGroup": "",
-          ...
-        }
-      }
+      "resources": { "azureSql": {}, "cosmosDb": {}, "redisCache": {} }
     }
   }
 }
@@ -533,43 +439,21 @@ The `project-manager` coordinates with `spec-kit-expert` to ensure documentation
 ### New Service Implementation
 ```
 User: "Add Cosmos DB to the solution"
-
 1. project-manager acknowledges and coordinates
-2. business-analyst ensures all requirements are captured
-3. spec-kit-expert updates specifications
-4. cloud-architect designs integration with existing services
-5. cosmos-db-architect defines configuration and security
-6. cosmos-db-developer writes data access code
-7. cosmos-db-terraform OR cosmos-db-bicep creates IaC
-8. document-writer captures documentation
-9. cost-analyst updates cost estimates
-```
-
-### Discovery Call Analysis
-```
-User: "Analyze this discovery call transcript"
-
-1. business-analyst analyzes transcript
-2. business-analyst identifies requirements and gaps
-3. business-analyst coordinates with service architects for feasibility
-4. project-manager creates scope of work
-5. document-writer updates scope of work
+2. cloud-architect designs integration with existing services
+3. cosmos-db-architect defines configuration and security
+4. cosmos-db-developer writes data access code
+5. cosmos-db-terraform OR cosmos-db-bicep creates IaC
+6. document-writer captures documentation
+7. cost-analyst updates cost estimates
 ```
 
 ### Deployment Preparation
 ```
 User: "Prepare deployment for staging"
-
 1. cloud-architect validates AZURE_CONFIG.json
 2. subscription-expert confirms resource providers
 3. terraform/bicep agents generate deployment scripts
-4. document-writer updates deployment runbook and development guide
+4. document-writer updates deployment runbook
 5. human manually executes changes
 ```
-
-## Adding New Service Agents
-
-When a new Azure service is needed:
-1. Create four agent files: `<service>-architect.md`, `<service>-developer.md`, `<service>-terraform.md`, `<service>-bicep.md`
-2. Update this CLAUDE.md to include the new service in the agent table
-3. Inform `cloud-architect` of the new service availability
