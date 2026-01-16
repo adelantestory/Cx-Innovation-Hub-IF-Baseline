@@ -1,0 +1,210 @@
+# Project Agent Manifest Template
+# Copy to: .claude/context/PROJECT_AGENT_MANIFEST.yaml
+# Maintained by: cloud-architect
+# Created during: Stage 5 (Architecture)
+
+metadata:
+  last_modified: "YYYY-MM-DD"
+  iac_preference: bicep  # bicep | terraform - choose one for the project
+
+# =============================================================================
+# APPLICATIONS
+# Define each application in concept/apps/
+# =============================================================================
+applications:
+  # Example application entry:
+  # app-id:
+  #   name: Human-readable name
+  #   type: container-app | function-app | web-app
+  #   path: concept/apps/<folder>/
+  #   identity: managed-identity-name
+  #   agents:
+  #     primary: <platform>-developer
+  #     architect: <platform>-architect
+  #     iac: <platform>-bicep or <platform>-terraform
+  #   consumes:
+  #     - service: service-id
+  #       ops: [read, write, query, send, receive, etc.]
+
+  app-1:
+    name:
+    type:
+    path: concept/apps//
+    identity:
+    agents:
+      primary:
+      architect:
+      iac:
+    consumes: []
+
+# =============================================================================
+# AZURE SERVICES
+# Define each Azure service used in the project
+# =============================================================================
+services:
+  # Example service entry:
+  # service-id:
+  #   agents: [<service>-architect, <service>-developer, <service>-terraform, <service>-bicep]
+  #   rbac_role: Required RBAC role for Managed Identity access
+  #   consumed_by: [app-1, app-2]
+  #   depends_on: [other-service-id]
+
+  # Common services - uncomment and configure as needed:
+
+  # cosmos-db:
+  #   agents: [cosmos-db-architect, cosmos-db-developer, cosmos-db-terraform, cosmos-db-bicep]
+  #   rbac_role: Cosmos DB Built-in Data Contributor
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # blob-storage:
+  #   agents: [blob-storage-architect, blob-storage-developer, blob-storage-terraform, blob-storage-bicep]
+  #   rbac_role: Storage Blob Data Contributor
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # service-bus:
+  #   agents: [service-bus-architect, service-bus-developer, service-bus-terraform, service-bus-bicep]
+  #   rbac_role: Azure Service Bus Data Owner
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # azure-openai:
+  #   agents: [azure-openai-architect, azure-openai-developer, azure-openai-terraform, azure-openai-bicep]
+  #   rbac_role: Cognitive Services User
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # azure-sql:
+  #   agents: [azure-sql-architect, azure-sql-developer, azure-sql-terraform, azure-sql-bicep]
+  #   rbac_role: db_datareader, db_datawriter (contained user)
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # redis-cache:
+  #   agents: [redis-cache-architect, redis-cache-developer, redis-cache-terraform, redis-cache-bicep]
+  #   rbac_role: Redis Cache Contributor
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # key-vault:
+  #   agents: [key-vault-architect, key-vault-developer, key-vault-terraform, key-vault-bicep]
+  #   rbac_role: Key Vault Secrets User
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # app-insights:
+  #   agents: [app-insights-architect, app-insights-developer, app-insights-terraform, app-insights-bicep]
+  #   rbac_role: null
+  #   consumed_by: []
+  #   depends_on: [log-analytics]
+
+  # log-analytics:
+  #   agents: [log-analytics-architect, log-analytics-developer, log-analytics-terraform, log-analytics-bicep]
+  #   rbac_role: null
+  #   consumed_by: []
+  #   depends_on: []
+
+  # container-apps-environment:
+  #   agents: [container-apps-environment-architect, container-apps-environment-developer, container-apps-environment-terraform, container-apps-environment-bicep]
+  #   rbac_role: null
+  #   consumed_by: []
+  #   depends_on: [log-analytics]
+
+  # container-registry:
+  #   agents: [container-registry-architect, container-registry-developer, container-registry-terraform, container-registry-bicep]
+  #   rbac_role: AcrPull
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # api-management:
+  #   agents: [api-management-architect, api-management-developer, api-management-terraform, api-management-bicep]
+  #   rbac_role: API Management Service Contributor
+  #   consumed_by: []
+  #   depends_on: [user-managed-identity]
+
+  # Always include - foundational for all projects:
+  user-managed-identity:
+    agents: [user-managed-identity-architect, user-managed-identity-developer, user-managed-identity-terraform, user-managed-identity-bicep]
+    rbac_role: null
+    consumed_by: [all]
+    depends_on: []
+
+# =============================================================================
+# ENGAGEMENT RULES
+# These rules define when to engage which agents - typically unchanged per project
+# =============================================================================
+engagement_rules:
+  application_code_change:
+    description: When modifying code in concept/apps/<app>/
+    engage:
+      - role: primary
+        source: applications.<app>.agents.primary
+        task: Write application code
+      - role: architect
+        source: applications.<app>.agents.architect
+        task: Review platform alignment
+      - role: service_developer
+        source: services.<consumed_service>.agents[1]
+        condition: When code touches this service
+        task: Review SDK usage and patterns
+      - role: service_architect
+        source: services.<consumed_service>.agents[0]
+        condition: When schema/config/permissions change
+        task: Approve configuration changes
+
+  service_config_change:
+    description: When modifying Azure service configuration
+    engage:
+      - agent: cloud-architect
+        task: Update AZURE_CONFIG.json
+      - agent: <service>-architect
+        task: Design configuration change
+      - agent: <service>-bicep or <service>-terraform
+        task: Update IaC
+      - role: app_primary
+        source: For each app in services.<service>.consumed_by
+        task: Update application code if needed
+
+  infrastructure_change:
+    description: When adding/modifying Azure resources
+    engage:
+      - agent: cloud-architect
+        task: Architecture approval, AZURE_CONFIG.json
+      - agent: subscription-expert
+        task: Resource providers, quotas
+      - agent: <service>-architect
+        task: Resource design
+      - agent: <service>-bicep or <service>-terraform
+        task: Create IaC
+      - agent: user-managed-identity-architect
+        condition: If RBAC needed
+        task: Configure identity roles
+      - agent: document-writer
+        task: Update ARCHITECTURE.md
+      - agent: cost-analyst
+        task: Update COST_ESTIMATE.md
+
+  cross_cutting_change:
+    description: When change affects multiple apps or services
+    engage:
+      - agent: cloud-architect
+        task: Impact analysis, coordination
+      - agents: All affected service architects
+      - agents: All affected app primary developers
+      - agent: project-manager
+        condition: If scope impact
+        task: Scope assessment
+
+# =============================================================================
+# PATH MAPPINGS
+# Update paths based on your project's applications
+# =============================================================================
+path_to_agent:
+  concept/apps/<app-1>/: <platform>-developer
+  concept/infrastructure/bicep/: <service>-bicep
+  concept/infrastructure/terraform/: <service>-terraform
+  concept/docs/: document-writer
+  concept/.specify/: spec-kit-expert
+  concept/sql/: azure-sql-developer
+  concept/AZURE_CONFIG.json: cloud-architect
