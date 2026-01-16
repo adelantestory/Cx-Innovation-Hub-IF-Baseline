@@ -79,6 +79,7 @@ Immediately delegate to `qa-engineer`. Do NOT attempt to diagnose directly. `qa-
 ├── concept/                     # Client-facing deliverables (this folder and its contents will be under git)
 │   ├── .specify/                # Spec kit files
 │   ├── AZURE_CONFIG.json        # Central configuration (updated and referenced by each 'deploy.sh' script)
+│   ├── README.md                # Public repository README (created in Stage 12)
 │   ├── docs/                    # Implementation documentation
 │   │   ├── ARCHITECTURE.md      # Architecture document
 │   │   ├── CONFIGURATION.md     # Service configuration guide
@@ -110,6 +111,7 @@ All standard project documentation **MUST** use the templates provided. Where th
 | --- | --- |
 | .specify/memory/constitution.md | _(Pre-populated - do not modify)_ |
 | .claude/context/PROJECT_AGENT_MANIFEST.yaml | .claude/templates/PROJECT_AGENT_MANIFEST.yaml |
+| concept/README.md | .claude/templates/README.md |
 | deliverables/AS_BUILT.md | .claude/templates/AS_BUILT.md |
 | deliverables/COST_ESTIMATE.md | .claude/templates/COST_ESTIMATE.md |
 | deliverables/POST_MORTEM.md | .claude/templates/POST_MORTEM.md |
