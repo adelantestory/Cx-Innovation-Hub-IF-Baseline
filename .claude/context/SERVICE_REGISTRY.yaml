@@ -476,3 +476,44 @@ services:
       - Create early in deployment sequence
       - Assign to resources that need to authenticate
       - RBAC roles assigned TO this identity for resource access
+
+  # =============================================================================
+  # ANALYTICS SERVICES
+  # =============================================================================
+
+  databricks:
+    display_name: Azure Databricks
+    resource_provider: Microsoft.Databricks
+    terraform_resource: azurerm_databricks_workspace
+    bicep_resource: Microsoft.Databricks/workspaces
+    bicep_api_version: "2023-02-01"
+    private_endpoint:
+      dns_zone: privatelink.azuredatabricks.net
+      group_id: databricks_ui_api
+    rbac_roles:
+      contributor: Contributor
+      admin: Owner
+    authentication:
+      method: Azure Active Directory with Managed Identity
+      token_scope: 2ff814a6-3304-4ab8-85cb-cd0e6f879c1d/.default  # Azure Databricks resource ID
+      notes: |
+        - Use AAD authentication for workspace access
+        - Service principals or managed identities for automation
+        - Personal Access Tokens (PATs) should be avoided in production
+    sdk_packages:
+      python:
+        - databricks-sql-connector
+        - databricks-sdk
+        - azure-identity
+      dotnet:
+        - Microsoft.Azure.Databricks.Client
+        - Azure.Identity
+      nodejs:
+        - "@databricks/sql"
+        - "@azure/identity"
+    special_considerations:
+      - Requires VNet injection for private networking
+      - Workspace must be in separate resource group from VNet
+      - Supports Unity Catalog for centralized governance
+      - Cluster policies enforce compute governance
+      - Secret scopes integrate with Azure Key Vault
