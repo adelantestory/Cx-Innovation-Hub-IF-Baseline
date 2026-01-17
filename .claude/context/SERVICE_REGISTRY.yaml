@@ -517,3 +517,58 @@ services:
       - Supports Unity Catalog for centralized governance
       - Cluster policies enforce compute governance
       - Secret scopes integrate with Azure Key Vault
+
+  fabric:
+    display_name: Microsoft Fabric
+    resource_provider: Microsoft.PowerBI
+    terraform_resource: azurerm_powerbi_embedded
+    bicep_resource: Microsoft.PowerBI/capacities
+    bicep_api_version: "2021-01-01"
+    private_endpoint:
+      dns_zone: privatelink.pbidedicated.windows.net
+      group_id: tenant
+    rbac_roles:
+      workspace_admin: Workspace Admin (Fabric-level, not Azure RBAC)
+      workspace_member: Workspace Member (Fabric-level, not Azure RBAC)
+      workspace_contributor: Workspace Contributor (Fabric-level, not Azure RBAC)
+      workspace_viewer: Workspace Viewer (Fabric-level, not Azure RBAC)
+      # For Azure resource access from Fabric (pipelines, notebooks):
+      storage_access: Storage Blob Data Contributor
+      keyvault_access: Key Vault Secrets User
+    rbac_role_ids:
+      storage_access: ba92f5b4-2d11-453d-a403-e96b0029c9fe
+      keyvault_access: 4633458b-17de-408a-b874-0445c86b69e6
+    authentication:
+      method: Azure AD with Managed Identity
+      token_scope: https://api.fabric.microsoft.com/.default
+      notes: |
+        - Workspace roles (Admin, Member, Contributor, Viewer) are Fabric-specific
+        - Managed Identity used for Fabric REST API access
+        - Managed Identity used in pipelines/notebooks for Azure resource access
+        - OneLake shortcuts can use Managed Identity to access ADLS Gen2
+        - Private Link requires Premium capacity
+    sdk_packages:
+      python:
+        - azure-identity
+        - requests  # For Fabric REST API
+        - pyodbc  # For SQL endpoint
+        - pyspark  # In Fabric notebooks
+      dotnet:
+        - Azure.Identity
+        - System.Net.Http  # For Fabric REST API
+        - Microsoft.Data.SqlClient  # For SQL endpoint
+      nodejs:
+        - "@azure/identity"
+        - axios  # For Fabric REST API
+        - tedious  # For SQL endpoint
+    special_considerations:
+      - Limited Terraform/Bicep support (capacity only, not workspaces/items)
+      - Workspace creation requires Fabric REST API or Portal
+      - OneLake provides unified data lake across all Fabric items
+      - Lakehouse uses Delta Lake format with ACID transactions
+      - Warehouse provides T-SQL endpoint for BI tools
+      - Data pipelines similar to ADF but integrated with OneLake
+      - Semantic models (formerly Power BI datasets) support DAX and RLS
+      - Minimum capacity SKU: F2 for POC/dev, F64+ for production
+      - Real-time analytics via Eventhouse and KQL
+      - Shortcuts enable virtual data integration without copying
