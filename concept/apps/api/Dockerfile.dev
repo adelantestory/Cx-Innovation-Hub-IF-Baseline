@@ -1,0 +1,38 @@
+# =============================================================================
+# Taskify Backend API - Development Dockerfile
+# =============================================================================
+# This Dockerfile is used ONLY for local development via docker-compose.
+# It runs the Express.js server with nodemon for automatic restart on file
+# changes. The production Dockerfile (Dockerfile) is a separate file used
+# for Azure Container Apps deployment.
+#
+# Key differences from production Dockerfile:
+#   - Uses nodemon for hot reload
+#   - NODE_ENV=development
+#   - Source code is bind-mounted from host (not copied into image)
+#   - No multi-stage build needed
+#   - Azure SDK packages (@azure/identity, @azure/keyvault-secrets) are
+#     installed but not used; the app detects local mode via empty
+#     AZURE_KEY_VAULT_URL and reads PostgreSQL credentials from env vars
+# =============================================================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install nodemon globally for hot reload
+RUN npm install -g nodemon
+
+# Copy package files and install dependencies
+# These are copied (not mounted) so npm install runs inside the container.
+# The source code is bind-mounted separately in docker-compose.yml.
+COPY package*.json ./
+RUN npm install
+
+# Source code is bind-mounted from docker-compose.yml at /app/src
+# No COPY of source code here -- changes on host are reflected immediately.
+
+EXPOSE 3000
+
+# Start with nodemon watching the src directory
+CMD ["nodemon", "--watch", "src", "--ext", "js,json", "src/index.js"]

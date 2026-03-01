@@ -10,6 +10,49 @@ services:
   # DATA SERVICES
   # =============================================================================
 
+  postgresql:
+    display_name: Azure Database for PostgreSQL Flexible Server
+    resource_provider: Microsoft.DBforPostgreSQL
+    terraform_resource: azurerm_postgresql_flexible_server, azurerm_postgresql_flexible_server_database
+    bicep_resource: Microsoft.DBforPostgreSQL/flexibleServers
+    bicep_api_version: "2022-12-01"
+    private_endpoint:
+      dns_zone: privatelink.postgres.database.azure.com
+      group_id: postgresqlServer
+    rbac_roles:
+      # PostgreSQL Flexible Server uses native PostgreSQL authentication or Azure AD
+      # RBAC roles below are for Azure AD authentication mode
+      data_read: Reader (Azure AD contained user with SELECT)
+      data_write: Contributor (Azure AD contained user with INSERT/UPDATE/DELETE)
+      admin: Server admin (PostgreSQL native or Azure AD admin)
+    authentication:
+      method: PostgreSQL native authentication with credentials stored in Key Vault
+      token_scope: https://ossrdbms-aad.database.windows.net/.default
+      notes: |
+        - For POC: Use PostgreSQL native auth with password in Key Vault
+        - For production: Use Azure AD authentication with Managed Identity
+        - SSL/TLS enforcement must be enabled
+        - Connection string format: postgresql://user:password@host:5432/database?sslmode=require
+    sdk_packages:
+      nodejs:
+        - pg
+        - "@azure/identity"
+        - "@azure/keyvault-secrets"
+      python:
+        - psycopg2-binary
+        - azure-identity
+        - azure-keyvault-secrets
+      dotnet:
+        - Npgsql
+        - Azure.Identity
+        - Azure.Security.KeyVault.Secrets
+    special_considerations:
+      - Flexible Server is the recommended deployment option (Single Server is deprecated)
+      - VNet integration uses delegated subnet (not private endpoint) for some configurations
+      - Requires Microsoft.DBforPostgreSQL resource provider registration
+      - Database creation can be done via Bicep or post-deployment SQL scripts
+      - Schema migrations should be run post-deployment
+
   azure-sql:
     display_name: Azure SQL Database
     resource_provider: Microsoft.Sql
