@@ -1,18 +1,16 @@
 {
   "name": "taskify-api",
   "version": "1.0.0",
-  "description": "Taskify Backend API - Express.js REST API for the Kanban board application",
+  "description": "Taskify Backend API",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon --watch src --ext js,json src/index.js"
+    "dev": "nodemon src/index.js"
   },
   "dependencies": {
     "express": "^4.21.0",
     "pg": "^8.13.0",
-    "cors": "^2.8.5",
-    "@azure/identity": "^4.5.0",
-    "@azure/keyvault-secrets": "^4.9.0"
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
