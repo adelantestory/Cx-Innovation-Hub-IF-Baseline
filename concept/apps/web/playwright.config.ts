@@ -1,12 +1,47 @@
-// playwright.config.ts — INCOMPLETE STUB
-// TODO: Configure Playwright for Taskify E2E tests
-// The app runs at http://localhost:5173 (web) and http://localhost:3000 (api)
-// Run tests with: npx playwright test
-// See https://playwright.dev/docs/test-configuration
-
 import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * Playwright Configuration for Taskify E2E Tests
+ * 
+ * The application consists of:
+ * - API server running on http://localhost:3000
+ * - Web frontend running on http://localhost:5173
+ */
 export default defineConfig({
   testDir: './tests',
-  // TODO: Add baseURL, webServer config, retries, reporter
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: 1,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  
+  use: {
+    baseURL: 'http://localhost:5173',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+
+  webServer: [
+    {
+      command: 'cd ../api && npm run dev',
+      url: 'http://localhost:3000',
+      reuseExistingServer: !process.env.CI,
+      stdout: 'ignore',
+      stderr: 'pipe',
+    },
+    {
+      command: 'npm run dev',
+      url: 'http://localhost:5173',
+      reuseExistingServer: !process.env.CI,
+      stdout: 'ignore',
+      stderr: 'pipe',
+    },
+  ],
 });
