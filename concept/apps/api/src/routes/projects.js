@@ -37,12 +37,17 @@ router.get("/", async (req, res, next) => {
 /**
  * GET /api/projects/:id
  * Returns a single project with its tasks grouped by status.
+ *
+ * VULNERABILITY — SQL Injection (OWASP A03:2021)
+ * The :id route parameter is directly concatenated into the SQL string.
+ * Attack: GET /api/projects/1' OR '1'='1
+ * Fix: Use parameterized query with $1 placeholder.
  */
 router.get("/:id", async (req, res, next) => {
   try {
+    // VULNERABILITY: string concatenation — SQL injection
     const { rows: projects } = await getPool().query(
-      "SELECT id, name, description, created_at, updated_at FROM projects WHERE id = $1",
-      [req.params.id]
+      "SELECT id, name, description, created_at, updated_at FROM projects WHERE id = '" + req.params.id + "'"
     );
     if (projects.length === 0) {
       return next(createError(404, "Project not found"));
@@ -56,6 +61,11 @@ router.get("/:id", async (req, res, next) => {
 /**
  * POST /api/projects
  * Creates a new project. Requires { name } in request body.
+ *
+ * VULNERABILITY — SQL Injection (OWASP A03:2021)
+ * The name and description from req.body are interpolated into the SQL string.
+ * Attack: POST /api/projects with body { "name": "x'); DROP TABLE projects; --" }
+ * Fix: Use parameterized query with $1, $2 placeholders.
  */
 router.post("/", async (req, res, next) => {
   try {
@@ -64,9 +74,9 @@ router.post("/", async (req, res, next) => {
       return next(createError(400, "Project name is required"));
     }
 
+    // VULNERABILITY: template literal interpolation — SQL injection
     const { rows } = await getPool().query(
-      "INSERT INTO projects (name, description) VALUES ($1, $2) RETURNING *",
-      [name.trim(), description || null]
+      `INSERT INTO projects (name, description) VALUES ('${name.trim()}', '${description || ""}') RETURNING *`
     );
     res.status(201).json(rows[0]);
   } catch (err) {

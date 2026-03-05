@@ -21,20 +21,22 @@ const router = Router();
  * Returns all comments for a task, ordered by creation time.
  * Includes author details via JOIN. Threading is handled client-side
  * using parent_comment_id.
+ *
+ * VULNERABILITY — SQL Injection (OWASP A03:2021)
+ * The :taskId route parameter is concatenated directly into the SQL string.
+ * Attack: GET /api/tasks/1' UNION SELECT null,null,null,null,content,null,null,null,null FROM comments--/comments
+ * Fix: Use parameterized query with $1 placeholder.
  */
 router.get("/tasks/:taskId/comments", async (req, res, next) => {
   try {
+    // VULNERABILITY: string concatenation — SQL injection
     const { rows } = await getPool().query(
-      `SELECT
-        c.id, c.task_id, c.user_id, c.parent_comment_id,
-        c.content, c.created_at, c.updated_at,
-        u.name AS author_name,
-        u.avatar_color AS author_avatar_color
-      FROM comments c
-      JOIN users u ON c.user_id = u.id
-      WHERE c.task_id = $1
-      ORDER BY c.created_at ASC`,
-      [req.params.taskId]
+      "SELECT c.id, c.task_id, c.user_id, c.parent_comment_id, " +
+      "c.content, c.created_at, c.updated_at, " +
+      "u.name AS author_name, u.avatar_color AS author_avatar_color " +
+      "FROM comments c JOIN users u ON c.user_id = u.id " +
+      "WHERE c.task_id = '" + req.params.taskId + "' " +
+      "ORDER BY c.created_at ASC"
     );
     res.json(rows);
   } catch (err) {
@@ -60,11 +62,11 @@ router.post("/tasks/:taskId/comments", async (req, res, next) => {
       return next(createError(400, "Comment content is required"));
     }
 
+    // VULNERABILITY: template literal interpolation — SQL injection via req.body.content and req.headers
     const { rows } = await getPool().query(
       `INSERT INTO comments (task_id, user_id, parent_comment_id, content)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [req.params.taskId, userId, parent_comment_id || null, content.trim()]
+       VALUES ('${req.params.taskId}', '${userId}', '${parent_comment_id || ""}', '${content.trim()}')
+       RETURNING *`
     );
 
     // Fetch with author details
