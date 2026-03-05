@@ -1,43 +1,53 @@
-# Demo Branch: Figma MCP — Design to Code
-## The Gap
-`concept/apps/web/src/components/kanban/Board.tsx` is a non-functional stub.
-Column.tsx, Card.tsx, and TaskDetail.tsx are complete and working.
-The app launches and shows the project list — but clicking a project shows the stub.
+# Demo Branch: Security & Code Quality
+## Seeded Vulnerabilities
 
-## Setup
-1. Open the Taskify Figma file
-2. Connect Figma MCP server in VS Code (Settings → Copilot → MCP → Add server)
-3. Verify MCP appears in Copilot Chat tools list
-
-## Copilot Prompt (with Figma MCP active)
-```
-Using the connected Figma design for Taskify, implement the complete Board.tsx component.
-
-Figma frame: "Taskify / Kanban Board"
-
-Requirements from the stub's design tokens and the existing sub-components:
-- Use DragDropContext from @hello-pangea/dnd wrapping 4 Column components
-- Map STATUS_COLUMNS ['todo','in_progress','in_review','done'] to display labels
-  ["To Do", "In Progress", "In Review", "Done"]
-- Pass currentUser to Column so Card can highlight cards assigned to currentUser
-  using --card-mine-bg and --card-mine-border from the design tokens
-- Column drop zones use --drop-zone-bg during onDragOver
-- Implement optimistic UI for drag: update local state immediately, then
-  call updateTaskStatus(), roll back on error
-- Include New Task form (inline input at top of todo column or as a header button)
-- Open TaskDetail modal on card click
-- Match the Figma layout, spacing, column widths exactly
-
-Replace the entire placeholder in Board.tsx. Keep the BoardProps interface unchanged.
+### 1. SQL Injection — OWASP A03:2021 (Critical)
+**Location:** `concept/apps/api/src/routes/tasks.js`, GET `/api/tasks/search`
+```javascript
+// VULNERABLE
+`SELECT * FROM tasks WHERE title ILIKE '%${q}%'`
+// Attack: ?q='; DROP TABLE tasks; --
 ```
 
-## What to Show
-Split screen: Figma design (left) vs VS Code (right).
-As Copilot generates, show it reading Figma node properties in the MCP tool calls.
-After generation: run `docker compose up` and show the visual match side-by-side.
+### 2. Missing Input Validation — OWASP A04:2021 (High)
+**Location:** POST `/api/projects/:id/tasks`
+`assigned_user_id` is not validated against the users table.
+Any arbitrary UUID is accepted — could reference non-existent users.
+
+### 3. Broken Access Control — OWASP A01:2021 (High)
+**Location:** PATCH `/api/tasks/:id/assign`
+No authorization check — any user can reassign any task to anyone.
+Should require the requester to be the current assignee or a PM.
+
+## Demo Flow
+
+### Step 1 — Copilot Security Review Prompt
+```
+Review concept/apps/api/src/routes/tasks.js for security vulnerabilities.
+
+For each vulnerability found:
+- Name the OWASP category
+- Show the vulnerable code
+- Explain the specific attack vector
+- Provide the exact fix
+
+Then apply all fixes.
+```
+
+### Step 2 — GitHub Advanced Security (CodeQL Autofix)
+1. Push this branch: `git push origin demo/security-quality`
+2. Go to the repo Security tab → Code Scanning
+3. Wait for CodeQL scan (or show a pre-run scan)
+4. Open the SQL Injection alert — show Copilot Autofix suggestion
+5. Click "Commit suggestion" — generates a PR with the fix
+
+## What Copilot Should Fix
+1. Replace `%${q}%` interpolation with parameterized `ILIKE $1`
+2. Add a SELECT EXISTS check that assigned_user_id is in users table before INSERT
+3. Add X-User-Id check in assign route: verify requester is current assignee or PM role
 
 ## Reset
 ```bash
-git checkout main && git branch -D demo/figma-mcp
-bash setup-demo-branches.sh --only figma-mcp
+git checkout main && git branch -D demo/security-quality
+bash setup-demo-branches.sh --only security-quality
 ```
