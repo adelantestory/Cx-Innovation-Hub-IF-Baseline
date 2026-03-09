@@ -2,17 +2,9 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "concept/apps/**"
-      - "concept/sql/**"
-      - ".github/workflows/playwright-tests.yml"
+    branches: [demo/playwright-testing]
   pull_request:
-    branches: [main]
-    paths:
-      - "concept/apps/**"
-      - "concept/sql/**"
-      - ".github/workflows/playwright-tests.yml"
+    branches: [demo/playwright-testing]
 
 jobs:
   playwright:
