@@ -1,0 +1,4 @@
+.DS_Store
+.vscode/
+.copilot-config/
+playwright-report/

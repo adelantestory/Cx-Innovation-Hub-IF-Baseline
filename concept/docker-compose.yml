@@ -1,0 +1,107 @@
+# =============================================================================
+# Taskify - Local Development Docker Compose
+# =============================================================================
+# This file provides a local development environment that mirrors the Azure
+# deployment architecture without requiring any Azure services. All Azure-
+# specific dependencies (Key Vault, Managed Identity) are bypassed in favor
+# of direct environment variable configuration.
+#
+# Usage:
+#   docker compose up            # Start all services
+#   docker compose up --build    # Rebuild images and start
+#   docker compose down          # Stop all services
+#   docker compose down -v       # Stop and remove volumes (resets database)
+#
+# Services:
+#   - db:      PostgreSQL 16 (matches Azure PostgreSQL Flexible Server)
+#   - api:     Node.js/Express backend API (port 3000)
+#   - web:     React/Vite frontend dev server (port 5173)
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # Mirrors: Azure Database for PostgreSQL Flexible Server v16
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: taskify-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: taskify
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taskify"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Backend API (Node.js + Express)
+  # Mirrors: Azure Container App ca-{uid}-taskify-api
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.dev
+    container_name: taskify-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      # Local PostgreSQL connection (bypasses Key Vault)
+      PGHOST: db
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: taskify
+      PGPORT: 5432
+      PGSSLMODE: disable
+      # Disable Azure Key Vault in local development
+      AZURE_KEY_VAULT_URL: ""
+      # CORS - allow the Vite dev server origin
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/api/src:/app/src:ro
+      - ./apps/api/package.json:/app/package.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Frontend (React + Vite Dev Server)
+  # Mirrors: Azure Container App ca-{uid}-taskify-web
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.dev
+    container_name: taskify-web
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web/src:/app/src:ro
+      - ./apps/web/public:/app/public:ro
+      - ./apps/web/index.html:/app/index.html:ro
+      - ./apps/web/vite.config.ts:/app/vite.config.ts:ro
+      - ./apps/web/tailwind.config.js:/app/tailwind.config.js:ro
+      - ./apps/web/tsconfig.json:/app/tsconfig.json:ro
+      - ./apps/web/tsconfig.app.json:/app/tsconfig.app.json:ro
+      - ./apps/web/postcss.config.js:/app/postcss.config.js:ro
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+    driver: local
