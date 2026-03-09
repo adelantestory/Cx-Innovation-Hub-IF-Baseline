@@ -1,0 +1,135 @@
+[
+  {
+    "id": "REQ-01",
+    "text": "Display 5 predefined users (1 PM, 4 engineers) on launch screen",
+    "source": "Taskify Product Description",
+    "category": "User Selection",
+    "coveredBy": [
+      { "specFile": "userSelect.spec.ts", "testName": "displays Taskify heading and five user cards on launch" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-02",
+    "text": "No password or login prompt required",
+    "source": "Taskify Product Description",
+    "category": "User Selection",
+    "coveredBy": [
+      { "specFile": "userSelect.spec.ts", "testName": "no password prompt is shown" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-03",
+    "text": "Clicking a user navigates to the main view with project list",
+    "source": "Taskify Product Description",
+    "category": "User Selection",
+    "coveredBy": [
+      { "specFile": "userSelect.spec.ts", "testName": "clicking a user navigates to the project list" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-04",
+    "text": "Three sample projects available for selection",
+    "source": "Taskify Product Description",
+    "category": "Project Management",
+    "coveredBy": [
+      { "specFile": "projectList.spec.ts", "testName": "project list displays exactly 3 sample projects" },
+      { "specFile": "projectList.spec.ts", "testName": "each project card shows name and description" },
+      { "specFile": "projectList.spec.ts", "testName": "clicking a project navigates to its Kanban board" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-05",
+    "text": "Four Kanban columns: To Do, In Progress, In Review, Done",
+    "source": "Taskify Product Description",
+    "category": "Kanban Board",
+    "coveredBy": [
+      { "specFile": "kanbanBoard.spec.ts", "testName": "board renders exactly 4 Kanban columns with correct headings" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-06",
+    "text": "Clicking a project opens its Kanban board",
+    "source": "Taskify Product Description",
+    "category": "Kanban Board",
+    "coveredBy": [
+      { "specFile": "kanbanBoard.spec.ts", "testName": "each column contains its expected task cards" },
+      { "specFile": "kanbanBoard.spec.ts", "testName": "clicking a card opens the task detail modal" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-07",
+    "text": "Drag and drop cards between columns to change status",
+    "source": "Taskify Product Description",
+    "category": "Kanban Board",
+    "coveredBy": [
+      { "specFile": "dragAndDrop.spec.ts", "testName": "move a card to the next column" },
+      { "specFile": "dragAndDrop.spec.ts", "testName": "move a card backward to the previous column" },
+      { "specFile": "dragAndDrop.spec.ts", "testName": "card remains in the board after drag (no data loss)" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-08",
+    "text": "Cards assigned to the current user highlighted in a different color",
+    "source": "Taskify Product Description",
+    "category": "Card Display",
+    "coveredBy": [
+      { "specFile": "cardHighlight.spec.ts", "testName": "cards assigned to the current user have a distinct background color" },
+      { "specFile": "cardHighlight.spec.ts", "testName": "card highlight updates when switching users" },
+      { "specFile": "cardHighlight.spec.ts", "testName": "unassigned cards use the default (non-highlighted) style" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-09",
+    "text": "Assign a user to a task card",
+    "source": "Taskify Product Description",
+    "category": "Task Management",
+    "coveredBy": [
+      { "specFile": "taskAssignment.spec.ts", "testName": "assign a user to an unassigned task card" },
+      { "specFile": "taskAssignment.spec.ts", "testName": "unassign a user from a task card" },
+      { "specFile": "taskAssignment.spec.ts", "testName": "reassign a task from one user to another" },
+      { "specFile": "taskAssignment.spec.ts", "testName": "assignment persists after navigating away and back" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-10",
+    "text": "Leave unlimited comments on a card",
+    "source": "Taskify Product Description",
+    "category": "Comments",
+    "coveredBy": [
+      { "specFile": "comments.spec.ts", "testName": "add a new comment to a task" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-11",
+    "text": "Edit only your own comments",
+    "source": "Taskify Product Description",
+    "category": "Comments",
+    "coveredBy": [
+      { "specFile": "comments.spec.ts", "testName": "edit own comment" },
+      { "specFile": "comments.spec.ts", "testName": "own comment shows Edit and Delete buttons" },
+      { "specFile": "comments.spec.ts", "testName": "cannot edit or delete comments made by other users" }
+    ],
+    "suggestion": null
+  },
+  {
+    "id": "REQ-12",
+    "text": "Delete only your own comments",
+    "source": "Taskify Product Description",
+    "category": "Comments",
+    "coveredBy": [
+      { "specFile": "comments.spec.ts", "testName": "delete own comment removes it from the list" },
+      { "specFile": "comments.spec.ts", "testName": "cannot edit or delete comments made by other users" }
+    ],
+    "suggestion": null
+  }
+]
