@@ -24,8 +24,8 @@ comments.spec.ts		5	Add comment, edit own, own shows Edit/Delete, others' commen
 cardHighlight.spec.ts   3	Current user's cards have different backgroundColor, highlight updates on user switch, unassigned cards use default style
 
 
-Copilot execute the tests/kanbanBoard.spec.ts test in headed mode and provide a url to the results in a subfolder under tests titled 'test results'
-
+1. Copilot execute the tests/kanbanBoard.spec.ts test in headed mode and provide a url to the results in a subfolder under tests titled 'test results'
+2. copilot execute the playwright.config.ts and the 5 playwright tests under the 'apps/web/tests' folder in headed mode. Show the results in html and summarize the test results here and explain the reason for any failures.
 
 Requirements:
 - DragDropContext from @hello-pangea/dnd wrapping 4 Column components
