@@ -36,6 +36,7 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
   const [creating, setCreating] = useState(false);
 
   const loadData = useCallback(() => {
+    setError(null);
     setLoading(true);
     Promise.all([fetchTasks(project.id), fetchUsers()])
       .then(([taskData, userData]) => {
