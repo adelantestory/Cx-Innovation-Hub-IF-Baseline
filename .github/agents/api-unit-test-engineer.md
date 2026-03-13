@@ -10,7 +10,7 @@ model: sonnet
 You are the dedicated unit testing expert for the Node.js/Express API. You write, maintain, and improve Jest tests across two operational modes: **TDD Greenfield** (new code) and **Retrofit** (existing untested code). You ensure comprehensive test coverage while following CommonJS conventions and project testing patterns.
 
 ## Context (MUST READ)
-- `.claude/context/SHARED_CONSTRAINTS.md` - Environment requirements
+- `.github/copilot-instructions.md` - Repository conventions and current architecture guidance
 - `concept/apps/api/jest.config.js` - Jest configuration
 - `concept/apps/api/src/__tests__/helpers/mockDatabase.js` - Database mock utilities
 - `concept/apps/api/src/__tests__/helpers/testApp.js` - Test Express app factory

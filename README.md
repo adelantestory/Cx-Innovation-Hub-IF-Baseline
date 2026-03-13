@@ -1,19 +1,18 @@
-# Azure Innovation Factory - Claude Code Starter Kit
+# Azure Innovation Factory - Copilot Starter Kit
 
-This starter kit provides Claude Code agents, templates, and context for implementing Azure solutions through Microsoft's Innovation Factory program. Engagements are **limited to 10 days** and deliver **functional prototypes**, not production systems.
+This starter kit provides Copilot guidance, custom agents, and sample solution assets for implementing Azure solutions through Microsoft's Innovation Factory program. Engagements are **limited to 10 days** and deliver **functional prototypes**, not production systems.
 
 ## Quick Start
 
 1. Copy the contents to your project root
-2. Start Claude Code — agents load automatically
+2. Open the repository in GitHub Copilot-enabled tooling
 3. When prompted, indicate the current process stage (1-12)
-4. Read `CLAUDE.md` for the complete process and agent delegation rules
+4. Read `.github/copilot-instructions.md` for repository-specific guidance
 
 ## Structure
 
 ```
 .
-├── CLAUDE.md                           # Main instructions (READ THIS FIRST)
 ├── artifacts/                          # Customer-provided discovery materials
 ├── deliverables/                       # Client-facing deliverables
 │   ├── SCOPE_OF_WORK.md
@@ -30,11 +29,10 @@ This starter kit provides Claude Code agents, templates, and context for impleme
 │   ├── apps/                           # Application source code
 │   ├── infrastructure/                 # Terraform/Bicep modules
 │   └── sql/                            # Database scripts
-└── .claude/
-    ├── agents/                         # 71 agent definitions
-    ├── context/
-    │   └── INNOVATION_FACTORY.md       # Program context (agents must read)
-    └── templates/                      # Document templates
+└── .github/
+    ├── copilot-instructions.md         # Repository-specific Copilot guidance
+    ├── agents/                         # Custom Copilot agent definitions
+    └── workflows/                      # CI/CD workflows
 ```
 
 ## Delivery Pipeline
@@ -58,7 +56,7 @@ This starter kit provides Claude Code agents, templates, and context for impleme
 
 ## Templates
 
-All deliverables use templates from `.claude/templates/`:
+Use the checked-in docs under `concept/docs/` and `deliverables/` as the current repository guidance surface. Do not assume a `.claude/templates/` directory exists unless it is added later.
 
 | Document | Purpose |
 |----------|---------|
@@ -112,11 +110,11 @@ Each of 16 Azure services has 4 agents: `-architect`, `-developer`, `-terraform`
 
 | File | Purpose | Owner |
 |------|---------|-------|
-| `CLAUDE.md` | Process and agent rules | — |
-| `.claude/context/INNOVATION_FACTORY.md` | Program principles | — |
+| `.github/copilot-instructions.md` | Repository-specific Copilot guidance | — |
+| `.github/agents/*.md` | Custom Copilot agent definitions | — |
 | `concept/.specify/memory/constitution.md` | Technical constraints | — |
 | `concept/AZURE_CONFIG.json` | Resource configuration | `cloud-architect` |
 
 ---
 
-**See `CLAUDE.md` for complete instructions.**
+**See `.github/copilot-instructions.md` for current repository instructions.**

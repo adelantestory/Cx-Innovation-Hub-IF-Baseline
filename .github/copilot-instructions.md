@@ -15,7 +15,7 @@ All deliverables in this repo should be treated as **functional prototypes**, no
 
 When working in this repository, prefer these sources of truth:
 
-- `CLAUDE.md` for high-level Innovation Factory process and prototype principles only; verify any repo-path or file-specific references before relying on them
+- `README.md` for top-level repository orientation
 - `.github/copilot-instructions.md` for Copilot-specific repo guidance
 - `.github/agents/*.md` for the custom testing agents currently defined in the repo
 - `concept/.specify/memory/constitution.md` for project principles that apply to the sample solution

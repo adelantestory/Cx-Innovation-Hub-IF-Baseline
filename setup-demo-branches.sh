@@ -32,7 +32,7 @@ err()  { echo -e "${RED}✗${NC}  $*"; exit 1; }
 head() { echo -e "\n${BOLD}$*${NC}"; }
 
 # ── Pre-flight checks ─────────────────────────────────────────────────────────
-[[ -f "CLAUDE.md" ]]            || err "Run this from the repo root (where CLAUDE.md lives)"
+[[ -f ".github/copilot-instructions.md" ]] || err "Run this from the repo root (where .github/copilot-instructions.md lives)"
 [[ -f "concept/docker-compose.yml" ]] || err "Unexpected repo structure — expected concept/docker-compose.yml"
 command -v git >/dev/null       || err "git not found"
 
@@ -95,12 +95,12 @@ create_branch() {
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Branch 1: demo/spec-driven-agent
-# Gap: concept/apps/ is empty. The spec and CLAUDE.md exist.
+# Gap: concept/apps/ is empty. The spec and Copilot instructions exist.
 # Copilot reads the spec and scaffolds the entire app from scratch.
 # ─────────────────────────────────────────────────────────────────────────────
 build_spec_agent() {
   head "Branch: demo/spec-driven-agent"
-  info "Gap: concept/apps/{api,web}/src wiped — only spec + CLAUDE.md remain"
+  info "Gap: concept/apps/{api,web}/src wiped — only spec + .github/copilot-instructions.md remain"
 
   create_branch "demo/spec-driven-agent"
 
@@ -139,7 +139,7 @@ Kanban-style team productivity platform (functional prototype, no auth)
 | DnD         | @hello-pangea/dnd                       |
 | Local Dev   | Docker Compose (see docker-compose.yml) |
 
-## Conventions (from CLAUDE.md)
+## Conventions (from .github/copilot-instructions.md)
 - API uses PG env vars: PGHOST, PGUSER, PGPASSWORD, PGDATABASE, PGPORT
 - CORS allows X-User-Id header (used for comment authorship — no JWT)
 - SQL scripts in concept/sql/ named NNN_description.sql (run in order)
@@ -228,12 +228,12 @@ comments    (id UUID PK, task_id UUID FK, user_id UUID FK,
 
 ## Copilot Prompt to Use
 ```
-Read CLAUDE.md and concept/.specify/specify.md.
+Read .github/copilot-instructions.md and concept/.specify/specify.md.
 Scaffold the complete Taskify application:
 - concept/apps/api/src/ — Node.js/Express API (match existing package.json and Dockerfiles)
 - concept/apps/web/src/ — React/Vite/TypeScript frontend (match existing tsconfig/vite/tailwind)
 - concept/sql/ — 001_create_tables.sql and 005_seed_data.sql
-Follow every convention in CLAUDE.md exactly. This is a functional prototype.
+Follow every convention in .github/copilot-instructions.md exactly. This is a functional prototype.
 ```
 SPECEOF
 
@@ -243,22 +243,22 @@ SPECEOF
 ## The Gap
 `concept/apps/api/src/` and `concept/apps/web/src/` are intentionally empty.
 `concept/sql/` has no SQL files.
-The spec, CLAUDE.md, Dockerfiles, and all config files exist.
+The spec, .github/copilot-instructions.md, Dockerfiles, and all config files exist.
 
 ## What Copilot Does
-Reads the spec in `concept/.specify/specify.md` + `CLAUDE.md` and scaffolds:
+Reads the spec in `concept/.specify/specify.md` + `.github/copilot-instructions.md` and scaffolds:
 - Full Express API with all 12 endpoints
 - Full React frontend with user select → project list → kanban → task detail
 - PostgreSQL schema + seed data
 
 ## Copilot Prompt (paste into Agent mode)
 ```
-Read CLAUDE.md and concept/.specify/specify.md.
+Read .github/copilot-instructions.md and concept/.specify/specify.md.
 Scaffold the complete Taskify application:
 - concept/apps/api/src/ — Node.js/Express API
 - concept/apps/web/src/ — React/Vite/TypeScript frontend
 - concept/sql/ — 001_create_tables.sql and 005_seed_data.sql
-Follow every convention in CLAUDE.md exactly.
+Follow every convention in .github/copilot-instructions.md exactly.
 ```
 
 ## Cascade Spec Change Prompt
@@ -1223,7 +1223,7 @@ Refactor concept/apps/api/src/index.js:
 - Add a centralized error handler middleware in concept/apps/api/src/middleware/errorHandler.js
 - Add a GET /api/health endpoint
 - Add request logging (use a simple console.log middleware)
-Follow the structure documented in CLAUDE.md.
+Follow the structure documented in .github/copilot-instructions.md.
 ```
 
 ### Step 4 — PR 3: Modernize React (High — 5 min)
