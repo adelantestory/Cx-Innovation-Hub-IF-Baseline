@@ -40,8 +40,8 @@ describe("CommentList", () => {
       />
     );
 
-    expect(screen.getByText("Comments (0)")).toBeInTheDocument();
-    expect(screen.getByText("No comments yet.")).toBeInTheDocument();
+    expect(screen.getByText(/Comments \(0\)/)).toBeInTheDocument();
+    expect(screen.getByText(/No comments yet/i)).toBeInTheDocument();
   });
 
   it("submits a reply with the parent comment id", async () => {
@@ -56,7 +56,12 @@ describe("CommentList", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Reply" })[0]!);
+    const topLevelComment = screen.getByText(baseComments[0]!.content).closest("div");
+    expect(topLevelComment).not.toBeNull();
+
+    await user.click(
+      within(topLevelComment as HTMLDivElement).getByRole("button", { name: "Reply" })
+    );
     const replyInput = screen.getByPlaceholderText("Write a reply...");
     await user.type(replyInput, "  Thanks for the update  ");
     await user.click(
@@ -81,15 +86,22 @@ describe("CommentList", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
-    const input = screen.getByDisplayValue("Top-level comment");
+    const topLevelComment = screen.getByText(baseComments[0]!.content).closest("div");
+    expect(topLevelComment).not.toBeNull();
+
+    await user.click(
+      within(topLevelComment as HTMLDivElement).getByRole("button", { name: "Edit" })
+    );
+    const input = screen.getByDisplayValue(baseComments[0]!.content);
     await user.clear(input);
     await user.type(input, "  Edited by author  ");
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(onEditComment).toHaveBeenCalledWith("1", "Edited by author");
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(
+      within(topLevelComment as HTMLDivElement).getByRole("button", { name: "Delete" })
+    );
     expect(onDeleteComment).toHaveBeenCalledWith("1");
   });
 });

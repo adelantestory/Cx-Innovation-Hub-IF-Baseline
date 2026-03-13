@@ -129,7 +129,7 @@ describe("TaskDetail", () => {
 
     renderTaskDetail();
 
-    expect(screen.getByText("Loading comments...")).toBeInTheDocument();
+    expect(screen.getByText(/loading comments/i)).toBeInTheDocument();
     expect(screen.queryByText(/Comment count:/)).not.toBeInTheDocument();
   });
 
@@ -137,9 +137,9 @@ describe("TaskDetail", () => {
     renderTaskDetail();
 
     await waitFor(() => {
-      expect(screen.getByText("Comment count: 1")).toBeInTheDocument();
+      expect(screen.getByText(`Comment count: ${mockComments.length}`)).toBeInTheDocument();
     });
-    expect(screen.getByText("Test comment")).toBeInTheDocument();
+    expect(screen.getByText(mockComments[0]!.content)).toBeInTheDocument();
     expect(mockedFetchComments).toHaveBeenCalledWith(mockTasks[0]!.id);
   });
 

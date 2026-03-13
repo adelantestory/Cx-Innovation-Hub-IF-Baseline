@@ -94,7 +94,7 @@ describe("App", () => {
 
     await user.click(screen.getByRole("button", { name: "Select Alice" }));
 
-    expect(screen.getByText("Header for Alice Johnson")).toBeInTheDocument();
+    expect(screen.getByText(`Header for ${mockUser.name}`)).toBeInTheDocument();
     expect(screen.getByText("Mock Project List")).toBeInTheDocument();
     expect(screen.queryByText("Mock User Select")).not.toBeInTheDocument();
   });
@@ -105,8 +105,8 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Select Alice" }));
     await user.click(screen.getByRole("button", { name: "Select Project" }));
 
-    expect(screen.getByText("Board for Alpha Project")).toBeInTheDocument();
-    expect(screen.getByText("Current user is Alice Johnson")).toBeInTheDocument();
+    expect(screen.getByText(`Board for ${mockProject.name}`)).toBeInTheDocument();
+    expect(screen.getByText(`Current user is ${mockUser.name}`)).toBeInTheDocument();
     expect(screen.queryByText("Mock Project List")).not.toBeInTheDocument();
   });
 
@@ -120,7 +120,7 @@ describe("App", () => {
     await waitFor(() => {
       expect(screen.getByText("Mock Project List")).toBeInTheDocument();
     });
-    expect(screen.queryByText("Board for Alpha Project")).not.toBeInTheDocument();
+    expect(screen.queryByText(`Board for ${mockProject.name}`)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Mock Switch User" }));
 

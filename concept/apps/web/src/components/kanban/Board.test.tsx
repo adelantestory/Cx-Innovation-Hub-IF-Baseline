@@ -79,11 +79,12 @@ describe("Board", () => {
       <Board project={mockProjects[0]!} currentUser={mockUsers[0]!} onBack={() => {}} />
     );
 
-    expect(screen.getByText("Loading board...")).toBeInTheDocument();
+    expect(screen.getByText(/loading board/i)).toBeInTheDocument();
   });
 
   it("shows an error and retries loading successfully", async () => {
-    mockedFetchTasks.mockRejectedValueOnce(new Error("Unable to load board"));
+    const loadError = "Unable to load board";
+    mockedFetchTasks.mockRejectedValueOnce(new Error(loadError));
     mockedFetchTasks.mockResolvedValueOnce(mockTasks);
 
     const { user } = render(
@@ -91,7 +92,7 @@ describe("Board", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Unable to load board")).toBeInTheDocument();
+      expect(screen.getByText(loadError)).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "Retry" }));
