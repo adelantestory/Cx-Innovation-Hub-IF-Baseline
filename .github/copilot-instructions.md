@@ -1,106 +1,167 @@
-# Copilot Instructions — Azure Innovation Factory Starter Kit
+# Copilot Instructions — Taskify Innovation Factory Repository
 
 ## What This Repo Is
 
-This is a **starter kit** for Microsoft Innovation Factory engagements — time-boxed (max 10-day) Azure POC projects. It provides a multi-agent orchestration framework, document templates, and a sample application ("Taskify") that demonstrates the architecture. Everything under `concept/` is the deployable solution; everything else is scaffolding, templates, and agent definitions.
+This repository is an Innovation Factory starter repo that also contains a concrete sample solution under `concept/`: **Taskify**, a prototype Kanban application.
 
-**All deliverables are functional prototypes, not production systems.**
+Treat the repo as two things at once:
 
-## Architecture Overview
+- `concept/` is the actual deployable solution and application code.
+- The rest of the repo provides guidance, workflows, and custom Copilot agent definitions that support work on that solution.
 
-### Agent-Driven Development
+All deliverables in this repo should be treated as **functional prototypes**, not production systems.
 
-This repo is designed for AI-assisted development using ~80 specialized agents (defined in `.claude/agents/`). Each Azure service has four agent roles: architect, developer, terraform, and bicep. Support agents handle cross-cutting concerns (project management, documentation, cost analysis, QA).
+## Guidance Surface That Actually Exists
 
-The agent orchestration follows a strict 12-stage process (Strategy → Prototyping → Validate → Improve → Evaluate → Hand Off), with stage definitions in `.claude/context/stages/STAGE_XX_*.md`.
+When working in this repository, prefer these sources of truth:
 
-### Sample Application: Taskify
+- `CLAUDE.md` for high-level Innovation Factory process and prototype principles only; verify any repo-path or file-specific references before relying on them
+- `.github/copilot-instructions.md` for Copilot-specific repo guidance
+- `.github/agents/*.md` for the custom testing agents currently defined in the repo
+- `concept/.specify/memory/constitution.md` for project principles that apply to the sample solution
+- `concept/docs/*.md` for architecture, configuration, deployment, and development guidance
 
-A Kanban board app with three services running as Docker containers:
+Do **not** assume a `.claude/` directory, `.claude/agents/`, `.claude/skills/`, `.claude/templates/`, or `.claude/context/stages/` exists in this repository unless those files are added later.
 
-- **API** (`concept/apps/api/`): Node.js + Express REST API (CommonJS, not ESM)
-- **Web** (`concept/apps/web/`): React 18 + TypeScript + Vite + Tailwind CSS frontend
-- **Database**: PostgreSQL 16 (Azure PostgreSQL Flexible Server in prod, Docker locally)
+## Current Custom Agents In This Repo
 
-API routes are mounted under `/api/` with resources: `/api/users`, `/api/projects`, `/api/tasks`, `/api/comments`. The API identifies users via `X-User-Id` header (no auth middleware — prototype pattern).
+The custom agent definitions currently present are:
 
-### Infrastructure
+- `.github/agents/api-unit-test-engineer.md`
+- `.github/agents/web-unit-test-engineer.md`
 
-- **IaC**: Bicep templates in `concept/infrastructure/bicep/` with modular stages (`stage1-foundation.bicep` through `stage4-application.bicep`) and reusable modules in `modules/`
-- **Terraform**: Alternative IaC option in `concept/infrastructure/terraform/` (if present)
-- **CI/CD**: Two GitHub Actions workflows — `deploy-infrastructure.yml` (Bicep) and `deploy-terraform.yml` — both use OIDC federated credentials
-- **Azure services**: Container Apps, Container Registry, PostgreSQL Flexible Server, Key Vault, Log Analytics, App Insights, User-Assigned Managed Identity
+There is **no repo-local skills directory** today. Do not reference repo-specific skills unless they are added to the repository.
 
-### Key Configuration
+## Solution Overview
 
-- `concept/AZURE_CONFIG.json` — Central resource configuration (owned by `cloud-architect` agent, gitignored)
-- `concept/.specify/` — Spec Kit documentation (constitution, specs, plan, tasks)
-- `.claude/context/SHARED_CONSTRAINTS.md` — Mandatory Azure environment constraints
+Taskify is a simple two-tier web application with a PostgreSQL database.
 
-## Build & Run Commands
+- **API**: `concept/apps/api/`
+  - Node.js + Express
+  - CommonJS modules (`require`, `module.exports`)
+  - REST endpoints under `/api`
+- **Web**: `concept/apps/web/`
+  - React 18 + TypeScript + Vite
+  - Tailwind CSS
+- **Database**: `concept/sql/`
+  - PostgreSQL schema and seed scripts
 
-### Local Development (Docker)
+Key routes and behaviors:
+
+- API resources live under `/api/users`, `/api/projects`, `/api/tasks`, and `/api/comments`
+- Health endpoint: `/api/health`
+- The prototype uses `X-User-Id` to identify the active user
+- There is **no authentication layer** in the sample app
+- There are **no AI services, queues, or background workers** in the sample app
+
+## Local Development
+
+The primary local workflow uses Docker Compose from `concept/`.
 
 ```bash
 cd concept
-docker compose up --build       # Start all services (db, api, web)
-docker compose down -v          # Stop and reset database
+docker compose up --build
+docker compose down
+docker compose down -v
 ```
 
-Services: API on `localhost:3000`, Web on `localhost:5173`, PostgreSQL on `localhost:5432`.
+Local service URLs:
 
-### API (Node.js)
+- Web UI: `http://localhost:5173`
+- API: `http://localhost:3000`
+- API health: `http://localhost:3000/api/health`
+- PostgreSQL: `localhost:5432`
 
-```bash
-cd concept/apps/api
-npm install
-npm run dev                     # Nodemon dev server (port 3000)
-npm start                       # Production start
-```
+The local stack is defined in `concept/docker-compose.yml` and starts:
 
-### Web (React/Vite)
+- `db` using `postgres:16-alpine`
+- `api` using `concept/apps/api/Dockerfile.dev`
+- `web` using `concept/apps/web/Dockerfile.dev`
 
-```bash
-cd concept/apps/web
-npm install
-npm run dev                     # Vite dev server (port 5173)
-npm run build                   # TypeScript check + Vite build
-```
+### Running Without Docker
 
-### E2E Tests (Playwright)
+Alternative local workflows are also supported:
 
-```bash
-cd concept/apps/web
-npx playwright install          # One-time browser setup
-npx playwright test             # Run all E2E tests
-npx playwright test tests/kanbanBoard.spec.ts  # Run single test file
-npx playwright test --ui        # Interactive test runner
-```
+- API from `concept/apps/api`
+  - `npm install`
+  - `npm run dev`
+  - `npm test`
+- Web from `concept/apps/web`
+  - `npm install`
+  - `npm run dev`
+  - `npm run build`
+  - `npm test`
+  - `npm run test:e2e`
 
-### Infrastructure Validation
+Use `concept/docs/DEVELOPMENT.md` as the source of truth for local setup details and environment variables.
 
-```bash
-az bicep build --file concept/infrastructure/bicep/main.bicep  # Lint Bicep
-```
+## Infrastructure Reality
 
-## Critical Constraints
+The infrastructure implementation currently present in the repo is **Bicep-first**.
 
-### Azure Environment (Non-Negotiable)
+- Bicep lives under `concept/infrastructure/bicep/`
+- The staged templates are:
+  - `stage1-foundation.bicep`
+  - `stage2-data.bicep`
+  - `stage3-containers.bicep`
+  - `stage4-application.bicep`
+- Reusable modules live under `concept/infrastructure/bicep/modules/`
+- Deployment orchestration currently lives in `concept/infrastructure/deploy.sh`
 
-- **Managed Identity only** — No connection strings, access keys, SAS tokens, or SQL auth
-- **Authentication pattern**: `Service → Managed Identity → RBAC Role Assignment → Resource`
-- **Private endpoints required** for all data/backend services (SQL, Cosmos, Storage, Key Vault, etc.)
-- **No direct Azure command execution by AI agents** — commands must be documented for human execution
-- **Compliance tags required** on all resources: `Environment`, `Stage`, `Purpose`
+Do **not** assume a complete Terraform implementation exists unless you verify files under `concept/infrastructure/terraform/`.
 
-### Code Conventions
+Do **not** assume a `concept/infrastructure/bicep/main.bicep` file exists unless you verify it in the repo.
 
-- API uses CommonJS (`require()`), not ES modules
-- Web app uses ESM (`import`) with TypeScript
-- Database credentials are fetched from Azure Key Vault in production, environment variables locally (controlled by `AZURE_KEY_VAULT_URL` being set or empty)
-- SQL DDL scripts in `concept/sql/` are numbered sequentially (`001_`, `002_`, etc.) and auto-run on Docker init
-- The `concept/` folder must be deployable from a fresh clone — no customer-identifying information allowed (except in `AZURE_CONFIG.json`)
+## Azure and Prototype Constraints
 
-### Document Templates
+This repo follows Innovation Factory prototype guidance, but the sample solution intentionally makes some POC tradeoffs. Keep both ideas in mind:
 
-All project documents must be generated from templates in `.claude/templates/`. Copy the template, then fill in content — never create documents from scratch.
+- Prefer simple, demonstrable solutions over production hardening
+- Document production implications rather than over-engineering the prototype
+- Preserve the current Taskify architecture unless the task explicitly changes it
+
+Important current-state details:
+
+- In Azure, the API retrieves database credentials from Key Vault at runtime
+- In local development, the API uses environment variables when `AZURE_KEY_VAULT_URL` is empty
+- Public browser access is intentional for the prototype experience
+
+When writing or editing guidance, distinguish clearly between:
+
+- **current implementation behavior**
+- **recommended production hardening**
+
+Do not present production-only constraints as if they already describe the current Taskify implementation.
+
+## Code Conventions
+
+Follow the conventions already used by the application:
+
+- API code uses **CommonJS**, not ESM
+- Web code uses **TypeScript + ESM**
+- Reuse existing project structure and naming before introducing new folders or abstractions
+- Keep SQL scripts in `concept/sql/` numerically ordered
+- Update docs when behavior or setup instructions change
+
+## Testing Conventions
+
+Use the existing test stacks:
+
+- API unit tests: Jest in `concept/apps/api/src/__tests__/`
+- Web unit tests: Vitest + React Testing Library in `concept/apps/web/src/**/*.{test,spec}.{ts,tsx}`
+- Web end-to-end tests: Playwright in `concept/apps/web/tests/`
+
+When the task is primarily API unit testing, prefer the `api-unit-test-engineer` custom agent.
+
+When the task is primarily frontend unit testing, prefer the `web-unit-test-engineer` custom agent.
+
+## Documentation Expectations
+
+Prefer updating existing docs over inventing new ones. The most relevant docs for this repo are:
+
+- `concept/docs/ARCHITECTURE.md`
+- `concept/docs/CONFIGURATION.md`
+- `concept/docs/DEPLOYMENT.md`
+- `concept/docs/DEVELOPMENT.md`
+
+If you update instructions or workflows, make sure they stay aligned with the real repository contents and actual Taskify implementation.
