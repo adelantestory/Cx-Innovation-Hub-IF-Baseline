@@ -139,6 +139,7 @@ export interface WorkflowSummary {
 
 export interface WorkflowRun {
   id: number;
+  name: string;
   status: string;
   conclusion: string | null;
   branch: string;

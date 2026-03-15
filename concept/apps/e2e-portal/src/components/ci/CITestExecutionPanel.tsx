@@ -215,6 +215,7 @@ export default function CITestExecutionPanel() {
             <thead>
               <tr className="border-b border-gray-200 text-left text-gray-500">
                 <th className="pb-2 pr-3">Status</th>
+                <th className="pb-2 pr-3">Workflow</th>
                 <th className="pb-2 pr-3">Branch</th>
                 <th className="pb-2 pr-3">Commit</th>
                 <th className="pb-2 pr-3">Duration</th>
@@ -229,6 +230,7 @@ export default function CITestExecutionPanel() {
                     {conclusionIcon(r.conclusion)}{" "}
                     {r.conclusion ?? r.status}
                   </td>
+                  <td className="py-2 pr-3 text-gray-700">{r.commitMessage}</td>
                   <td className="py-2 pr-3 text-gray-700">{r.branch}</td>
                   <td className="py-2 pr-3 text-gray-500" title={r.commitMessage}>
                     {r.commitSha}

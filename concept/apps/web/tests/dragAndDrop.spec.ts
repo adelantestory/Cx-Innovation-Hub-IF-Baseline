@@ -8,60 +8,64 @@
 // between the different columns in the Kanban work board."
 //
 // @hello-pangea/dnd uses data-rfd-* attributes (not data-rbd-* from the old
-// react-beautiful-dnd). We use Playwright's mouse API for the drag.
+// react-beautiful-dnd). We use keyboard-based drag (Space + Arrow keys) because
+// the mouse sensor depends on requestAnimationFrame timing that is unreliable
+// in headless CI environments.
 // =============================================================================
 
 import { test, expect } from './base';
 import type { Page, Locator } from '@playwright/test';
 
-/** Drag a card element into a target column using Playwright's mouse API. */
+/** Wait for one animation frame to be painted in the page context. */
+async function waitForFrame(page: Page) {
+  await page.evaluate(() => new Promise<void>(r => requestAnimationFrame(() => r())));
+}
+
+/**
+ * Drag a card element into a target column.
+ * Uses keyboard-based drag (Space to lift, Arrow keys to move, Space to drop)
+ * because @hello-pangea/dnd's mouse sensor relies on requestAnimationFrame
+ * timing that behaves inconsistently in headless CI environments.
+ */
 async function dragCardToColumn(page: Page, card: Locator, targetColumnId: string) {
-  const srcBox = await card.boundingBox();
-  if (!srcBox) throw new Error('Card not visible');
+  // Determine which column the card is currently in
+  const colOrder = ['todo', 'in_progress', 'in_review', 'done'];
+  const cardText = (await card.innerText()).split('\n')[0].trim();
+  let srcIdx = -1;
+  for (let i = 0; i < colOrder.length; i++) {
+    const col = page.locator(`[data-rfd-droppable-id="${colOrder[i]}"]`);
+    if (await col.getByText(cardText).count() > 0) {
+      srcIdx = i;
+      break;
+    }
+  }
+  if (srcIdx === -1) throw new Error(`Card "${cardText}" not found in any column`);
 
-  const target = page.locator(`[data-rfd-droppable-id="${targetColumnId}"]`);
-  await expect(target).toBeVisible();
-  const tgtBox = await target.boundingBox();
-  if (!tgtBox) throw new Error(`Column "${targetColumnId}" not visible`);
+  const tgtIdx = colOrder.indexOf(targetColumnId);
+  if (tgtIdx === -1) throw new Error(`Unknown column "${targetColumnId}"`);
 
-  const srcX = srcBox.x + srcBox.width / 2;
-  const srcY = srcBox.y + srcBox.height / 2;
-  const tgtX = tgtBox.x + tgtBox.width / 2;
-  const tgtY = tgtBox.y + tgtBox.height / 2;
+  const steps = tgtIdx - srcIdx;
+  const key = steps > 0 ? 'ArrowRight' : 'ArrowLeft';
+  const absSteps = Math.abs(steps);
 
-  // Position mouse on the card and press
-  await page.mouse.move(srcX, srcY);
-  await page.mouse.down();
+  // Focus the card's drag handle and lift with Space
+  await card.focus();
+  await waitForFrame(page);
+  await page.keyboard.press('Space');
 
-  // Allow the drag sensor to register the mousedown
-  await page.waitForTimeout(200);
-
-  // Move past the 5px slop threshold to start the drag
-  await page.mouse.move(srcX + 10, srcY);
-
-  // Wait for the drag to actually activate — @hello-pangea/dnd inserts a
-  // placeholder element once the drag is live. This is a real DOM signal
-  // rather than a fixed-time guess.
+  // Wait for the drag to activate (placeholder appears)
   await page.waitForSelector('[data-rfd-placeholder-context-id]', { timeout: 2000 });
 
-  // Move to the target column in steps. Each step is followed by a short
-  // wait so the raf-schd throttled sensor processes each move in its own
-  // requestAnimationFrame frame (critical for headless CI without slowMo).
-  const moveSteps = 10;
-  for (let i = 1; i <= moveSteps; i++) {
-    const x = srcX + (tgtX - srcX) * i / moveSteps;
-    const y = srcY + (tgtY - srcY) * i / moveSteps;
-    await page.mouse.move(x, y);
-    await page.waitForTimeout(50);
+  // Move across columns with arrow keys
+  for (let i = 0; i < absSteps; i++) {
+    await page.keyboard.press(key);
+    await waitForFrame(page);
   }
 
-  // Let the drop zone fully register before releasing
-  await page.waitForTimeout(300);
+  // Drop with Space
+  await page.keyboard.press('Space');
 
-  // Release to drop
-  await page.mouse.up();
-
-  // Wait for the app to process the drop and run animations
+  // Wait for the drop animation and state update
   await page.waitForTimeout(1000);
 }
 

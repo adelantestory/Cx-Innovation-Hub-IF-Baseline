@@ -142,12 +142,13 @@ app.get("/api/ci/workflow", (_req, res) => {
 app.get("/api/ci/runs", (_req, res) => {
   try {
     const raw = ghApi(
-      `/repos/${CI_OWNER}/${CI_REPO}/actions/workflows/${CI_WORKFLOW}/runs?per_page=5`
+      `/repos/${CI_OWNER}/${CI_REPO}/actions/workflows/${CI_WORKFLOW}/runs?per_page=3`
     );
     const data = JSON.parse(raw);
 
     interface GHRun {
       id: number;
+      name: string;
       status: string;
       conclusion: string | null;
       head_branch: string;
@@ -166,6 +167,7 @@ app.get("/api/ci/runs", (_req, res) => {
       const secs = Math.floor((durationMs % 60000) / 1000);
       return {
         id: r.id,
+        name: r.name,
         status: r.status,
         conclusion: r.conclusion,
         branch: r.head_branch,
