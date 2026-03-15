@@ -33,8 +33,14 @@ async function dragCardToColumn(page: Page, card: Locator, targetColumnId: strin
   await page.mouse.move(srcX, srcY);
   await page.mouse.down();
 
+  // Allow the drag sensor to register the mousedown (requestAnimationFrame)
+  await page.waitForTimeout(150);
+
   // Move past the 5px slop threshold to start the drag
   await page.mouse.move(srcX + 10, srcY);
+
+  // Allow the sensor to transition from "pending" to "dragging"
+  await page.waitForTimeout(150);
 
   // Move to the target column in visible steps (each step is a separate
   // Playwright call so slowMo creates a paced, observable drag)
@@ -44,6 +50,9 @@ async function dragCardToColumn(page: Page, card: Locator, targetColumnId: strin
     const y = srcY + (tgtY - srcY) * i / moveSteps;
     await page.mouse.move(x, y);
   }
+
+  // Let the drop zone register before releasing
+  await page.waitForTimeout(150);
 
   // Release to drop
   await page.mouse.up();
