@@ -13,6 +13,7 @@ import { STATUS_LABELS } from "../../api/types";
 interface ColumnProps {
   status: TaskStatus;
   tasks: Task[];
+  currentUserId: string;
   onCardClick: (task: Task) => void;
 }
 
@@ -30,7 +31,7 @@ const HEADER_COLORS: Record<TaskStatus, string> = {
   done: "text-green-700",
 };
 
-export default function Column({ status, tasks, onCardClick }: ColumnProps) {
+export default function Column({ status, tasks, currentUserId, onCardClick }: ColumnProps) {
   return (
     <div className={`${COLUMN_COLORS[status]} rounded-lg p-3 min-h-[200px] flex flex-col`}>
       <div className="flex items-center justify-between mb-3">
@@ -56,6 +57,7 @@ export default function Column({ status, tasks, onCardClick }: ColumnProps) {
                 key={task.id}
                 task={task}
                 index={index}
+                isCurrentUser={task.assigned_user_id === currentUserId}
                 onClick={onCardClick}
               />
             ))}

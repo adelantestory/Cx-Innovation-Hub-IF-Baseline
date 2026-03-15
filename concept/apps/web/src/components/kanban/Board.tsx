@@ -153,6 +153,7 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
               key={status}
               status={status}
               tasks={tasksByColumn(status)}
+              currentUserId={currentUser.id}
               onCardClick={setSelectedTask}
             />
           ))}

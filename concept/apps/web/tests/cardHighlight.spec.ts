@@ -23,6 +23,7 @@ test.describe('Card Highlight', () => {
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();
     await page.getByText('Website Redesign').first().click();
+    await expect(page.locator('[data-rfd-droppable-id="todo"]')).toBeVisible();
 
     // Alex's card (assigned to current user)
     const myCard = page.getByText('Implement responsive navigation bar').first().locator('..');
@@ -43,6 +44,7 @@ test.describe('Card Highlight', () => {
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Jordan Kim' }).click();
     await page.getByText('Website Redesign').first().click();
+    await expect(page.locator('[data-rfd-droppable-id="todo"]')).toBeVisible();
 
     // Jordan's card should be highlighted
     const jordanCard = page.getByText('Design new homepage layout').first().locator('..');
@@ -60,6 +62,7 @@ test.describe('Card Highlight', () => {
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();
     await page.getByText('Mobile App MVP').click();
+    await expect(page.locator('[data-rfd-droppable-id="todo"]')).toBeVisible();
 
     const unassignedCard = page.getByText('Create onboarding flow').locator('..');
     const unassignedBg = await unassignedCard.evaluate(
