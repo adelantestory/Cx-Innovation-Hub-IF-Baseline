@@ -8,7 +8,7 @@
 // that project. You're going to see the columns."
 // =============================================================================
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './base';
 
 const COLUMNS = ['To Do', 'In Progress', 'In Review', 'Done'];
 
@@ -25,7 +25,7 @@ test.describe('Kanban Board', () => {
     // Log in as Alex Rivera and open "Website Redesign"
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();
-    await page.getByText('Website Redesign').click();
+    await page.getByText('Website Redesign').first().click();
   });
 
   test('board renders exactly 4 Kanban columns with correct headings', async ({ page }) => {

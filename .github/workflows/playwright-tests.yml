@@ -5,6 +5,7 @@ on:
     branches: [demo/playwright-testing]
   pull_request:
     branches: [demo/playwright-testing]
+  workflow_dispatch:
 
 jobs:
   playwright:

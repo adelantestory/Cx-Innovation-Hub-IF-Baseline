@@ -7,7 +7,7 @@
 // projects."
 // =============================================================================
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './base';
 
 const EXPECTED_USERS = [
   { name: 'Sarah Chen', role: 'product manager' },

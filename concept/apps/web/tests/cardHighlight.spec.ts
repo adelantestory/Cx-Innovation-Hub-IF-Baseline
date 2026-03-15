@@ -11,7 +11,7 @@
 //   --card-bg:          #FFFFFF  (other users' cards)
 // =============================================================================
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './base';
 
 test.describe('Card Highlight', () => {
   test('cards assigned to the current user have a distinct background color', async ({ page }) => {
@@ -22,14 +22,14 @@ test.describe('Card Highlight', () => {
     // navigation bar" to Alex in the Website Redesign project
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();
-    await page.getByText('Website Redesign').click();
+    await page.getByText('Website Redesign').first().click();
 
     // Alex's card (assigned to current user)
-    const myCard = page.getByText('Implement responsive navigation bar').locator('..');
+    const myCard = page.getByText('Implement responsive navigation bar').first().locator('..');
     const myBg = await myCard.evaluate((el) => getComputedStyle(el).backgroundColor);
 
     // Another user's card (Jordan Kim's)
-    const otherCard = page.getByText('Design new homepage layout').locator('..');
+    const otherCard = page.getByText('Design new homepage layout').first().locator('..');
     const otherBg = await otherCard.evaluate((el) => getComputedStyle(el).backgroundColor);
 
     // The backgrounds must differ
@@ -42,14 +42,14 @@ test.describe('Card Highlight', () => {
     // Log in as Jordan Kim — "Design new homepage layout" is assigned to Jordan
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Jordan Kim' }).click();
-    await page.getByText('Website Redesign').click();
+    await page.getByText('Website Redesign').first().click();
 
     // Jordan's card should be highlighted
-    const jordanCard = page.getByText('Design new homepage layout').locator('..');
+    const jordanCard = page.getByText('Design new homepage layout').first().locator('..');
     const jordanBg = await jordanCard.evaluate((el) => getComputedStyle(el).backgroundColor);
 
     // Alex's card should NOT be highlighted (different user)
-    const alexCard = page.getByText('Implement responsive navigation bar').locator('..');
+    const alexCard = page.getByText('Implement responsive navigation bar').first().locator('..');
     const alexBg = await alexCard.evaluate((el) => getComputedStyle(el).backgroundColor);
 
     expect(jordanBg).not.toEqual(alexBg);
