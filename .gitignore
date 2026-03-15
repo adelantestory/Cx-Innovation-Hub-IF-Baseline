@@ -3,3 +3,5 @@
 .copilot-config/
 .playwright-mcp/
 playwright-report/
+dist/
+node_modules/
