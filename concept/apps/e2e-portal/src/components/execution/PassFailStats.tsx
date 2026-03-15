@@ -87,7 +87,7 @@ export default function PassFailStats({
               className={`rounded-lg p-4 text-center transition-all border-2 shadow-sm ${
                 statusFilter === "passed"
                   ? "bg-[#3a3a3a] border-[#3a3a3a] text-white"
-                  : "bg-portal-pass/5 border-portal-pass/20 hover:border-portal-pass/50 hover:shadow-md"
+                  : "bg-portal-card border-portal-border hover:border-portal-pass/50 hover:shadow-md"
               }`}
             >
               <p className={`text-2xl font-bold ${statusFilter === "passed" ? "text-white" : "text-portal-pass"}`}>{finalStats.passed}</p>
@@ -98,7 +98,7 @@ export default function PassFailStats({
               className={`rounded-lg p-4 text-center transition-all border-2 shadow-sm ${
                 statusFilter === "failed"
                   ? "bg-[#3a3a3a] border-[#3a3a3a] text-white"
-                  : "bg-portal-fail/5 border-portal-fail/20 hover:border-portal-fail/50 hover:shadow-md"
+                  : "bg-portal-card border-portal-border hover:border-portal-fail/50 hover:shadow-md"
               }`}
             >
               <p className={`text-2xl font-bold ${statusFilter === "failed" ? "text-white" : "text-portal-fail"}`}>{finalStats.failed}</p>
@@ -109,7 +109,7 @@ export default function PassFailStats({
               className={`rounded-lg p-4 text-center transition-all border-2 shadow-sm ${
                 statusFilter === "skipped"
                   ? "bg-[#3a3a3a] border-[#3a3a3a] text-white"
-                  : "bg-portal-skip/5 border-portal-skip/20 hover:border-portal-skip/50 hover:shadow-md"
+                  : "bg-portal-card border-portal-border hover:border-portal-skip/50 hover:shadow-md"
               }`}
             >
               <p className={`text-2xl font-bold ${statusFilter === "skipped" ? "text-white" : "text-portal-skip"}`}>

@@ -61,8 +61,8 @@ test.describe('Kanban Board', () => {
       page.locator('.fixed').getByText('Design new homepage layout')
     ).toBeVisible();
 
-    // Close modal
-    await page.locator('.fixed').getByText('x').click();
+    // Close modal — use exact role match to avoid substring hits on 'x'
+    await page.locator('.fixed').getByRole('button', { name: 'x', exact: true }).click();
   });
 
   test('back button returns to the project list', async ({ page }) => {

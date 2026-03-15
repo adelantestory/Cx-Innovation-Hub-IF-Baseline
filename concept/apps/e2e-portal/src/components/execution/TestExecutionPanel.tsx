@@ -271,11 +271,6 @@ export default function TestExecutionPanel() {
         </div>
       )}
 
-      {!isRunning && !hasResults && !initMessage && !errorMessage && (
-        <div className="text-portal-muted text-sm text-center py-8">
-          Select tests above and press Run to begin execution.
-        </div>
-      )}
     </div>
   );
 }

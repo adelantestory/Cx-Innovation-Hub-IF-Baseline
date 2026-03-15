@@ -33,32 +33,36 @@ async function dragCardToColumn(page: Page, card: Locator, targetColumnId: strin
   await page.mouse.move(srcX, srcY);
   await page.mouse.down();
 
-  // Allow the drag sensor to register the mousedown (requestAnimationFrame)
-  await page.waitForTimeout(150);
+  // Allow the drag sensor to register the mousedown
+  await page.waitForTimeout(200);
 
   // Move past the 5px slop threshold to start the drag
   await page.mouse.move(srcX + 10, srcY);
 
-  // Allow the sensor to transition from "pending" to "dragging"
-  await page.waitForTimeout(150);
+  // Wait for the drag to actually activate — @hello-pangea/dnd inserts a
+  // placeholder element once the drag is live. This is a real DOM signal
+  // rather than a fixed-time guess.
+  await page.waitForSelector('[data-rfd-placeholder-context-id]', { timeout: 2000 });
 
-  // Move to the target column in visible steps (each step is a separate
-  // Playwright call so slowMo creates a paced, observable drag)
-  const moveSteps = 5;
+  // Move to the target column in steps. Each step is followed by a short
+  // wait so the raf-schd throttled sensor processes each move in its own
+  // requestAnimationFrame frame (critical for headless CI without slowMo).
+  const moveSteps = 10;
   for (let i = 1; i <= moveSteps; i++) {
     const x = srcX + (tgtX - srcX) * i / moveSteps;
     const y = srcY + (tgtY - srcY) * i / moveSteps;
     await page.mouse.move(x, y);
+    await page.waitForTimeout(50);
   }
 
-  // Let the drop zone register before releasing
-  await page.waitForTimeout(150);
+  // Let the drop zone fully register before releasing
+  await page.waitForTimeout(300);
 
   // Release to drop
   await page.mouse.up();
 
-  // Wait for the app to process the drop
-  await page.waitForTimeout(500);
+  // Wait for the app to process the drop and run animations
+  await page.waitForTimeout(1000);
 }
 
 test.describe('Drag and Drop', () => {
@@ -101,7 +105,7 @@ test.describe('Drag and Drop', () => {
     await dragCardToColumn(page, card!, targetCol);
 
     const targetColumn = page.locator(`[data-rfd-droppable-id="${targetCol}"]`);
-    await expect(targetColumn.getByText(cardText)).toBeVisible();
+    await expect(targetColumn.getByText(cardText)).toBeVisible({ timeout: 10000 });
   });
 
   test('move a card backward to the previous column', async ({ page }) => {
@@ -136,7 +140,7 @@ test.describe('Drag and Drop', () => {
     await dragCardToColumn(page, card!, targetCol);
 
     const targetColumn = page.locator(`[data-rfd-droppable-id="${targetCol}"]`);
-    await expect(targetColumn.getByText(cardText)).toBeVisible();
+    await expect(targetColumn.getByText(cardText)).toBeVisible({ timeout: 10000 });
   });
 
   test('card remains in the board after drag (no data loss)', async ({ page }) => {

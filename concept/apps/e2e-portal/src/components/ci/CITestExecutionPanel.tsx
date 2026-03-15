@@ -15,6 +15,7 @@ export default function CITestExecutionPanel() {
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState("");
   const [dispatchStatus, setDispatchStatus] = useState<DispatchStatus>("idle");
+  const [testFilter, setTestFilter] = useState("");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = useCallback(() => {
@@ -86,7 +87,11 @@ export default function CITestExecutionPanel() {
     setError("");
     setFailures([]);
     try {
-      const res = await fetch(`${API}/dispatch`, { method: "POST" });
+      const res = await fetch(`${API}/dispatch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ testFilter: testFilter.trim() || undefined }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Dispatch failed");
       startPolling();
@@ -251,6 +256,13 @@ export default function CITestExecutionPanel() {
 
       {/* Action buttons */}
       <div className="flex items-center gap-3 flex-wrap">
+        <input
+          type="text"
+          value={testFilter}
+          onChange={(e) => setTestFilter(e.target.value)}
+          placeholder='Filter tests (e.g. "Drag", kanbanBoard.spec.ts)'
+          className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-mono text-gray-700 placeholder-gray-400 focus:outline-none focus:border-purple-400 w-72"
+        />
         <button
           onClick={handleDispatch}
           disabled={dispatching || dispatchStatus !== "idle"}

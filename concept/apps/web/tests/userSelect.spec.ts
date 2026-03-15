@@ -28,8 +28,9 @@ test.describe('User Selection', () => {
     await expect(page.getByText('Select your user to get started')).toBeVisible();
 
     for (const user of EXPECTED_USERS) {
-      await expect(page.getByText(user.name)).toBeVisible();
-      await expect(page.getByText(user.role)).toBeVisible();
+      const card = page.getByRole('button').filter({ hasText: user.name });
+      await expect(card).toBeVisible();
+      await expect(card.getByText(user.role)).toBeVisible();
     }
   });
 

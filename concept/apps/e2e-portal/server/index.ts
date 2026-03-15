@@ -184,13 +184,15 @@ app.get("/api/ci/runs", (_req, res) => {
   }
 });
 
-// Trigger a workflow dispatch
-app.post("/api/ci/dispatch", (_req, res) => {
+// Trigger a workflow dispatch (optionally filtered to specific tests)
+app.post("/api/ci/dispatch", (req, res) => {
   try {
-    execSync(
-      `gh api -X POST /repos/${CI_OWNER}/${CI_REPO}/actions/workflows/${CI_WORKFLOW}/dispatches -f ref=demo/playwright-testing`,
-      { encoding: "utf-8", timeout: 15000 }
-    );
+    const testFilter: string = req.body?.testFilter ?? "";
+    let cmd = `gh api -X POST /repos/${CI_OWNER}/${CI_REPO}/actions/workflows/${CI_WORKFLOW}/dispatches -f ref=demo/playwright-testing`;
+    if (testFilter.trim()) {
+      cmd += ` -f "inputs[test_filter]=${testFilter.trim()}"`;
+    }
+    execSync(cmd, { encoding: "utf-8", timeout: 15000 });
     res.json({ ok: true, message: "Workflow dispatch triggered" });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
