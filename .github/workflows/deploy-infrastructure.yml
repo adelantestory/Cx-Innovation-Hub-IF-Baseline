@@ -356,6 +356,36 @@ jobs:
 
           echo "api_url=${API_URL}" >> "$GITHUB_OUTPUT"
           echo "web_url=${WEB_URL}" >> "$GITHUB_OUTPUT"
+          echo "::notice::API URL: ${API_URL}"
+
+      - name: Rebuild Web image with real API URL
+        run: |
+          ACR="${{ needs.deploy.outputs.acr_login_server }}"
+          TAG="${{ vars.API_IMAGE_TAG_PERF || 'latest' }}"
+          API_URL="${{ steps.app_deploy.outputs.api_url }}"
+          echo "Building web image with VITE_API_URL=${API_URL}"
+          az acr login --name "${ACR}"
+          docker build \
+            --build-arg VITE_API_URL="${API_URL}" \
+            -t "${ACR}/taskify-web:${TAG}" \
+            -f concept/apps/web/Dockerfile \
+            concept/apps/web/
+          docker push "${ACR}/taskify-web:${TAG}"
+
+      - name: Update Web container app with new image
+        run: |
+          UID_VAL="${{ needs.deploy.outputs.uid }}"
+          ENV="${{ needs.deploy.outputs.environment }}"
+          RG="${{ needs.deploy.outputs.resource_group }}"
+          ACR="${{ needs.deploy.outputs.acr_login_server }}"
+          TAG="${{ vars.API_IMAGE_TAG_PERF || 'latest' }}"
+          APP_NAME="ca-${UID_VAL}-taskify-web"
+          az containerapp update \
+            --name "${APP_NAME}" \
+            --resource-group "${RG}" \
+            --image "${ACR}/taskify-web:${TAG}" \
+            --output none
+          echo "Web container app updated with correct API URL"
 
       - name: Write application deployment summary
         run: |
