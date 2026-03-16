@@ -14,7 +14,7 @@
 import { test, expect } from './base';
 
 test.describe('Card Highlight', () => {
-  test('cards assigned to the current user have a distinct background color', async ({ page }) => {
+  test('cards assigned to the current user have a distinct background color', { tag: ['@prod-safe'] }, async ({ page }) => {
     // Requirement: "cards assigned to you...in a different color from all the
     // other ones, so you can quickly see yours"
 
@@ -37,7 +37,7 @@ test.describe('Card Highlight', () => {
     expect(myBg).not.toEqual(otherBg);
   });
 
-  test('card highlight updates when switching users', async ({ page }) => {
+  test('card highlight updates when switching users', { tag: ['@prod-safe'] }, async ({ page }) => {
     // Requirement: styling is based on "the currently logged in user"
 
     // Log in as Jordan Kim — "Design new homepage layout" is assigned to Jordan
@@ -57,7 +57,7 @@ test.describe('Card Highlight', () => {
     expect(jordanBg).not.toEqual(alexBg);
   });
 
-  test('unassigned cards use the default (non-highlighted) style', async ({ page }) => {
+  test('unassigned cards use the default (non-highlighted) style', { tag: ['@prod-safe'] }, async ({ page }) => {
     // Mobile App MVP has an unassigned task: "Create onboarding flow"
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();
