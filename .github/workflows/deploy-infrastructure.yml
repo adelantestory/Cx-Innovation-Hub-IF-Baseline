@@ -238,16 +238,132 @@ jobs:
       - name: Write deployment summary
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" <<EOF
-          ## Deployment Summary
+          ## Infrastructure Deployment Summary
 
           | Resource         | Value |
           |------------------|-------|
           | Environment      | ${{ steps.vars.outputs.environment }} |
           | Resource Group   | ${{ steps.vars.outputs.resource_group }} |
-          | API URL          | ${{ steps.bicep_deploy.outputs.api_url }} |
-          | Web URL          | ${{ steps.bicep_deploy.outputs.web_url }} |
           | Key Vault        | ${{ steps.bicep_deploy.outputs.kv_name }} |
           | Database Server  | ${{ steps.bicep_deploy.outputs.db_server }} |
           | App Insights     | ${{ steps.bicep_deploy.outputs.appi_connection_string }} |
           | ACR Server       | ${{ steps.bicep_deploy.outputs.acr_login_server }} |
+          EOF
+
+    outputs:
+      acr_login_server: ${{ steps.bicep_deploy.outputs.acr_login_server }}
+      resource_group: ${{ steps.vars.outputs.resource_group }}
+      environment: ${{ steps.vars.outputs.environment }}
+      location: ${{ steps.vars.outputs.location }}
+      uid: ${{ steps.vars.outputs.uid }}
+      kv_name: ${{ steps.bicep_deploy.outputs.kv_name }}
+
+  # ---------------------------------------------------------------------------
+  # build-push: Build Docker images and push to ACR
+  # ---------------------------------------------------------------------------
+  build-push:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PERF }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_PERF }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PERF }}
+
+      - name: Log in to ACR
+        run: |
+          az acr login --name "${{ needs.deploy.outputs.acr_login_server }}"
+
+      - name: Build and push API image
+        run: |
+          ACR="${{ needs.deploy.outputs.acr_login_server }}"
+          TAG="${{ vars.API_IMAGE_TAG_PERF || 'latest' }}"
+          docker build \
+            -t "${ACR}/taskify-api:${TAG}" \
+            -f concept/apps/api/Dockerfile \
+            concept/apps/api/
+          docker push "${ACR}/taskify-api:${TAG}"
+
+      - name: Build and push Web image
+        run: |
+          ACR="${{ needs.deploy.outputs.acr_login_server }}"
+          TAG="${{ vars.API_IMAGE_TAG_PERF || 'latest' }}"
+          docker build \
+            --build-arg VITE_API_URL="https://placeholder.azurecontainerapps.io" \
+            -t "${ACR}/taskify-web:${TAG}" \
+            -f concept/apps/web/Dockerfile \
+            concept/apps/web/
+          docker push "${ACR}/taskify-web:${TAG}"
+
+      - name: Write build summary
+        run: |
+          ACR="${{ needs.deploy.outputs.acr_login_server }}"
+          TAG="${{ vars.API_IMAGE_TAG_PERF || 'latest' }}"
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## Container Images Built
+
+          | Image | Tag |
+          |-------|-----|
+          | ${ACR}/taskify-api | ${TAG} |
+          | ${ACR}/taskify-web | ${TAG} |
+          EOF
+
+  # ---------------------------------------------------------------------------
+  # deploy-apps: Redeploy with ACR set to provision Container Apps (Stage 4)
+  # ---------------------------------------------------------------------------
+  deploy-apps:
+    name: Deploy Applications
+    runs-on: ubuntu-latest
+    needs: [deploy, build-push]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PERF }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_PERF }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PERF }}
+
+      - name: Deploy applications (Bicep Stage 4)
+        id: app_deploy
+        run: |
+          ACR="${{ needs.deploy.outputs.acr_login_server }}"
+          OUTPUT=$(az deployment group create \
+            --resource-group "${{ needs.deploy.outputs.resource_group }}" \
+            --template-file concept/infrastructure/bicep/main.bicep \
+            --parameters \
+              uid="${{ needs.deploy.outputs.uid }}" \
+              location="${{ needs.deploy.outputs.location }}" \
+              environment="${{ needs.deploy.outputs.environment }}" \
+              pgAdminPassword="${{ secrets.PG_ADMIN_PASSWORD_PERF }}" \
+              containerRegistryLoginServer="${ACR}" \
+              apiImageTag="${{ vars.API_IMAGE_TAG_PERF || 'latest' }}" \
+            --query "properties.outputs" \
+            --output json)
+
+          API_URL=$(echo "$OUTPUT" | jq -r '.apiUrl.value')
+          WEB_URL=$(echo "$OUTPUT" | jq -r '.webUrl.value')
+
+          echo "api_url=${API_URL}" >> "$GITHUB_OUTPUT"
+          echo "web_url=${WEB_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Write application deployment summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## Application Deployment Summary
+
+          | App | URL |
+          |-----|-----|
+          | API | ${{ steps.app_deploy.outputs.api_url }} |
+          | Web | ${{ steps.app_deploy.outputs.web_url }} |
           EOF
