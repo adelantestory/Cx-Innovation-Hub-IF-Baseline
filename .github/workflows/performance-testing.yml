@@ -6,9 +6,9 @@
 #
 # Authentication (cloud tests only): OIDC federated credentials (no stored secrets).
 #   Required GitHub environment secrets:
-#     AZURE_CLIENT_ID        - Service principal / workload identity client ID
-#     AZURE_TENANT_ID        - Azure AD tenant ID
-#     AZURE_SUBSCRIPTION_ID  - Target Azure subscription ID
+#     AZURE_CLIENT_ID_V2        - Service principal / workload identity client ID
+#     AZURE_TENANT_ID_V2        - Azure AD tenant ID
+#     AZURE_SUBSCRIPTION_ID_V2  - Target Azure subscription ID
 #
 # Thresholds:
 #   - GET  requests: p95 < 500ms
@@ -236,9 +236,9 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID_V2 }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_V2 }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_V2 }}
 
       - name: Install Azure Load Testing CLI extension
         run: |
