@@ -6,21 +6,21 @@
 #
 # Authentication: OIDC federated credentials (no stored secrets).
 #   Required GitHub environment secrets:
-#     AZURE_CLIENT_ID        - Service principal / workload identity client ID
-#     AZURE_TENANT_ID        - Azure AD tenant ID
-#     AZURE_SUBSCRIPTION_ID  - Target Azure subscription ID
+#     AZURE_CLIENT_ID_V2     - Service principal / workload identity client ID
+#     AZURE_TENANT_ID_V2     - Azure AD tenant ID
+#     AZURE_SUBSCRIPTION_ID_V2 - Target Azure subscription ID
 #
 #   Required GitHub environment variables:
-#     TFSTATE_RESOURCE_GROUP   - Resource group containing the tfstate storage account
-#     TFSTATE_STORAGE_ACCOUNT  - Storage account name for Terraform remote state
-#     TFSTATE_CONTAINER        - Blob container name for Terraform state files
-#     CONTAINER_REGISTRY_LOGIN_SERVER - ACR login server (e.g. crXXXtaskifydev.azurecr.io)
+#     TFSTATE_RESOURCE_GROUP_V2 - Resource group containing the tfstate storage account
+#     TFSTATE_STORAGE_ACCOUNT_V2 - Storage account name for Terraform remote state
+#     TFSTATE_CONTAINER_V2   - Blob container name for Terraform state files
+#     CONTAINER_REGISTRY_LOGIN_SERVER_V2 - ACR login server (e.g. crXXXtaskifydev.azurecr.io)
 #
 #   Optional GitHub environment or repository variables (used for push trigger):
-#     DEPLOY_UID             - Unique identifier for resource naming (e.g. abc12)
-#     DEPLOY_LOCATION        - Azure region (default: eastus)
-#     DEPLOY_ENVIRONMENT     - Target environment: dev | stg | prd (default: dev)
-#     API_IMAGE_TAG          - Container image tag (default: latest)
+#     DEPLOY_UID_V2          - Unique identifier for resource naming (e.g. abc12)
+#     DEPLOY_LOCATION_V2     - Azure region (default: eastus)
+#     DEPLOY_ENVIRONMENT_V2  - Target environment: dev | stg | prd (default: dev)
+#     API_IMAGE_TAG_V2       - Container image tag (default: latest)
 #
 # Prerequisites (one-time setup per environment):
 #   The service principal used for OIDC must have the following RBAC roles in
@@ -56,12 +56,13 @@ on:
   push:
     branches:
       - main
+      - demo/performance-testing
     paths:
       - 'concept/infrastructure/terraform/**'
 
 # Prevent concurrent deployments to the same environment.
 concurrency:
-  group: deploy-terraform-${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
+  group: deploy-terraform-${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
   cancel-in-progress: false
 
 permissions:
@@ -75,17 +76,17 @@ jobs:
   terraform-plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
+    environment: ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
 
     env:
-      TF_VAR_uid:                              ${{ inputs.uid || vars.DEPLOY_UID }}
-      TF_VAR_location:                         ${{ inputs.location || vars.DEPLOY_LOCATION || 'eastus' }}
-      TF_VAR_environment:                      ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
-      TF_VAR_container_registry_login_server:  ${{ vars.CONTAINER_REGISTRY_LOGIN_SERVER }}
-      TF_VAR_api_image_tag:                    ${{ vars.API_IMAGE_TAG || 'latest' }}
-      ARM_CLIENT_ID:                           ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_TENANT_ID:                           ${{ secrets.AZURE_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID:                     ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_uid:                              ${{ inputs.uid || vars.DEPLOY_UID_V2 }}
+      TF_VAR_location:                         ${{ inputs.location || vars.DEPLOY_LOCATION_V2 || 'eastus' }}
+      TF_VAR_environment:                      ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
+      TF_VAR_container_registry_login_server:  ${{ vars.CONTAINER_REGISTRY_LOGIN_SERVER_V2 }}
+      TF_VAR_api_image_tag:                    ${{ vars.API_IMAGE_TAG_V2 || 'latest' }}
+      ARM_CLIENT_ID:                           ${{ secrets.AZURE_CLIENT_ID_V2 }}
+      ARM_TENANT_ID:                           ${{ secrets.AZURE_TENANT_ID_V2 }}
+      ARM_SUBSCRIPTION_ID:                     ${{ secrets.AZURE_SUBSCRIPTION_ID_V2 }}
       ARM_USE_OIDC:                            "true"
 
     steps:
@@ -94,18 +95,18 @@ jobs:
 
       - name: Validate required inputs
         run: |
-          UID_VAL="${{ inputs.uid || vars.DEPLOY_UID }}"
+          UID_VAL="${{ inputs.uid || vars.DEPLOY_UID_V2 }}"
           if [[ -z "${UID_VAL}" ]]; then
-            echo "::error::UID is required. Provide 'uid' as a workflow_dispatch input or set the DEPLOY_UID repository/environment variable."
+            echo "::error::UID is required. Provide 'uid' as a workflow_dispatch input or set the DEPLOY_UID_V2 repository/environment variable."
             exit 1
           fi
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID_V2 }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_V2 }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_V2 }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -119,12 +120,12 @@ jobs:
       - name: Terraform Init
         working-directory: concept/infrastructure/terraform
         run: |
-          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}"
-          UID_VAL="${{ inputs.uid || vars.DEPLOY_UID }}"
+          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}"
+          UID_VAL="${{ inputs.uid || vars.DEPLOY_UID_V2 }}"
           terraform init \
-            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
+            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP_V2 }}" \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT_V2 }}" \
+            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER_V2 }}" \
             -backend-config="key=taskify-${ENV}.tfstate"
 
       - name: Terraform Validate
@@ -141,7 +142,7 @@ jobs:
       - name: Upload plan artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan-${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
+          name: tfplan-${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
           path: concept/infrastructure/terraform/tfplan
           retention-days: 1
 
@@ -152,12 +153,12 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     needs: terraform-plan
-    environment: ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
+    environment: ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
 
     env:
-      ARM_CLIENT_ID:       ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_TENANT_ID:       ${{ secrets.AZURE_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID:       ${{ secrets.AZURE_CLIENT_ID_V2 }}
+      ARM_TENANT_ID:       ${{ secrets.AZURE_TENANT_ID_V2 }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_V2 }}
       ARM_USE_OIDC:        "true"
 
     steps:
@@ -167,9 +168,9 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID_V2 }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_V2 }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_V2 }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -179,17 +180,17 @@ jobs:
       - name: Terraform Init
         working-directory: concept/infrastructure/terraform
         run: |
-          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}"
+          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}"
           terraform init \
-            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
+            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP_V2 }}" \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT_V2 }}" \
+            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER_V2 }}" \
             -backend-config="key=taskify-${ENV}.tfstate"
 
       - name: Download plan artifact
         uses: actions/download-artifact@v4
         with:
-          name: tfplan-${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
+          name: tfplan-${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
           path: concept/infrastructure/terraform
 
       - name: Terraform Apply
@@ -230,7 +231,7 @@ jobs:
 
           | Resource        | Value |
           |-----------------|-------|
-          | Environment     | ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }} |
+          | Environment     | ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }} |
           | API URL         | ${{ steps.tf_outputs.outputs.api_url }} |
           | Web URL         | ${{ steps.tf_outputs.outputs.web_url }} |
           | Key Vault       | ${{ steps.tf_outputs.outputs.kv_name }} |

@@ -6,19 +6,19 @@
 #
 # Authentication: OIDC federated credentials (no stored secrets).
 #   Required GitHub environment secrets:
-#     AZURE_CLIENT_ID        - Service principal / workload identity client ID
-#     AZURE_TENANT_ID        - Azure AD tenant ID
-#     AZURE_SUBSCRIPTION_ID  - Target Azure subscription ID
-#     PG_ADMIN_PASSWORD      - PostgreSQL administrator password
+#     AZURE_CLIENT_ID_V2     - Service principal / workload identity client ID
+#     AZURE_TENANT_ID_V2     - Azure AD tenant ID
+#     AZURE_SUBSCRIPTION_ID_V2 - Target Azure subscription ID
+#     PG_ADMIN_PASSWORD_V2   - PostgreSQL administrator password
 #
 #   Required GitHub environment or repository variables:
-#     CONTAINER_REGISTRY_LOGIN_SERVER - ACR login server (e.g., crXXXtaskifydev.azurecr.io)
+#     CONTAINER_REGISTRY_LOGIN_SERVER_V2 - ACR login server (e.g., crXXXtaskifydev.azurecr.io)
 #
 #   Optional GitHub environment or repository variables (used for push trigger):
-#     DEPLOY_UID             - Unique identifier for resource naming (e.g., abc12)
-#     DEPLOY_LOCATION        - Azure region (default: eastus)
-#     DEPLOY_ENVIRONMENT     - Target environment: dev | stg | prd (default: dev)
-#     API_IMAGE_TAG          - Container image tag (default: latest)
+#     DEPLOY_UID_V2          - Unique identifier for resource naming (e.g., abc12)
+#     DEPLOY_LOCATION_V2     - Azure region (default: eastus)
+#     DEPLOY_ENVIRONMENT_V2  - Target environment: dev | stg | prd (default: dev)
+#     API_IMAGE_TAG_V2       - Container image tag (default: latest)
 #
 # Prerequisites (one-time setup per environment):
 #   The service principal used for OIDC must have the following RBAC roles in
@@ -27,9 +27,9 @@
 #     - Key Vault Secrets Officer  (write secrets to Key Vault post-deployment)
 #   Assign with:
 #     az role assignment create \
-#       --assignee <AZURE_CLIENT_ID> \
+#       --assignee <AZURE_CLIENT_ID_V2> \
 #       --role "Key Vault Secrets Officer" \
-#       --scope /subscriptions/<AZURE_SUBSCRIPTION_ID>
+#       --scope /subscriptions/<AZURE_SUBSCRIPTION_ID_V2>
 # =============================================================================
 
 name: Deploy Infrastructure
@@ -58,12 +58,13 @@ on:
   push:
     branches:
       - main
+      - demo/performance-testing
     paths:
       - 'concept/infrastructure/bicep/**'
 
 # Prevent concurrent deployments to the same environment.
 concurrency:
-  group: deploy-${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
+  group: deploy-${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
   cancel-in-progress: false
 
 permissions:
@@ -77,7 +78,7 @@ jobs:
   validate:
     name: Validate
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
+    environment: ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
 
     steps:
       - name: Checkout repository
@@ -86,12 +87,12 @@ jobs:
       - name: Resolve deployment variables
         id: vars
         run: |
-          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}"
-          LOCATION="${{ inputs.location || vars.DEPLOY_LOCATION || 'eastus' }}"
-          UID_VAL="${{ inputs.uid || vars.DEPLOY_UID }}"
+          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}"
+          LOCATION="${{ inputs.location || vars.DEPLOY_LOCATION_V2 || 'eastus' }}"
+          UID_VAL="${{ inputs.uid || vars.DEPLOY_UID_V2 }}"
           RG="rg-${UID_VAL}-taskify-${ENV}"
           if [[ -z "${UID_VAL}" ]]; then
-            echo "::error::UID is required. Provide 'uid' as a workflow_dispatch input or set the DEPLOY_UID repository/environment variable."
+            echo "::error::UID is required. Provide 'uid' as a workflow_dispatch input or set the DEPLOY_UID_V2 repository/environment variable."
             exit 1
           fi
           echo "environment=${ENV}"      >> "$GITHUB_OUTPUT"
@@ -102,9 +103,9 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID_V2 }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_V2 }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_V2 }}
 
       - name: Lint Bicep template
         run: |
@@ -128,8 +129,8 @@ jobs:
               uid="${{ steps.vars.outputs.uid }}" \
               location="${{ steps.vars.outputs.location }}" \
               environment="${{ steps.vars.outputs.environment }}" \
-              pgAdminPassword="${{ secrets.PG_ADMIN_PASSWORD }}" \
-              containerRegistryLoginServer="${{ vars.CONTAINER_REGISTRY_LOGIN_SERVER }}"
+              pgAdminPassword="${{ secrets.PG_ADMIN_PASSWORD_V2 }}" \
+              containerRegistryLoginServer="${{ vars.CONTAINER_REGISTRY_LOGIN_SERVER_V2 }}"
 
   # ---------------------------------------------------------------------------
   # deploy: Create or update Azure resources
@@ -138,7 +139,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     needs: validate
-    environment: ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}
+    environment: ${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}
 
     steps:
       - name: Checkout repository
@@ -147,13 +148,13 @@ jobs:
       - name: Resolve deployment variables
         id: vars
         run: |
-          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT || 'dev' }}"
-          LOCATION="${{ inputs.location || vars.DEPLOY_LOCATION || 'eastus' }}"
-          UID_VAL="${{ inputs.uid || vars.DEPLOY_UID }}"
-          IMAGE_TAG="${{ vars.API_IMAGE_TAG || 'latest' }}"
+          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_V2 || 'dev' }}"
+          LOCATION="${{ inputs.location || vars.DEPLOY_LOCATION_V2 || 'eastus' }}"
+          UID_VAL="${{ inputs.uid || vars.DEPLOY_UID_V2 }}"
+          IMAGE_TAG="${{ vars.API_IMAGE_TAG_V2 || 'latest' }}"
           RG="rg-${UID_VAL}-taskify-${ENV}"
           if [[ -z "${UID_VAL}" ]]; then
-            echo "::error::UID is required. Provide 'uid' as a workflow_dispatch input or set the DEPLOY_UID repository/environment variable."
+            echo "::error::UID is required. Provide 'uid' as a workflow_dispatch input or set the DEPLOY_UID_V2 repository/environment variable."
             exit 1
           fi
           echo "environment=${ENV}"      >> "$GITHUB_OUTPUT"
@@ -165,9 +166,9 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID_V2 }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_V2 }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_V2 }}
 
       - name: Create resource group
         run: |
@@ -188,8 +189,8 @@ jobs:
               uid="${{ steps.vars.outputs.uid }}" \
               location="${{ steps.vars.outputs.location }}" \
               environment="${{ steps.vars.outputs.environment }}" \
-              pgAdminPassword="${{ secrets.PG_ADMIN_PASSWORD }}" \
-              containerRegistryLoginServer="${{ vars.CONTAINER_REGISTRY_LOGIN_SERVER }}" \
+              pgAdminPassword="${{ secrets.PG_ADMIN_PASSWORD_V2 }}" \
+              containerRegistryLoginServer="${{ vars.CONTAINER_REGISTRY_LOGIN_SERVER_V2 }}" \
               apiImageTag="${{ steps.vars.outputs.image_tag }}" \
             --query "properties.outputs" \
             --output json)
@@ -199,12 +200,16 @@ jobs:
           KV_NAME=$(echo "$OUTPUT" | jq -r '.keyVaultName.value')
           DB_SERVER=$(echo "$OUTPUT" | jq -r '.dbServerName.value')
           DB_FQDN=$(echo "$OUTPUT" | jq -r '.dbServerFqdn.value')
+          APPI_CONN=$(echo "$OUTPUT" | jq -r '.appInsightsConnectionString.value // "not-deployed"')
+          ACR_SERVER=$(echo "$OUTPUT" | jq -r '.containerRegistryLoginServer.value // "not-deployed"')
 
           echo "api_url=${API_URL}"      >> "$GITHUB_OUTPUT"
           echo "web_url=${WEB_URL}"      >> "$GITHUB_OUTPUT"
           echo "kv_name=${KV_NAME}"      >> "$GITHUB_OUTPUT"
           echo "db_server=${DB_SERVER}"  >> "$GITHUB_OUTPUT"
           echo "db_fqdn=${DB_FQDN}"      >> "$GITHUB_OUTPUT"
+          echo "appi_connection_string=${APPI_CONN}" >> "$GITHUB_OUTPUT"
+          echo "acr_login_server=${ACR_SERVER}" >> "$GITHUB_OUTPUT"
 
       - name: Store PostgreSQL credentials in Key Vault
         run: |
@@ -214,7 +219,7 @@ jobs:
           az keyvault secret set \
             --vault-name "$KV_NAME" \
             --name "postgresql-admin-password" \
-            --value "${{ secrets.PG_ADMIN_PASSWORD }}" \
+            --value "${{ secrets.PG_ADMIN_PASSWORD_V2 }}" \
             --output none
 
           az keyvault secret set \
@@ -244,4 +249,6 @@ jobs:
           | Web URL          | ${{ steps.bicep_deploy.outputs.web_url }} |
           | Key Vault        | ${{ steps.bicep_deploy.outputs.kv_name }} |
           | Database Server  | ${{ steps.bicep_deploy.outputs.db_server }} |
+          | App Insights     | ${{ steps.bicep_deploy.outputs.appi_connection_string }} |
+          | ACR Server       | ${{ steps.bicep_deploy.outputs.acr_login_server }} |
           EOF

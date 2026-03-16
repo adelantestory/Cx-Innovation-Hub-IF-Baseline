@@ -405,6 +405,22 @@
 
 ---
 
+## Deployment Validation
+
+| ID | Task | Priority | Status | Dependencies | Owner |
+|----|------|----------|--------|--------------|-------|
+| DEPLOY-001 | Update deploy-infrastructure.yml with _V2 secrets | P0 | Not Started | — | cloud-architect |
+| DEPLOY-002 | Update deploy-terraform.yml with _V2 secrets | P0 | Not Started | — | cloud-architect |
+| DEPLOY-003 | Create main.bicep composition wrapper | P0 | Not Started | — | cloud-architect |
+| DEPLOY-004 | Add OIDC federated credential for environment:dev | P0 | Not Started | — | cloud-architect |
+| DEPLOY-005 | Create GitHub secrets/variables with _V2 suffix | P0 | Not Started | DEPLOY-004 | cloud-architect |
+| DEPLOY-006 | Deploy infrastructure via workflow_dispatch | P0 | Not Started | DEPLOY-001, DEPLOY-002, DEPLOY-003, DEPLOY-005 | cloud-architect |
+| DEPLOY-007 | Build and push Docker images to ACR | P0 | Not Started | DEPLOY-006 | cloud-architect |
+| DEPLOY-008 | Run live performance tests against deployed app | P0 | Not Started | DEPLOY-007 | qa-engineer |
+| DEPLOY-009 | Verify App Insights telemetry | P1 | Not Started | DEPLOY-008 | qa-engineer |
+
+---
+
 ## Updated Task Summary
 
 | Category | Total | P0 | P1 | P2 | P3 |
@@ -416,4 +432,5 @@
 | Deployment | 4 | 4 | 0 | 0 | 0 |
 | Documentation | 4 | 0 | 4 | 0 | 0 |
 | Performance Testing | 10 | 5 | 5 | 0 | 0 |
-| **Total** | **46** | **32** | **13** | **0** | **1** |
+| Deployment Validation | 9 | 8 | 1 | 0 | 0 |
+| **Total** | **55** | **40** | **14** | **0** | **1** |

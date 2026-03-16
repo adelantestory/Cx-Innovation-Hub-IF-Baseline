@@ -187,6 +187,37 @@ This plan outlines the implementation sequence for the Taskify team productivity
 
 ---
 
+## Stage 8: Live Deployment & Validation
+
+**Timeline**: 0.5 days
+**Dependencies**: Stages 1-7
+
+### Objectives
+- Deploy full Taskify stack to Azure using GitHub Actions with _V2 secrets
+- Build and push Docker images to Azure Container Registry
+- Run Locust performance tests against live deployed API
+- Validate Application Insights captures performance telemetry
+- Establish live performance baselines
+
+### Steps
+1. Create `main.bicep` composition file (wraps stages 1-5)
+2. Update deployment workflows to use `_V2` suffixed secrets/variables
+3. Configure OIDC federated credentials for GitHub environment
+4. Trigger Deploy Infrastructure workflow via `workflow_dispatch`
+5. Build and push API + Web Docker images to ACR
+6. Deploy Container Apps with live images
+7. Run Locust performance tests against live API endpoint
+8. Verify App Insights shows request telemetry
+9. Compare live baselines with local test baselines
+
+### Deliverables
+- Deployed Taskify stack on Azure
+- Live performance test results
+- App Insights telemetry verification
+- Updated AZURE_CONFIG.json with deployment outputs
+
+---
+
 ## Infrastructure-as-Code Organization
 
 ```
