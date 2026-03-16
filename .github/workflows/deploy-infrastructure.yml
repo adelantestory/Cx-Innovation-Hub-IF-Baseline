@@ -235,6 +235,53 @@ jobs:
 
           echo "PostgreSQL credentials stored in Key Vault: $KV_NAME"
 
+      - name: Initialize database schema and seed data
+        run: |
+          DB_FQDN="${{ steps.bicep_deploy.outputs.db_fqdn }}"
+          DB_SERVER="${{ steps.bicep_deploy.outputs.db_server }}"
+          RG="${{ steps.vars.outputs.resource_group }}"
+
+          # Allow runner IP through firewall
+          RUNNER_IP=$(curl -s https://api.ipify.org)
+          az postgres flexible-server firewall-rule create \
+            --name "$DB_SERVER" \
+            --resource-group "$RG" \
+            --rule-name "gh-runner-${GITHUB_RUN_ID}" \
+            --start-ip-address "$RUNNER_IP" \
+            --end-ip-address "$RUNNER_IP" \
+            --output none || true
+
+          sleep 10
+
+          # Install psql client
+          sudo apt-get update -qq && sudo apt-get install -yqq postgresql-client > /dev/null
+
+          # Create database if not exists
+          PGPASSWORD="${{ secrets.PG_ADMIN_PASSWORD_PERF }}" psql \
+            "host=${DB_FQDN} port=5432 user=taskifyadmin dbname=postgres sslmode=require" \
+            -tc "SELECT 1 FROM pg_database WHERE datname = 'taskify'" | grep -q 1 \
+            || PGPASSWORD="${{ secrets.PG_ADMIN_PASSWORD_PERF }}" psql \
+              "host=${DB_FQDN} port=5432 user=taskifyadmin dbname=postgres sslmode=require" \
+              -c "CREATE DATABASE taskify"
+
+          # Run schema and seed scripts
+          PGPASSWORD="${{ secrets.PG_ADMIN_PASSWORD_PERF }}" psql \
+            "host=${DB_FQDN} port=5432 user=taskifyadmin dbname=taskify sslmode=require" \
+            -f concept/sql/001_create_tables.sql
+
+          PGPASSWORD="${{ secrets.PG_ADMIN_PASSWORD_PERF }}" psql \
+            "host=${DB_FQDN} port=5432 user=taskifyadmin dbname=taskify sslmode=require" \
+            -f concept/sql/005_seed_data.sql
+
+          echo "Database initialized with schema and seed data"
+
+          # Clean up firewall rule
+          az postgres flexible-server firewall-rule delete \
+            --name "$DB_SERVER" \
+            --resource-group "$RG" \
+            --rule-name "gh-runner-${GITHUB_RUN_ID}" \
+            --yes --output none || true
+
       - name: Write deployment summary
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" <<EOF
