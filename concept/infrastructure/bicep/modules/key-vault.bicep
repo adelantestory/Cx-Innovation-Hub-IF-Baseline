@@ -51,7 +51,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableRbacAuthorization: enableRbacAuthorization
     enableSoftDelete: enableSoftDelete
     softDeleteRetentionInDays: softDeleteRetentionInDays
-    enablePurgeProtection: false // Disabled for POC to allow cleanup
     publicNetworkAccess: 'Enabled' // Required for POC; production would use private endpoints
   }
 }
