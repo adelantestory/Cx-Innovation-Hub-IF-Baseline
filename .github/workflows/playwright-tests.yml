@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       test_filter:
-        description: "Playwright test filter (--grep pattern or spec filename). Leave blank to run all tests."
+        description: "Test filter — use @tag (e.g. @dev, @qa) for environment tags, or a spec filename. Leave blank to run all."
         required: false
         default: ""
 
@@ -78,7 +78,15 @@ jobs:
           AZURE_KEY_VAULT_URL: ""
           CORS_ORIGIN: http://localhost:5173
           VITE_API_URL: http://localhost:3000
-        run: npx playwright test ${{ github.event.inputs.test_filter }}
+        run: |
+          FILTER="${{ github.event.inputs.test_filter }}"
+          if [[ "$FILTER" == @* ]]; then
+            npx playwright test --grep "$FILTER"
+          elif [ -n "$FILTER" ]; then
+            npx playwright test $FILTER
+          else
+            npx playwright test
+          fi
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
