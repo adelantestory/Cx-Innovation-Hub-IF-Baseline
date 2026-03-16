@@ -22,7 +22,7 @@ test.describe('User Selection', () => {
     await page.goto('/');
   });
 
-  test('displays Taskify heading and five user cards on launch', async ({ page }) => {
+  test('displays Taskify heading and five user cards on launch', { tag: ['@dev', '@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Requirement: "give you a list of the five users to pick from"
     await expect(page.getByRole('heading', { name: 'Taskify' })).toBeVisible();
     await expect(page.getByText('Select your user to get started')).toBeVisible();
@@ -34,7 +34,7 @@ test.describe('User Selection', () => {
     }
   });
 
-  test('each user card shows an avatar with the first letter of the name', async ({ page }) => {
+  test('each user card shows an avatar with the first letter of the name', { tag: ['@dev', '@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     for (const user of EXPECTED_USERS) {
       const initial = user.name.charAt(0);
       const card = page.getByRole('button').filter({ hasText: user.name });
@@ -42,7 +42,7 @@ test.describe('User Selection', () => {
     }
   });
 
-  test('clicking a user navigates to the project list', async ({ page }) => {
+  test('clicking a user navigates to the project list', { tag: ['@dev', '@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Requirement: "When you click on a user, you go into the main view,
     // which displays the list of projects."
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();
@@ -52,12 +52,12 @@ test.describe('User Selection', () => {
     await expect(page.getByText('Switch User')).toBeVisible();
   });
 
-  test('no password prompt is shown', async ({ page }) => {
+  test('no password prompt is shown', { tag: ['@dev', '@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Requirement: "There will be no password required."
     await expect(page.locator('input[type="password"]')).toHaveCount(0);
   });
 
-  test('Switch User returns to the user selection screen', async ({ page }) => {
+  test('Switch User returns to the user selection screen', { tag: ['@dev', '@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Select a user first
     await page.getByRole('button').filter({ hasText: 'Sarah Chen' }).click();
     await expect(page.getByText('Switch User')).toBeVisible();
