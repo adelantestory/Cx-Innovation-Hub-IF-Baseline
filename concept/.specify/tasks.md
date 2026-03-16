@@ -409,11 +409,11 @@
 
 | ID | Task | Priority | Status | Dependencies | Owner |
 |----|------|----------|--------|--------------|-------|
-| DEPLOY-001 | Update deploy-infrastructure.yml with _V2 secrets | P0 | Not Started | — | cloud-architect |
-| DEPLOY-002 | Update deploy-terraform.yml with _V2 secrets | P0 | Not Started | — | cloud-architect |
+| DEPLOY-001 | Update deploy-infrastructure.yml with _PERF secrets | P0 | Not Started | — | cloud-architect |
+| DEPLOY-002 | Update deploy-terraform.yml with _PERF secrets | P0 | Not Started | — | cloud-architect |
 | DEPLOY-003 | Create main.bicep composition wrapper | P0 | Not Started | — | cloud-architect |
 | DEPLOY-004 | Add OIDC federated credential for environment:dev | P0 | Not Started | — | cloud-architect |
-| DEPLOY-005 | Create GitHub secrets/variables with _V2 suffix | P0 | Not Started | DEPLOY-004 | cloud-architect |
+| DEPLOY-005 | Create GitHub secrets/variables with _PERF suffix | P0 | Not Started | DEPLOY-004 | cloud-architect |
 | DEPLOY-006 | Deploy infrastructure via workflow_dispatch | P0 | Not Started | DEPLOY-001, DEPLOY-002, DEPLOY-003, DEPLOY-005 | cloud-architect |
 | DEPLOY-007 | Build and push Docker images to ACR | P0 | Not Started | DEPLOY-006 | cloud-architect |
 | DEPLOY-008 | Run live performance tests against deployed app | P0 | Not Started | DEPLOY-007 | qa-engineer |
