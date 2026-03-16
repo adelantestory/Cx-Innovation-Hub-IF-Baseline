@@ -10,6 +10,10 @@
 #     AZURE_TENANT_ID_PERF        - Azure AD tenant ID
 #     AZURE_SUBSCRIPTION_ID_PERF  - Target Azure subscription ID
 #
+#   Required GitHub variables (optional – fall back to workflow inputs):
+#     DEPLOY_UID_PERF             - Unique deployment identifier
+#     DEPLOY_ENVIRONMENT_PERF     - Target environment (dev/stg/prd/perf)
+#
 # Thresholds:
 #   - GET  requests: p95 < 500ms
 #   - POST/PATCH requests: p95 < 1000ms
@@ -23,17 +27,24 @@ on:
     inputs:
       deploy_uid:
         description: 'Unique identifier for resource naming'
-        required: true
+        required: false
+        default: 'perfv2'
         type: string
       environment:
         description: 'Environment'
         required: false
-        default: 'dev'
+        default: 'perf'
         type: choice
         options:
           - dev
           - stg
           - prd
+          - perf
+      target_url:
+        description: 'Override API URL (leave empty to auto-detect from Azure)'
+        required: false
+        default: ''
+        type: string
       run_cloud_tests:
         description: 'Run Azure Load Testing (requires deployed infrastructure)'
         required: false
@@ -42,6 +53,10 @@ on:
   push:
     paths:
       - 'concept/tests/performance/**'
+
+permissions:
+  id-token: write
+  contents: read
 
 concurrency:
   group: perf-testing-${{ github.ref }}
@@ -217,17 +232,30 @@ jobs:
           echo "Docker Compose services stopped and volumes removed"
 
   # ---------------------------------------------------------------------------
-  # cloud-load-test: Run Azure Load Testing against deployed infrastructure
+  # cloud-load-test: Run each scenario as a separate Azure Load Test (matrix)
   # ---------------------------------------------------------------------------
   cloud-load-test:
-    name: Azure Load Test
+    name: "Azure Load Test — ${{ matrix.scenario.description }}"
     needs: local-verification
     if: github.event.inputs.run_cloud_tests == 'true'
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - name: browse-projects
+            file: concept/tests/performance/scenarios/test_browse_projects.py
+            description: "Browse Projects"
+          - name: kanban-board
+            file: concept/tests/performance/scenarios/test_kanban_board.py
+            description: "Kanban Board Flow"
+          - name: comments
+            file: concept/tests/performance/scenarios/test_comments.py
+            description: "Comment Activity"
+          - name: health-check
+            file: concept/tests/performance/scenarios/test_health.py
+            description: "Health Check"
 
     steps:
       - name: Checkout repository
@@ -244,49 +272,66 @@ jobs:
         run: |
           az extension add --name load --yes
 
-      - name: Resolve resource names
+      - name: Resolve resource names and API URL
         id: vars
         run: |
-          UID_VAL="${{ inputs.deploy_uid }}"
-          ENV="${{ inputs.environment || 'dev' }}"
+          UID_VAL="${{ inputs.deploy_uid || vars.DEPLOY_UID_PERF || 'perfv2' }}"
+          ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_PERF || 'perf' }}"
           RG="rg-${UID_VAL}-taskify-${ENV}"
-          ALT_NAME="alt-${UID_VAL}-taskify-${ENV}"
-          AI_NAME="ai-${UID_VAL}-taskify-${ENV}"
+          LT_NAME="lt-${UID_VAL}-taskify-${ENV}"
+          AI_NAME="appi-${UID_VAL}-taskify-${ENV}"
 
           echo "uid=${UID_VAL}"              >> "$GITHUB_OUTPUT"
           echo "environment=${ENV}"          >> "$GITHUB_OUTPUT"
           echo "resource_group=${RG}"        >> "$GITHUB_OUTPUT"
-          echo "load_test_name=${ALT_NAME}"  >> "$GITHUB_OUTPUT"
+          echo "load_test_name=${LT_NAME}"   >> "$GITHUB_OUTPUT"
           echo "app_insights_name=${AI_NAME}" >> "$GITHUB_OUTPUT"
 
-      - name: Create Azure Load Testing resource
-        run: |
-          az load create \
-            --name "${{ steps.vars.outputs.load_test_name }}" \
-            --resource-group "${{ steps.vars.outputs.resource_group }}" \
-            --location eastus \
-            --output none 2>/dev/null || echo "Load Testing resource already exists"
+          # Resolve API URL: explicit input > auto-detect from Container App
+          TARGET_URL="${{ inputs.target_url }}"
+          if [ -z "$TARGET_URL" ]; then
+            echo "Auto-detecting API URL from Container App ca-${UID_VAL}-taskify-api..."
+            FQDN=$(az containerapp show \
+              --name "ca-${UID_VAL}-taskify-api" \
+              --resource-group "$RG" \
+              --query "properties.configuration.ingress.fqdn" \
+              -o tsv 2>/dev/null || true)
+            if [ -n "$FQDN" ]; then
+              TARGET_URL="https://${FQDN}"
+            else
+              echo "::error::Could not auto-detect API URL. Provide target_url input or verify the Container App exists."
+              exit 1
+            fi
+          fi
 
-      - name: Create and run load test
+          echo "api_url=${TARGET_URL}" >> "$GITHUB_OUTPUT"
+          echo "Resolved API URL: ${TARGET_URL}"
+
+      - name: Create and run load test — ${{ matrix.scenario.description }}
         id: load_test
         run: |
-          TEST_ID="perf-run-$(date +%Y%m%d-%H%M%S)"
-          echo "test_run_id=${TEST_ID}" >> "$GITHUB_OUTPUT"
+          TEST_ID="perf-${{ matrix.scenario.name }}-$(date +%Y%m%d-%H%M%S)"
+          echo "test_id=${TEST_ID}" >> "$GITHUB_OUTPUT"
           echo "test_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+          LT_NAME="${{ steps.vars.outputs.load_test_name }}"
+          RG="${{ steps.vars.outputs.resource_group }}"
+          API_URL="${{ steps.vars.outputs.api_url }}"
 
           # Create the test
           az load test create \
-            --name "${{ steps.vars.outputs.load_test_name }}" \
-            --resource-group "${{ steps.vars.outputs.resource_group }}" \
+            --name "$LT_NAME" \
+            --resource-group "$RG" \
             --test-id "${TEST_ID}" \
-            --test-plan concept/tests/performance/locustfile.py \
+            --test-plan "${{ matrix.scenario.file }}" \
             --engine-instances 1 \
+            --env TASKIFY_BASE_URL="${API_URL}" \
             --output none
 
           # Start the test run
           az load test-run create \
-            --name "${{ steps.vars.outputs.load_test_name }}" \
-            --resource-group "${{ steps.vars.outputs.resource_group }}" \
+            --name "$LT_NAME" \
+            --resource-group "$RG" \
             --test-id "${TEST_ID}" \
             --test-run-id "${TEST_ID}-run" \
             --output none
@@ -295,7 +340,7 @@ jobs:
 
       - name: Wait for test completion
         run: |
-          echo "Waiting for load test to complete..."
+          echo "Waiting for load test '${{ matrix.scenario.description }}' to complete..."
           MAX_WAIT=600
           INTERVAL=15
           ELAPSED=0
@@ -303,7 +348,7 @@ jobs:
             STATUS=$(az load test-run show \
               --name "${{ steps.vars.outputs.load_test_name }}" \
               --resource-group "${{ steps.vars.outputs.resource_group }}" \
-              --test-run-id "${{ steps.load_test.outputs.test_run_id }}-run" \
+              --test-run-id "${{ steps.load_test.outputs.test_id }}-run" \
               --query "status" -o tsv 2>/dev/null || echo "UNKNOWN")
 
             echo "  Status: ${STATUS} (${ELAPSED}s / ${MAX_WAIT}s)"
@@ -332,16 +377,16 @@ jobs:
           az load test-run download-files \
             --name "${{ steps.vars.outputs.load_test_name }}" \
             --resource-group "${{ steps.vars.outputs.resource_group }}" \
-            --test-run-id "${{ steps.load_test.outputs.test_run_id }}-run" \
+            --test-run-id "${{ steps.load_test.outputs.test_id }}-run" \
             --path cloud-results \
             --force \
             --output none || echo "::warning::Could not download all result files"
 
-      - name: Upload cloud test results
+      - name: Upload cloud test results — ${{ matrix.scenario.description }}
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: performance-results-cloud
+          name: performance-results-cloud-${{ matrix.scenario.name }}
           path: cloud-results/
           retention-days: 30
 
@@ -387,30 +432,32 @@ jobs:
           echo "$FAILED_REQS" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
 
-      - name: Post cloud test summary
+      - name: Post cloud test summary — ${{ matrix.scenario.description }}
         if: always()
         run: |
-          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
-          ## Azure Load Test Results
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## Azure Load Test Results — ${{ matrix.scenario.description }}
 
           | Property | Value |
           |----------|-------|
-          | Test Run ID | ${{ steps.load_test.outputs.test_run_id }}-run |
+          | Scenario | ${{ matrix.scenario.description }} |
+          | Test ID | ${{ steps.load_test.outputs.test_id }} |
+          | API URL | ${{ steps.vars.outputs.api_url }} |
           | Environment | ${{ steps.vars.outputs.environment }} |
           | Resource Group | ${{ steps.vars.outputs.resource_group }} |
           | Load Test Resource | ${{ steps.vars.outputs.load_test_name }} |
 
           ### Application Insights — Errors During Test Window
 
-          ```json
+          \`\`\`json
           ${{ steps.ai_query.outputs.errors }}
-          ```
+          \`\`\`
 
           ### Application Insights — Request Performance
 
-          ```json
+          \`\`\`json
           ${{ steps.ai_query.outputs.failed_reqs }}
-          ```
+          \`\`\`
 
-          > **Note**: Review the full results in the uploaded `performance-results-cloud` artifact.
+          > **Note**: Review the full results in the uploaded \`performance-results-cloud-${{ matrix.scenario.name }}\` artifact.
           EOF
