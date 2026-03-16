@@ -14,7 +14,7 @@
 import { test, expect } from './base';
 
 test.describe('Comments', () => {
-  test('add a new comment to a task', async ({ page }) => {
+  test('add a new comment to a task', { tag: ['@prod-safe'] }, async ({ page }) => {
     // Requirement: "leave an unlimited number of comments for a particular card"
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();
@@ -37,7 +37,7 @@ test.describe('Comments', () => {
     await expect(page.getByText('Alex Rivera').last()).toBeVisible();
   });
 
-  test('edit own comment', async ({ page }) => {
+  test('edit own comment', { tag: ['@prod-safe'] }, async ({ page }) => {
     // Requirement: "You can edit any comments that you make"
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();
@@ -69,7 +69,7 @@ test.describe('Comments', () => {
     await expect(page.getByText(updatedText)).toBeVisible();
   });
 
-  test('cannot edit or delete comments made by other users', async ({ page }) => {
+  test('cannot edit or delete comments made by other users', { tag: ['@prod-safe'] }, async ({ page }) => {
     // Requirement: "you can't edit comments that other people made"
     // Requirement: "you can't delete comments anybody else made"
     await page.goto('/');
@@ -92,7 +92,7 @@ test.describe('Comments', () => {
     await expect(sarahCommentBlock.getByRole('button', { name: 'Delete', exact: true })).toHaveCount(0);
   });
 
-  test('own comment shows Edit and Delete buttons', async ({ page }) => {
+  test('own comment shows Edit and Delete buttons', { tag: ['@prod-safe'] }, async ({ page }) => {
     // Requirement: "You can edit any comments that you make" +
     //              "You can delete any comments that you made"
     await page.goto('/');
@@ -112,7 +112,7 @@ test.describe('Comments', () => {
     await expect(alexCommentBlock.getByRole('button', { name: 'Delete', exact: true })).toBeVisible();
   });
 
-  test('delete own comment removes it from the list', async ({ page }) => {
+  test('delete own comment removes it from the list', { tag: ['@prod-safe'] }, async ({ page }) => {
     // Requirement: "You can delete any comments that you made"
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();

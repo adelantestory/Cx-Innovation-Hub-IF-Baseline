@@ -9,11 +9,11 @@ export default {
       },
       colors: {
         portal: {
-          bg: "#F8F4F1",
+          bg: "#000000",
           card: "#ffffff",
           border: "#e0dbd7",
           accent: "#c96442",
-          heading: "#4A1259",
+          heading: "#FFFFFF",
           pass: "#22c55e",
           fail: "#ef4444",
           skip: "#eab308",

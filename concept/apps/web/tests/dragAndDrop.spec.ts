@@ -77,7 +77,7 @@ test.describe('Drag and Drop', () => {
     await expect(page.locator('[data-rfd-droppable-id="todo"]')).toBeVisible();
   });
 
-  test('move a card to the next column', async ({ page }) => {
+  test('move a card to the next column', { tag: ['@uat', '@prod-safe'] }, async ({ page }) => {
     // Pick the first card in the first non-empty column and drag it one column right
     const columns = ['todo', 'in_progress', 'in_review'] as const;
     const nextColumn: Record<string, string> = {
@@ -112,7 +112,7 @@ test.describe('Drag and Drop', () => {
     await expect(targetColumn.getByText(cardText)).toBeVisible({ timeout: 10000 });
   });
 
-  test('move a card backward to the previous column', async ({ page }) => {
+  test('move a card backward to the previous column', { tag: ['@uat', '@prod-safe'] }, async ({ page }) => {
     // Pick the first card from a column that can move left
     const columns = ['done', 'in_review', 'in_progress'] as const;
     const prevColumn: Record<string, string> = {
@@ -147,7 +147,7 @@ test.describe('Drag and Drop', () => {
     await expect(targetColumn.getByText(cardText)).toBeVisible({ timeout: 10000 });
   });
 
-  test('card remains in the board after drag (no data loss)', async ({ page }) => {
+  test('card remains in the board after drag (no data loss)', { tag: ['@uat', '@prod-safe'] }, async ({ page }) => {
     // Count all cards before drag
     const allCards = page.locator('[data-rfd-draggable-id]');
     const countBefore = await allCards.count();

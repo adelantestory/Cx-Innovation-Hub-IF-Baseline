@@ -6,13 +6,37 @@
     "summary": "Checks that the Taskify welcome screen appears when the app first opens, showing all five team members with their names and roles.",
     "objective": "Verify the landing page renders the app heading and all five user cards with correct names and roles.",
     "flow": [
-      { "description": "Open the app", "action": "Navigate to the home page" },
-      { "description": "The Taskify heading is visible at the top of the screen", "action": "Check for 'Taskify' heading" },
-      { "description": "A prompt reads 'Select your user to get started'", "action": "Check for instruction text" },
-      { "description": "Five user cards are displayed showing Sarah Chen, Alex Rivera, Jordan Kim, Morgan Lee, and Taylor Patel", "action": "Verify each user name is visible" },
-      { "description": "Each card shows the user's role (e.g., product manager, engineer)", "action": "Verify each user role is visible" }
+      {
+        "description": "Open the app",
+        "action": "Navigate to the home page"
+      },
+      {
+        "description": "The Taskify heading is visible at the top of the screen",
+        "action": "Check for 'Taskify' heading"
+      },
+      {
+        "description": "A prompt reads 'Select your user to get started'",
+        "action": "Check for instruction text"
+      },
+      {
+        "description": "Five user cards are displayed showing Sarah Chen, Alex Rivera, Jordan Kim, Morgan Lee, and Taylor Patel",
+        "action": "Verify each user name is visible"
+      },
+      {
+        "description": "Each card shows the user's role (e.g., product manager, engineer)",
+        "action": "Verify each user role is visible"
+      }
     ],
-    "tags": ["ui", "landing-page", "user-selection", "smoke-test"]
+    "tags": [
+      "ui",
+      "landing-page",
+      "user-selection",
+      "smoke-test",
+      "@dev",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "userSelect.spec.ts",
@@ -21,11 +45,29 @@
     "summary": "Confirms that every user card displays an avatar circle containing the first letter of the user's name (e.g., 'S' for Sarah Chen).",
     "objective": "Verify each user card renders a letter-based avatar using the first character of the user's name.",
     "flow": [
-      { "description": "Open the app", "action": "Navigate to the home page" },
-      { "description": "Look at each user card", "action": "Locate each user card button" },
-      { "description": "Each card shows a circular avatar with the user's initial (S, A, J, M, T)", "action": "Verify the first letter of the name appears inside the card" }
+      {
+        "description": "Open the app",
+        "action": "Navigate to the home page"
+      },
+      {
+        "description": "Look at each user card",
+        "action": "Locate each user card button"
+      },
+      {
+        "description": "Each card shows a circular avatar with the user's initial (S, A, J, M, T)",
+        "action": "Verify the first letter of the name appears inside the card"
+      }
     ],
-    "tags": ["ui", "avatar", "user-selection", "visual"]
+    "tags": [
+      "ui",
+      "avatar",
+      "user-selection",
+      "visual",
+      "@dev",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "userSelect.spec.ts",
@@ -34,13 +76,36 @@
     "summary": "Verifies that clicking on a user card takes you to the main project list view, showing the logged-in user's name and a Switch User button.",
     "objective": "Validate that selecting a user transitions the app from the user selection screen to the project list view.",
     "flow": [
-      { "description": "Open the app", "action": "Navigate to the home page" },
-      { "description": "Click on the 'Alex Rivera' card", "action": "Click the Alex Rivera button" },
-      { "description": "The screen changes to show the project list", "action": "Verify the main view loads" },
-      { "description": "Alex Rivera's name appears in the header", "action": "Check for user name in header" },
-      { "description": "A 'Switch User' button is visible", "action": "Verify Switch User button is present" }
+      {
+        "description": "Open the app",
+        "action": "Navigate to the home page"
+      },
+      {
+        "description": "Click on the 'Alex Rivera' card",
+        "action": "Click the Alex Rivera button"
+      },
+      {
+        "description": "The screen changes to show the project list",
+        "action": "Verify the main view loads"
+      },
+      {
+        "description": "Alex Rivera's name appears in the header",
+        "action": "Check for user name in header"
+      },
+      {
+        "description": "A 'Switch User' button is visible",
+        "action": "Verify Switch User button is present"
+      }
     ],
-    "tags": ["navigation", "user-selection", "authentication"]
+    "tags": [
+      "navigation",
+      "user-selection",
+      "authentication",
+      "@dev",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "userSelect.spec.ts",
@@ -49,11 +114,29 @@
     "summary": "Ensures the app does not ask for a password—users simply click their name to log in.",
     "objective": "Confirm that no password input field exists on the user selection screen.",
     "flow": [
-      { "description": "Open the app", "action": "Navigate to the home page" },
-      { "description": "Look for any password fields on the page", "action": "Count password input elements" },
-      { "description": "No password fields are found", "action": "Verify count is zero" }
+      {
+        "description": "Open the app",
+        "action": "Navigate to the home page"
+      },
+      {
+        "description": "Look for any password fields on the page",
+        "action": "Count password input elements"
+      },
+      {
+        "description": "No password fields are found",
+        "action": "Verify count is zero"
+      }
     ],
-    "tags": ["authentication", "ui", "security", "user-selection"]
+    "tags": [
+      "authentication",
+      "ui",
+      "security",
+      "user-selection",
+      "@dev",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "userSelect.spec.ts",
@@ -62,13 +145,36 @@
     "summary": "Confirms that after logging in, clicking the 'Switch User' button takes the user back to the original selection screen.",
     "objective": "Verify the Switch User button navigates back to the user selection landing page.",
     "flow": [
-      { "description": "Open the app and select Sarah Chen", "action": "Navigate to home and click Sarah Chen" },
-      { "description": "The project list appears with a 'Switch User' button", "action": "Verify Switch User button is visible" },
-      { "description": "Click the 'Switch User' button", "action": "Click Switch User" },
-      { "description": "The user selection screen reappears with the Taskify heading", "action": "Verify Taskify heading is visible" },
-      { "description": "The instruction text 'Select your user to get started' is shown again", "action": "Verify instruction text reappears" }
+      {
+        "description": "Open the app and select Sarah Chen",
+        "action": "Navigate to home and click Sarah Chen"
+      },
+      {
+        "description": "The project list appears with a 'Switch User' button",
+        "action": "Verify Switch User button is visible"
+      },
+      {
+        "description": "Click the 'Switch User' button",
+        "action": "Click Switch User"
+      },
+      {
+        "description": "The user selection screen reappears with the Taskify heading",
+        "action": "Verify Taskify heading is visible"
+      },
+      {
+        "description": "The instruction text 'Select your user to get started' is shown again",
+        "action": "Verify instruction text reappears"
+      }
     ],
-    "tags": ["navigation", "user-selection", "session-management"]
+    "tags": [
+      "navigation",
+      "user-selection",
+      "session-management",
+      "@dev",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "kanbanBoard.spec.ts",
@@ -77,12 +183,32 @@
     "summary": "After opening a project, the board displays four columns labeled To Do, In Progress, In Review, and Done.",
     "objective": "Verify the Kanban board renders all four status columns with the correct headings.",
     "flow": [
-      { "description": "Log in as Alex Rivera", "action": "Select Alex Rivera from the user selection screen" },
-      { "description": "Open the 'Website Redesign' project", "action": "Click on Website Redesign" },
-      { "description": "The board shows four columns", "action": "Check for column headings" },
-      { "description": "Columns are labeled 'To Do', 'In Progress', 'In Review', and 'Done'", "action": "Verify each heading is visible" }
+      {
+        "description": "Log in as Alex Rivera",
+        "action": "Select Alex Rivera from the user selection screen"
+      },
+      {
+        "description": "Open the 'Website Redesign' project",
+        "action": "Click on Website Redesign"
+      },
+      {
+        "description": "The board shows four columns",
+        "action": "Check for column headings"
+      },
+      {
+        "description": "Columns are labeled 'To Do', 'In Progress', 'In Review', and 'Done'",
+        "action": "Verify each heading is visible"
+      }
     ],
-    "tags": ["ui", "kanban", "layout", "smoke-test"]
+    "tags": [
+      "ui",
+      "kanban",
+      "layout",
+      "smoke-test",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "kanbanBoard.spec.ts",
@@ -91,13 +217,35 @@
     "summary": "Checks that tasks from the sample data appear in the correct columns—for example, 'Design new homepage layout' is in To Do.",
     "objective": "Verify seed data task cards are rendered and visible in their expected columns.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "'Design new homepage layout' appears in the To Do column", "action": "Verify task card is visible" },
-      { "description": "'Implement responsive navigation bar' appears in In Progress", "action": "Verify task card is visible" },
-      { "description": "'Refactor CSS to Tailwind' appears in In Review", "action": "Verify task card is visible" },
-      { "description": "'Set up CI/CD pipeline' appears in Done", "action": "Verify task card is visible" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "'Design new homepage layout' appears in the To Do column",
+        "action": "Verify task card is visible"
+      },
+      {
+        "description": "'Implement responsive navigation bar' appears in In Progress",
+        "action": "Verify task card is visible"
+      },
+      {
+        "description": "'Refactor CSS to Tailwind' appears in In Review",
+        "action": "Verify task card is visible"
+      },
+      {
+        "description": "'Set up CI/CD pipeline' appears in Done",
+        "action": "Verify task card is visible"
+      }
     ],
-    "tags": ["kanban", "data-integrity", "seed-data"]
+    "tags": [
+      "kanban",
+      "data-integrity",
+      "seed-data",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "kanbanBoard.spec.ts",
@@ -106,11 +254,28 @@
     "summary": "Each column header displays a small badge showing how many task cards are in that column.",
     "objective": "Verify that each Kanban column displays a numeric count badge reflecting the number of cards it contains.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Look at each column header", "action": "Locate the column heading containers" },
-      { "description": "Each column shows a count badge (showing '1' for each column in the sample data)", "action": "Verify the count badge text is visible next to each heading" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Look at each column header",
+        "action": "Locate the column heading containers"
+      },
+      {
+        "description": "Each column shows a count badge (showing '1' for each column in the sample data)",
+        "action": "Verify the count badge text is visible next to each heading"
+      }
     ],
-    "tags": ["ui", "kanban", "badge", "visual"]
+    "tags": [
+      "ui",
+      "kanban",
+      "badge",
+      "visual",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "kanbanBoard.spec.ts",
@@ -119,13 +284,36 @@
     "summary": "Clicking on a task card opens a pop-up window showing the full details of that task.",
     "objective": "Verify that clicking a task card triggers the task detail modal overlay with the task's information.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Click on the 'Design new homepage layout' card", "action": "Click the task card" },
-      { "description": "A modal window appears on screen", "action": "Verify the modal overlay is visible" },
-      { "description": "The modal shows the task title 'Design new homepage layout'", "action": "Check task title in modal" },
-      { "description": "Close the modal by clicking the 'x' button", "action": "Click the close button" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Click on the 'Design new homepage layout' card",
+        "action": "Click the task card"
+      },
+      {
+        "description": "A modal window appears on screen",
+        "action": "Verify the modal overlay is visible"
+      },
+      {
+        "description": "The modal shows the task title 'Design new homepage layout'",
+        "action": "Check task title in modal"
+      },
+      {
+        "description": "Close the modal by clicking the 'x' button",
+        "action": "Click the close button"
+      }
     ],
-    "tags": ["ui", "modal", "kanban", "interaction"]
+    "tags": [
+      "ui",
+      "modal",
+      "kanban",
+      "interaction",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "kanbanBoard.spec.ts",
@@ -134,12 +322,31 @@
     "summary": "Clicking the '← Projects' button on the board takes you back to the list of all projects.",
     "objective": "Verify the back navigation button returns the user from the Kanban board to the project list view.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Click the '← Projects' button", "action": "Click the back button" },
-      { "description": "The project list appears showing all projects", "action": "Verify project list is visible" },
-      { "description": "'Website Redesign' and 'Mobile App MVP' are both listed", "action": "Check project names are displayed" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Click the '← Projects' button",
+        "action": "Click the back button"
+      },
+      {
+        "description": "The project list appears showing all projects",
+        "action": "Verify project list is visible"
+      },
+      {
+        "description": "'Website Redesign' and 'Mobile App MVP' are both listed",
+        "action": "Check project names are displayed"
+      }
     ],
-    "tags": ["navigation", "kanban", "project-list"]
+    "tags": [
+      "navigation",
+      "kanban",
+      "project-list",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "dragAndDrop.spec.ts",
@@ -148,14 +355,39 @@
     "summary": "A task card can be picked up and moved from the To Do column to In Progress using keyboard shortcuts, simulating a drag-and-drop action.",
     "objective": "Verify that keyboard-based drag and drop moves a card from the To Do column to the In Progress column.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Focus the 'Design new homepage layout' card in the To Do column", "action": "Give keyboard focus to the card" },
-      { "description": "Press Space to pick up the card", "action": "Press Space key to lift" },
-      { "description": "Press the Right Arrow key to move it to the next column", "action": "Press ArrowRight to shift columns" },
-      { "description": "Press Space again to drop the card", "action": "Press Space key to drop" },
-      { "description": "The card now appears in the In Progress column", "action": "Verify card is in the In Progress droppable area" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Focus the 'Design new homepage layout' card in the To Do column",
+        "action": "Give keyboard focus to the card"
+      },
+      {
+        "description": "Press Space to pick up the card",
+        "action": "Press Space key to lift"
+      },
+      {
+        "description": "Press the Right Arrow key to move it to the next column",
+        "action": "Press ArrowRight to shift columns"
+      },
+      {
+        "description": "Press Space again to drop the card",
+        "action": "Press Space key to drop"
+      },
+      {
+        "description": "The card now appears in the In Progress column",
+        "action": "Verify card is in the In Progress droppable area"
+      }
     ],
-    "tags": ["drag-and-drop", "accessibility", "keyboard", "kanban"]
+    "tags": [
+      "drag-and-drop",
+      "accessibility",
+      "keyboard",
+      "kanban",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "dragAndDrop.spec.ts",
@@ -164,12 +396,31 @@
     "summary": "A task card in the In Progress column can be moved forward to the In Review column using keyboard drag.",
     "objective": "Verify keyboard drag moves a card from In Progress to In Review.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Focus the 'Implement responsive navigation bar' card in In Progress", "action": "Give keyboard focus to the card" },
-      { "description": "Pick up the card with Space, move right with Arrow, and drop with Space", "action": "Perform keyboard drag sequence" },
-      { "description": "The card now appears in the In Review column", "action": "Verify card is in the In Review droppable area" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Focus the 'Implement responsive navigation bar' card in In Progress",
+        "action": "Give keyboard focus to the card"
+      },
+      {
+        "description": "Pick up the card with Space, move right with Arrow, and drop with Space",
+        "action": "Perform keyboard drag sequence"
+      },
+      {
+        "description": "The card now appears in the In Review column",
+        "action": "Verify card is in the In Review droppable area"
+      }
     ],
-    "tags": ["drag-and-drop", "accessibility", "keyboard", "kanban"]
+    "tags": [
+      "drag-and-drop",
+      "accessibility",
+      "keyboard",
+      "kanban",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "dragAndDrop.spec.ts",
@@ -178,12 +429,32 @@
     "summary": "A task card can also be moved backward—from the Done column back to In Review—confirming that drag works in both directions.",
     "objective": "Verify that cards can be dragged backward (right-to-left) between columns using the left arrow key.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Focus the 'Set up CI/CD pipeline' card in the Done column", "action": "Give keyboard focus to the card" },
-      { "description": "Pick up the card with Space, move left with Arrow, and drop with Space", "action": "Perform backward keyboard drag sequence" },
-      { "description": "The card now appears in the In Review column instead of Done", "action": "Verify card is in the In Review droppable area" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Focus the 'Set up CI/CD pipeline' card in the Done column",
+        "action": "Give keyboard focus to the card"
+      },
+      {
+        "description": "Pick up the card with Space, move left with Arrow, and drop with Space",
+        "action": "Perform backward keyboard drag sequence"
+      },
+      {
+        "description": "The card now appears in the In Review column instead of Done",
+        "action": "Verify card is in the In Review droppable area"
+      }
     ],
-    "tags": ["drag-and-drop", "accessibility", "keyboard", "kanban", "regression"]
+    "tags": [
+      "drag-and-drop",
+      "accessibility",
+      "keyboard",
+      "kanban",
+      "regression",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "dragAndDrop.spec.ts",
@@ -192,12 +463,31 @@
     "summary": "After moving a card between columns, all four task cards are still present on the board—nothing is accidentally lost.",
     "objective": "Verify that dragging a card does not remove or duplicate any task cards on the board.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Move the 'Design new homepage layout' card to a different column", "action": "Perform keyboard drag to move the card" },
-      { "description": "Check that all four original tasks are still visible on the board", "action": "Verify all task titles are present" },
-      { "description": "'Design new homepage layout', 'Implement responsive navigation bar', 'Refactor CSS to Tailwind', and 'Set up CI/CD pipeline' are all accounted for", "action": "Confirm no cards were lost or duplicated" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Move the 'Design new homepage layout' card to a different column",
+        "action": "Perform keyboard drag to move the card"
+      },
+      {
+        "description": "Check that all four original tasks are still visible on the board",
+        "action": "Verify all task titles are present"
+      },
+      {
+        "description": "'Design new homepage layout', 'Implement responsive navigation bar', 'Refactor CSS to Tailwind', and 'Set up CI/CD pipeline' are all accounted for",
+        "action": "Confirm no cards were lost or duplicated"
+      }
     ],
-    "tags": ["drag-and-drop", "data-integrity", "kanban", "regression"]
+    "tags": [
+      "drag-and-drop",
+      "data-integrity",
+      "kanban",
+      "regression",
+      "@uat",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "cardHighlight.spec.ts",
@@ -206,12 +496,30 @@
     "summary": "Task cards assigned to the currently logged-in user appear in a different background color, making it easy to spot your own tasks at a glance.",
     "objective": "Verify that the logged-in user's assigned cards have a visually distinct background color compared to cards assigned to other users.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Look at the card assigned to Alex ('Implement responsive navigation bar')", "action": "Get the background color of Alex's card" },
-      { "description": "Look at a card assigned to someone else ('Design new homepage layout')", "action": "Get the background color of another user's card" },
-      { "description": "The two background colors are different", "action": "Compare the two colors and confirm they differ" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Look at the card assigned to Alex ('Implement responsive navigation bar')",
+        "action": "Get the background color of Alex's card"
+      },
+      {
+        "description": "Look at a card assigned to someone else ('Design new homepage layout')",
+        "action": "Get the background color of another user's card"
+      },
+      {
+        "description": "The two background colors are different",
+        "action": "Compare the two colors and confirm they differ"
+      }
     ],
-    "tags": ["ui", "visual", "card-highlight", "personalization"]
+    "tags": [
+      "ui",
+      "visual",
+      "card-highlight",
+      "personalization",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "cardHighlight.spec.ts",
@@ -220,12 +528,31 @@
     "summary": "When a different user logs in, the highlighting shifts to that user's cards—so the highlight always reflects who is currently using the app.",
     "objective": "Verify that card highlighting dynamically updates based on the currently logged-in user.",
     "flow": [
-      { "description": "Log in as Jordan Kim and open Website Redesign", "action": "Navigate to the board as Jordan" },
-      { "description": "Jordan's card ('Design new homepage layout') is highlighted", "action": "Get the background color of Jordan's card" },
-      { "description": "Alex's card ('Implement responsive navigation bar') is not highlighted", "action": "Get the background color of Alex's card" },
-      { "description": "The colors differ, confirming the highlight follows the logged-in user", "action": "Compare the two colors and confirm they differ" }
+      {
+        "description": "Log in as Jordan Kim and open Website Redesign",
+        "action": "Navigate to the board as Jordan"
+      },
+      {
+        "description": "Jordan's card ('Design new homepage layout') is highlighted",
+        "action": "Get the background color of Jordan's card"
+      },
+      {
+        "description": "Alex's card ('Implement responsive navigation bar') is not highlighted",
+        "action": "Get the background color of Alex's card"
+      },
+      {
+        "description": "The colors differ, confirming the highlight follows the logged-in user",
+        "action": "Compare the two colors and confirm they differ"
+      }
     ],
-    "tags": ["ui", "visual", "card-highlight", "personalization", "session-management"]
+    "tags": [
+      "ui",
+      "visual",
+      "card-highlight",
+      "personalization",
+      "session-management",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "cardHighlight.spec.ts",
@@ -234,12 +561,30 @@
     "summary": "Cards that are not assigned to anyone do not receive the special highlight color—they use the standard default background.",
     "objective": "Verify that unassigned task cards are rendered with the default (non-highlighted) background color.",
     "flow": [
-      { "description": "Log in as Alex Rivera", "action": "Select Alex Rivera from the user selection screen" },
-      { "description": "Open the 'Mobile App MVP' project", "action": "Click on Mobile App MVP" },
-      { "description": "Find the unassigned card 'Create onboarding flow'", "action": "Locate the unassigned task card" },
-      { "description": "The card's background color is the default white, not the highlight blue", "action": "Verify background color is not the highlight color (rgb(239, 246, 255))" }
+      {
+        "description": "Log in as Alex Rivera",
+        "action": "Select Alex Rivera from the user selection screen"
+      },
+      {
+        "description": "Open the 'Mobile App MVP' project",
+        "action": "Click on Mobile App MVP"
+      },
+      {
+        "description": "Find the unassigned card 'Create onboarding flow'",
+        "action": "Locate the unassigned task card"
+      },
+      {
+        "description": "The card's background color is the default white, not the highlight blue",
+        "action": "Verify background color is not the highlight color (rgb(239, 246, 255))"
+      }
     ],
-    "tags": ["ui", "visual", "card-highlight", "edge-case"]
+    "tags": [
+      "ui",
+      "visual",
+      "card-highlight",
+      "edge-case",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "comments.spec.ts",
@@ -248,14 +593,37 @@
     "summary": "A user can type a comment in the comment box and click Send to add it to a task. The new comment immediately appears in the list.",
     "objective": "Verify that a user can submit a new comment on a task and see it displayed in the comments section.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Click on the 'Design new homepage layout' card to open the detail modal", "action": "Open the task detail modal" },
-      { "description": "The Comments section is visible", "action": "Wait for the comments area to load" },
-      { "description": "Type 'This is a test comment from Alex' into the comment box", "action": "Fill the comment input field" },
-      { "description": "Click the Send button", "action": "Submit the comment" },
-      { "description": "The new comment appears in the list with Alex Rivera's name", "action": "Verify the comment text and author are visible" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Click on the 'Design new homepage layout' card to open the detail modal",
+        "action": "Open the task detail modal"
+      },
+      {
+        "description": "The Comments section is visible",
+        "action": "Wait for the comments area to load"
+      },
+      {
+        "description": "Type 'This is a test comment from Alex' into the comment box",
+        "action": "Fill the comment input field"
+      },
+      {
+        "description": "Click the Send button",
+        "action": "Submit the comment"
+      },
+      {
+        "description": "The new comment appears in the list with Alex Rivera's name",
+        "action": "Verify the comment text and author are visible"
+      }
     ],
-    "tags": ["comments", "interaction", "data-integrity"]
+    "tags": [
+      "comments",
+      "interaction",
+      "data-integrity",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "comments.spec.ts",
@@ -264,15 +632,42 @@
     "summary": "A user can edit a comment they previously wrote by clicking Edit, changing the text, and saving. The updated text replaces the original.",
     "objective": "Verify that a user can modify the text of their own existing comment through the inline edit flow.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Open the 'Implement responsive navigation bar' task", "action": "Click the task card" },
-      { "description": "Find Alex's existing comment ('I am about halfway done with this...')", "action": "Locate the seed data comment" },
-      { "description": "Click the Edit button next to Alex's comment", "action": "Click Edit" },
-      { "description": "Clear the text and type 'Updated comment by Alex'", "action": "Modify the comment text" },
-      { "description": "Click Save", "action": "Save the edited comment" },
-      { "description": "The comment now reads 'Updated comment by Alex'", "action": "Verify the updated text is displayed" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Open the 'Implement responsive navigation bar' task",
+        "action": "Click the task card"
+      },
+      {
+        "description": "Find Alex's existing comment ('I am about halfway done with this...')",
+        "action": "Locate the seed data comment"
+      },
+      {
+        "description": "Click the Edit button next to Alex's comment",
+        "action": "Click Edit"
+      },
+      {
+        "description": "Clear the text and type 'Updated comment by Alex'",
+        "action": "Modify the comment text"
+      },
+      {
+        "description": "Click Save",
+        "action": "Save the edited comment"
+      },
+      {
+        "description": "The comment now reads 'Updated comment by Alex'",
+        "action": "Verify the updated text is displayed"
+      }
     ],
-    "tags": ["comments", "editing", "permissions", "interaction"]
+    "tags": [
+      "comments",
+      "editing",
+      "permissions",
+      "interaction",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "comments.spec.ts",
@@ -281,13 +676,34 @@
     "summary": "When viewing comments left by other people, the Edit and Delete buttons are hidden—you can only manage your own comments.",
     "objective": "Verify that Edit and Delete actions are not available on comments authored by a different user.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Open the 'Design new homepage layout' task", "action": "Click the task card" },
-      { "description": "Find Sarah Chen's comment ('Let us prioritize the hero section...')", "action": "Locate the other user's comment" },
-      { "description": "Look for Edit and Delete buttons near Sarah's comment", "action": "Check for action buttons" },
-      { "description": "No Edit or Delete buttons are shown for Sarah's comment", "action": "Verify both buttons have zero count" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Open the 'Design new homepage layout' task",
+        "action": "Click the task card"
+      },
+      {
+        "description": "Find Sarah Chen's comment ('Let us prioritize the hero section...')",
+        "action": "Locate the other user's comment"
+      },
+      {
+        "description": "Look for Edit and Delete buttons near Sarah's comment",
+        "action": "Check for action buttons"
+      },
+      {
+        "description": "No Edit or Delete buttons are shown for Sarah's comment",
+        "action": "Verify both buttons have zero count"
+      }
     ],
-    "tags": ["comments", "permissions", "security", "authorization"]
+    "tags": [
+      "comments",
+      "permissions",
+      "security",
+      "authorization",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "comments.spec.ts",
@@ -296,13 +712,34 @@
     "summary": "When viewing your own comments, Edit and Delete buttons are visible, giving you full control to modify or remove what you wrote.",
     "objective": "Verify that Edit and Delete action buttons are displayed on comments authored by the currently logged-in user.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Open the 'Design new homepage layout' task", "action": "Click the task card" },
-      { "description": "Find Alex's comment ('Should we consider A/B testing...')", "action": "Locate Alex's own comment" },
-      { "description": "An Edit button is visible next to the comment", "action": "Verify Edit button is present" },
-      { "description": "A Delete button is visible next to the comment", "action": "Verify Delete button is present" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Open the 'Design new homepage layout' task",
+        "action": "Click the task card"
+      },
+      {
+        "description": "Find Alex's comment ('Should we consider A/B testing...')",
+        "action": "Locate Alex's own comment"
+      },
+      {
+        "description": "An Edit button is visible next to the comment",
+        "action": "Verify Edit button is present"
+      },
+      {
+        "description": "A Delete button is visible next to the comment",
+        "action": "Verify Delete button is present"
+      }
     ],
-    "tags": ["comments", "permissions", "ui", "authorization"]
+    "tags": [
+      "comments",
+      "permissions",
+      "ui",
+      "authorization",
+      "@prod-safe"
+    ]
   },
   {
     "specFile": "comments.spec.ts",
@@ -311,14 +748,41 @@
     "summary": "A user can delete a comment they wrote by clicking Delete and confirming. The comment disappears from the list immediately.",
     "objective": "Verify that deleting an own comment removes it from the UI after confirmation.",
     "flow": [
-      { "description": "Log in as Alex Rivera and open Website Redesign", "action": "Navigate to the board" },
-      { "description": "Open the 'Design new homepage layout' task", "action": "Click the task card" },
-      { "description": "Add a temporary comment ('Temporary comment to delete')", "action": "Type and submit a new comment" },
-      { "description": "The temporary comment appears in the list", "action": "Verify the comment is visible" },
-      { "description": "Click Delete next to the temporary comment", "action": "Click the Delete button" },
-      { "description": "A confirmation dialog appears—click OK", "action": "Accept the confirmation dialog" },
-      { "description": "The comment is no longer in the list", "action": "Verify the comment text has zero occurrences" }
+      {
+        "description": "Log in as Alex Rivera and open Website Redesign",
+        "action": "Navigate to the board"
+      },
+      {
+        "description": "Open the 'Design new homepage layout' task",
+        "action": "Click the task card"
+      },
+      {
+        "description": "Add a temporary comment ('Temporary comment to delete')",
+        "action": "Type and submit a new comment"
+      },
+      {
+        "description": "The temporary comment appears in the list",
+        "action": "Verify the comment is visible"
+      },
+      {
+        "description": "Click Delete next to the temporary comment",
+        "action": "Click the Delete button"
+      },
+      {
+        "description": "A confirmation dialog appears—click OK",
+        "action": "Accept the confirmation dialog"
+      },
+      {
+        "description": "The comment is no longer in the list",
+        "action": "Verify the comment text has zero occurrences"
+      }
     ],
-    "tags": ["comments", "deletion", "permissions", "data-integrity"]
+    "tags": [
+      "comments",
+      "deletion",
+      "permissions",
+      "data-integrity",
+      "@prod-safe"
+    ]
   }
 ]

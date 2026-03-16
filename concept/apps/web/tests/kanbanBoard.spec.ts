@@ -28,31 +28,34 @@ test.describe('Kanban Board', () => {
     await page.getByText('Website Redesign').first().click();
   });
 
-  test('board renders exactly 4 Kanban columns with correct headings', async ({ page }) => {
+  test('board renders exactly 4 Kanban columns with correct headings', { tag: ['@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Requirement: "standard Kanban columns: To Do, In Progress, In Review, Done"
     for (const column of COLUMNS) {
       await expect(page.getByRole('heading', { name: column })).toBeVisible();
     }
   });
 
-  test('each column contains its expected task cards', async ({ page }) => {
+  test('each column contains its expected task cards', { tag: ['@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Requirement: Tasks are distributed across the four Kanban columns
     for (const [_column, taskTitle] of Object.entries(WEBSITE_REDESIGN_TASKS)) {
       await expect(page.getByText(taskTitle)).toBeVisible();
     }
   });
 
-  test('columns show a card count badge', async ({ page }) => {
-    // Each column in Website Redesign has exactly 1 task in seed data
-    // The Column component renders a count badge
+  test('columns show a card count badge', { tag: ['@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
+    // Each column should display a badge showing how many cards it contains
     for (const column of COLUMNS) {
       const columnHeading = page.getByRole('heading', { name: column });
       const columnContainer = columnHeading.locator('..');
-      await expect(columnContainer.getByText('1')).toBeVisible();
+      // Count actual cards in the column's droppable area
+      const statusKey = column.toLowerCase().replace(/ /g, '_');
+      const droppable = page.locator(`[data-rfd-droppable-id="${statusKey}"]`);
+      const cardCount = await droppable.locator('[data-rfd-draggable-id]').count();
+      await expect(columnContainer.getByText(String(cardCount))).toBeVisible();
     }
   });
 
-  test('clicking a card opens the task detail modal', async ({ page }) => {
+  test('clicking a card opens the task detail modal', { tag: ['@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Requirement: "For each task in the UI for a task card..."
     await page.getByText('Design new homepage layout').click();
 
@@ -65,7 +68,7 @@ test.describe('Kanban Board', () => {
     await page.locator('.fixed').getByRole('button', { name: 'x', exact: true }).click();
   });
 
-  test('back button returns to the project list', async ({ page }) => {
+  test('back button returns to the project list', { tag: ['@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     await page.getByText('← Projects').click();
     await expect(page.getByText('Website Redesign')).toBeVisible();
     await expect(page.getByText('Mobile App MVP')).toBeVisible();

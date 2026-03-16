@@ -262,7 +262,7 @@ export default function CITestExecutionPanel() {
           type="text"
           value={testFilter}
           onChange={(e) => setTestFilter(e.target.value)}
-          placeholder='Filter tests (e.g. "Drag", kanbanBoard.spec.ts)'
+          placeholder='e.g. @dev, @qa, kanbanBoard.spec.ts'
           className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-mono text-gray-700 placeholder-gray-400 focus:outline-none focus:border-purple-400 w-72"
         />
         <button

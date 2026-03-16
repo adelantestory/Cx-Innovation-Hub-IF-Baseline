@@ -156,3 +156,19 @@ export interface CIFailure {
   error: string;
   suggestion: string;
 }
+
+// ── Requirements Coverage types ─────────────────────────────────
+
+export interface RequirementTestLink {
+  specFile: string;
+  testName: string;
+}
+
+export interface Requirement {
+  id: string;
+  text: string;
+  source: string;
+  category: string;
+  coveredBy: RequirementTestLink[];
+  suggestion: string | null;
+}

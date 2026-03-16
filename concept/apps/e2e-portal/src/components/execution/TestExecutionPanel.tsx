@@ -220,8 +220,8 @@ export default function TestExecutionPanel() {
         </div>
       )}
 
-      {/* Active test step description */}
-      {isRunning && currentTest && (
+      {/* Active test step description (hidden in headed mode — browser has focus) */}
+      {isRunning && currentTest && !isHeaded && (
         <StepDescriptionCard
           testName={currentTest}
           description={currentStepDescription}
