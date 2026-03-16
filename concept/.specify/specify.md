@@ -128,10 +128,41 @@ Taskify is a Kanban-style team productivity platform that enables predefined tea
 - **Transport Security**: TLS 1.2+ enforced for all connections (HTTPS for web, SSL for PostgreSQL)
 - **CORS**: Backend API configured to accept requests from the frontend Container App origin
 
-### Performance
-- **Prototype scope**: No performance optimization or load testing required
-- **Database**: Connection pooling via `pg` library Pool
-- **Frontend**: Standard Vite build optimization (code splitting, minification)
+### Performance & Load Testing
+
+#### Local Performance Testing
+- **Tool**: Locust (Python-based load testing framework)
+- **Location**: `concept/tests/performance/`
+- **Scenarios**: 4 weighted test scenarios exercising all API endpoints
+- **Baselines**:
+  | Metric | Target |
+  |--------|--------|
+  | p95 response time (GET) | < 500ms |
+  | p95 response time (POST/PATCH) | < 1000ms |
+  | Error rate | < 1% |
+  | Concurrent users (local) | 50 users sustained for 2 minutes |
+
+#### CI/CD Performance Testing
+- **Platform**: GitHub Actions (`performance-testing.yml`)
+- **Pipeline**: Local verification → Deploy to perf environment → Azure Load Testing
+- **Gate**: Pipeline fails if local performance baselines are breached
+
+#### Cloud Performance Testing
+- **Service**: Azure Load Testing
+- **Infrastructure**: Dedicated Bicep module (`stage5-performance.bicep`)
+- **Monitoring**: Application Insights connected to API Container App
+- **Scale**: 100+ concurrent users for cloud-scale validation
+
+#### Copilot Integration
+- **Skills**: Performance Test Generator, Performance Baseline Analyzer
+- **Hooks**: Pre-commit performance guardrail, PR performance gate
+- **Agentic Workflow**: Dynamic performance analysis via GitHub Agentic Workflows (gh-aw)
+
+#### Database
+- Connection pooling via `pg` library Pool
+
+#### Frontend
+- Standard Vite build optimization (code splitting, minification)
 
 ### Data Persistence
 - All data persisted in PostgreSQL across browser sessions

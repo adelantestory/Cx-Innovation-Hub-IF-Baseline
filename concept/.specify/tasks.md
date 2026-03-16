@@ -321,3 +321,99 @@
 | Deployment | 4 | 4 | 0 | 0 | 0 |
 | Documentation | 4 | 0 | 4 | 0 | 0 |
 | **Total** | **36** | **27** | **8** | **0** | **1** |
+
+---
+
+## Performance Testing Tasks
+
+### PERF-001: Create Locust Test Suite
+- **Status**: [ ]
+- **Priority**: P0
+- **Agent**: python-developer
+- **Description**: Create Python Locust load tests with 4 weighted scenarios (Browse Projects, Kanban Board Flow, Comment Activity, Health Check) targeting all 13 API endpoints
+- **Deliverable**: `concept/tests/performance/locustfile.py`, `requirements.txt`, `README.md`
+
+### PERF-002: Create App Insights Bicep Module
+- **Status**: [ ]
+- **Priority**: P0
+- **Agent**: app-insights-bicep
+- **Description**: Create Application Insights Bicep module linked to existing Log Analytics Workspace
+- **Deliverable**: `concept/infrastructure/bicep/modules/app-insights.bicep`
+
+### PERF-003: Create Azure Load Testing Bicep Module
+- **Status**: [ ]
+- **Priority**: P0
+- **Agent**: cloud-architect
+- **Description**: Create Azure Load Testing Bicep module for cloud-scale performance testing
+- **Deliverable**: `concept/infrastructure/bicep/modules/load-testing.bicep`
+
+### PERF-004: Create Performance Infrastructure Stage
+- **Status**: [ ]
+- **Priority**: P0
+- **Agent**: cloud-architect
+- **Description**: Create stage5-performance.bicep composing App Insights and Load Testing modules
+- **Deliverable**: `concept/infrastructure/bicep/stage5-performance.bicep`
+- **Depends On**: PERF-002, PERF-003
+
+### PERF-005: Create Performance Test Generator Skill
+- **Status**: [ ]
+- **Priority**: P1
+- **Agent**: cloud-architect
+- **Description**: Create Copilot skill for generating Locust tests for new API endpoints
+- **Deliverable**: `.claude/skills/performance-test-generator/SKILL.md`
+- **Depends On**: PERF-001
+
+### PERF-006: Create Performance Baseline Analyzer Skill
+- **Status**: [ ]
+- **Priority**: P1
+- **Agent**: cloud-architect
+- **Description**: Create Copilot skill for analyzing Locust results against performance thresholds
+- **Deliverable**: `.claude/skills/performance-baseline-analyzer/SKILL.md`
+- **Depends On**: PERF-001
+
+### PERF-007: Create Pre-Commit Performance Hook
+- **Status**: [ ]
+- **Priority**: P1
+- **Agent**: cloud-architect
+- **Description**: Create Copilot hook that warns when API routes are modified without corresponding Locust test coverage
+- **Deliverable**: `.github/hooks/pre-commit-perf-check.md`
+- **Depends On**: PERF-001
+
+### PERF-008: Create PR Performance Gate Hook
+- **Status**: [ ]
+- **Priority**: P1
+- **Agent**: cloud-architect
+- **Description**: Create Copilot hook that verifies performance tests pass on PRs touching API code
+- **Deliverable**: `.github/hooks/pr-perf-gate.md`
+- **Depends On**: PERF-001, PERF-007
+
+### PERF-009: Create Performance Testing Pipeline
+- **Status**: [ ]
+- **Priority**: P0
+- **Agent**: cloud-architect
+- **Description**: Create GitHub Actions workflow with 3 jobs: local Locust verification, deploy to perf environment, Azure Load Testing execution
+- **Deliverable**: `.github/workflows/performance-testing.yml`
+- **Depends On**: PERF-001, PERF-004
+
+### PERF-010: Create Agentic Workflow for Dynamic Analysis
+- **Status**: [ ]
+- **Priority**: P1
+- **Agent**: cloud-architect
+- **Description**: Create GitHub Agentic Workflow (gh-aw) that analyzes performance results post-pipeline and creates regression issues
+- **Deliverable**: `.github/workflows/perf-analysis.md`
+- **Depends On**: PERF-009
+
+---
+
+## Updated Task Summary
+
+| Category | Total | P0 | P1 | P2 | P3 |
+|----------|-------|----|----|----|----|
+| Infrastructure | 8 | 7 | 1 | 0 | 0 |
+| Database | 3 | 2 | 0 | 0 | 1 |
+| Backend API | 8 | 7 | 1 | 0 | 0 |
+| Frontend | 9 | 7 | 2 | 0 | 0 |
+| Deployment | 4 | 4 | 0 | 0 | 0 |
+| Documentation | 4 | 0 | 4 | 0 | 0 |
+| Performance Testing | 10 | 5 | 5 | 0 | 0 |
+| **Total** | **46** | **32** | **13** | **0** | **1** |

@@ -26,6 +26,7 @@
 #   2 - Data:           PostgreSQL Flexible Server, Key Vault secret population
 #   3 - Containers:     Container Registry, Container Apps Environment
 #   4 - Application:    Build/push images, deploy Backend + Frontend Container Apps
+#   5 - Performance:    Application Insights, Azure Load Testing
 # =============================================================================
 
 set -euo pipefail
@@ -53,7 +54,7 @@ Required Parameters:
   -u, --uid           Unique identifier for resource naming (e.g., "abc12")
   -e, --environment   Environment: dev, stg, prd
   -l, --location      Azure region (e.g., westus3, eastus)
-  -s, --stage         Stage to deploy: 1, 2, 3, 4, or "all"
+  -s, --stage         Stage to deploy: 1, 2, 3, 4, 5, or "all"
 
 Optional Parameters:
   -h, --help          Show this help message
@@ -65,8 +66,8 @@ Examples:
   # Deploy only Stage 1 (Foundation)
   $(basename "$0") -u myapp -e dev -l westus3 -s 1
 
-  # Deploy only Stage 4 (Application)
-  $(basename "$0") -u myapp -e dev -l westus3 -s 4
+  # Deploy only Stage 5 (Performance Testing)
+  $(basename "$0") -u myapp -e dev -l westus3 -s 5
 EOF
   exit 0
 }
@@ -109,8 +110,8 @@ if [[ ! "$ENVIRONMENT" =~ ^(dev|stg|prd)$ ]]; then
   exit 1
 fi
 
-if [[ ! "$STAGE" =~ ^(1|2|3|4|all)$ ]]; then
-  log_error "Stage must be one of: 1, 2, 3, 4, all"
+if [[ ! "$STAGE" =~ ^(1|2|3|4|5|all)$ ]]; then
+  log_error "Stage must be one of: 1, 2, 3, 4, 5, all"
   exit 1
 fi
 
@@ -519,6 +520,85 @@ deploy_stage4() {
 }
 
 # ---------------------------------------------------------------------------
+# Stage 5: Performance Testing Infrastructure
+# ---------------------------------------------------------------------------
+deploy_stage5() {
+  log_step "Stage 5: Performance Testing"
+
+  # Read Log Analytics workspace ID from config
+  local log_analytics_id
+  log_analytics_id=$(jq -r '.stages.stage1.resources.logAnalytics.id' "$CONFIG_FILE")
+
+  if [[ -z "$log_analytics_id" || "$log_analytics_id" == "null" ]]; then
+    log_error "Log Analytics workspace ID not found in AZURE_CONFIG.json. Deploy Stage 1 first."
+    exit 1
+  fi
+
+  # Deploy Bicep template
+  log_info "Deploying Stage 5 Bicep template..."
+  local output
+  output=$(az deployment group create \
+    --resource-group "$RG_NAME" \
+    --template-file "${BICEP_DIR}/stage5-performance.bicep" \
+    --parameters uid="$UID_VALUE" location="$LOCATION" environment="$ENVIRONMENT" \
+                 logAnalyticsWorkspaceId="$log_analytics_id" \
+    --query "properties.outputs" \
+    --output json)
+
+  # Extract outputs
+  local appi_id appi_name appi_connection_string appi_instrumentation_key
+  local lt_id lt_name
+
+  appi_id=$(echo "$output" | jq -r '.appInsightsId.value')
+  appi_name=$(echo "$output" | jq -r '.appInsightsName.value')
+  appi_connection_string=$(echo "$output" | jq -r '.appInsightsConnectionString.value')
+  appi_instrumentation_key=$(echo "$output" | jq -r '.appInsightsInstrumentationKey.value')
+
+  lt_id=$(echo "$output" | jq -r '.loadTestingId.value')
+  lt_name=$(echo "$output" | jq -r '.loadTestingName.value')
+
+  # Update AZURE_CONFIG.json
+  log_info "Updating AZURE_CONFIG.json with Stage 5 outputs..."
+  local tmp
+  tmp=$(mktemp)
+  jq --arg appi_id "$appi_id" \
+     --arg appi_name "$appi_name" \
+     --arg appi_cs "$appi_connection_string" \
+     --arg appi_key "$appi_instrumentation_key" \
+     --arg lt_id "$lt_id" \
+     --arg lt_name "$lt_name" \
+     '
+     .stages.stage5.name = "Performance" |
+     .stages.stage5.description = "Performance testing infrastructure" |
+     .stages.stage5.resources.appInsights.id = $appi_id |
+     .stages.stage5.resources.appInsights.name = $appi_name |
+     .stages.stage5.resources.appInsights.connectionString = $appi_cs |
+     .stages.stage5.resources.appInsights.instrumentationKey = $appi_key |
+     .stages.stage5.resources.loadTesting.id = $lt_id |
+     .stages.stage5.resources.loadTesting.name = $lt_name
+     ' "$CONFIG_FILE" > "$tmp" && mv "$tmp" "$CONFIG_FILE"
+
+  # Wire App Insights into API Container App (if deployed)
+  local api_name_val
+  api_name_val=$(jq -r '.stages.stage4.resources.containerAppApi.name // empty' "$CONFIG_FILE")
+  if [[ -n "$api_name_val" ]]; then
+    log_info "Wiring Application Insights into API Container App (${api_name_val})..."
+    az containerapp update \
+      --name "$api_name_val" \
+      --resource-group "$RG_NAME" \
+      --set-env-vars "APPLICATIONINSIGHTS_CONNECTION_STRING=${appi_connection_string}" \
+      --output none
+    log_info "App Insights connected to API."
+  else
+    log_warn "API Container App not found in config. Deploy Stage 4 first to wire App Insights."
+  fi
+
+  log_info "Stage 5 complete."
+  log_info "  App Insights:    ${appi_name}"
+  log_info "  Load Testing:    ${lt_name}"
+}
+
+# ---------------------------------------------------------------------------
 # Main Execution
 # ---------------------------------------------------------------------------
 
@@ -534,11 +614,13 @@ case "$STAGE" in
   2)   deploy_stage2 ;;
   3)   deploy_stage3 ;;
   4)   deploy_stage4 ;;
+  5)   deploy_stage5 ;;
   all)
     deploy_stage1
     deploy_stage2
     deploy_stage3
     deploy_stage4
+    deploy_stage5
     ;;
 esac
 

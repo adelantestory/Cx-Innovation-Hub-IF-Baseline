@@ -1,0 +1,416 @@
+# =============================================================================
+# Performance Testing
+# =============================================================================
+# Runs performance tests using Locust against a local Docker Compose stack and,
+# optionally, against deployed Azure infrastructure via Azure Load Testing.
+#
+# Authentication (cloud tests only): OIDC federated credentials (no stored secrets).
+#   Required GitHub environment secrets:
+#     AZURE_CLIENT_ID        - Service principal / workload identity client ID
+#     AZURE_TENANT_ID        - Azure AD tenant ID
+#     AZURE_SUBSCRIPTION_ID  - Target Azure subscription ID
+#
+# Thresholds:
+#   - GET  requests: p95 < 500ms
+#   - POST/PATCH requests: p95 < 1000ms
+#   - Overall error rate: < 1%
+# =============================================================================
+
+name: Performance Testing
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_uid:
+        description: 'Unique identifier for resource naming'
+        required: true
+        type: string
+      environment:
+        description: 'Environment'
+        required: false
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - stg
+          - prd
+      run_cloud_tests:
+        description: 'Run Azure Load Testing (requires deployed infrastructure)'
+        required: false
+        default: false
+        type: boolean
+  push:
+    paths:
+      - 'concept/tests/performance/**'
+
+concurrency:
+  group: perf-testing-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # local-verification: Run Locust against local Docker Compose stack
+  # ---------------------------------------------------------------------------
+  local-verification:
+    name: Local Performance Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: concept/tests/performance/requirements.txt
+
+      - name: Install Locust and dependencies
+        run: |
+          pip install -r concept/tests/performance/requirements.txt
+
+      - name: Start Docker Compose services
+        run: |
+          cd concept
+          docker compose up -d --wait
+          echo "Docker Compose services started"
+
+      - name: Wait for API health
+        run: |
+          echo "Waiting for API to be healthy..."
+          MAX_WAIT=30
+          INTERVAL=2
+          ELAPSED=0
+          until curl -sf http://localhost:3000/api/health > /dev/null 2>&1; do
+            if [ "$ELAPSED" -ge "$MAX_WAIT" ]; then
+              echo "::error::API health check timed out after ${MAX_WAIT}s"
+              docker compose -f concept/docker-compose.yml logs
+              exit 1
+            fi
+            echo "  Waiting... (${ELAPSED}s / ${MAX_WAIT}s)"
+            sleep "$INTERVAL"
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+          echo "API is healthy (responded in ${ELAPSED}s)"
+
+      - name: Create results directory
+        run: mkdir -p concept/tests/performance/results
+
+      - name: Run Locust performance tests
+        run: |
+          cd concept/tests/performance
+          locust -f locustfile.py \
+            --host=http://localhost:3000 \
+            --headless \
+            -u 50 \
+            -r 10 \
+            -t 2m \
+            --csv=results/taskify \
+            --html=results/report.html
+
+      - name: Upload performance results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results-local
+          path: concept/tests/performance/results/
+          retention-days: 30
+
+      - name: Check performance thresholds
+        if: success()
+        run: |
+          STATS_FILE="concept/tests/performance/results/taskify_stats.csv"
+          FAILED=0
+
+          if [ ! -f "$STATS_FILE" ]; then
+            echo "::error::Stats CSV not found at ${STATS_FILE}"
+            exit 1
+          fi
+
+          echo "## Performance Threshold Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Method | Endpoint | p95 (ms) | Threshold (ms) | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|----------|----------|----------------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+          # Process each row (skip header and Aggregated row)
+          tail -n +2 "$STATS_FILE" | while IFS=',' read -r TYPE NAME REQ_COUNT FAIL_COUNT MEDIAN AVG MIN MAX AVG_SIZE RPS FAIL_PER_SEC P50 P66 P75 P80 P90 P95 P98 P99 P999 P9999 P100; do
+            # Skip the Aggregated row
+            if echo "$NAME" | grep -qi "aggregated"; then
+              continue
+            fi
+
+            # Clean quotes from fields
+            TYPE=$(echo "$TYPE" | tr -d '"')
+            NAME=$(echo "$NAME" | tr -d '"')
+            P95_VAL=$(echo "$P95" | tr -d '"' | tr -d ' ')
+
+            # Skip empty lines
+            if [ -z "$TYPE" ] || [ -z "$P95_VAL" ]; then
+              continue
+            fi
+
+            # Determine threshold based on method
+            case "$TYPE" in
+              GET)
+                THRESHOLD=500
+                ;;
+              POST|PATCH)
+                THRESHOLD=1000
+                ;;
+              *)
+                THRESHOLD=1000
+                ;;
+            esac
+
+            # Compare p95 against threshold
+            if [ "$(echo "$P95_VAL > $THRESHOLD" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+              STATUS="❌ FAIL"
+              echo "::warning file=concept/tests/performance/locustfile.py::${TYPE} ${NAME} p95=${P95_VAL}ms exceeds threshold ${THRESHOLD}ms"
+              FAILED=1
+            else
+              STATUS="✅ PASS"
+            fi
+
+            echo "| ${TYPE} | ${NAME} | ${P95_VAL} | ${THRESHOLD} | ${STATUS} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          # Check overall error rate from the Aggregated row
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Error Rate" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          AGG_LINE=$(tail -n +2 "$STATS_FILE" | grep -i "aggregated" || true)
+          if [ -n "$AGG_LINE" ]; then
+            TOTAL_REQS=$(echo "$AGG_LINE" | awk -F',' '{print $3}' | tr -d '"')
+            TOTAL_FAILS=$(echo "$AGG_LINE" | awk -F',' '{print $4}' | tr -d '"')
+
+            if [ "$TOTAL_REQS" -gt 0 ] 2>/dev/null; then
+              ERROR_RATE=$(echo "scale=2; $TOTAL_FAILS * 100 / $TOTAL_REQS" | bc -l)
+              if [ "$(echo "$ERROR_RATE > 1" | bc -l)" = "1" ]; then
+                echo "| Error Rate | ${ERROR_RATE}% | < 1% | ❌ FAIL |" >> "$GITHUB_STEP_SUMMARY"
+                echo "::error::Error rate ${ERROR_RATE}% exceeds 1% threshold"
+                FAILED=1
+              else
+                echo "| Error Rate | ${ERROR_RATE}% | < 1% | ✅ PASS |" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            fi
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Users**: 50 (ramp rate: 10/s)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Duration**: 2 minutes" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Total Requests**: ${TOTAL_REQS:-N/A}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Failed Requests**: ${TOTAL_FAILS:-N/A}" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$FAILED" = "1" ]; then
+            echo "::error::Performance thresholds exceeded — see summary for details"
+            exit 1
+          fi
+
+      - name: Tear down Docker Compose
+        if: always()
+        run: |
+          cd concept
+          docker compose down -v
+          echo "Docker Compose services stopped and volumes removed"
+
+  # ---------------------------------------------------------------------------
+  # cloud-load-test: Run Azure Load Testing against deployed infrastructure
+  # ---------------------------------------------------------------------------
+  cloud-load-test:
+    name: Azure Load Test
+    needs: local-verification
+    if: github.event.inputs.run_cloud_tests == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Azure Load Testing CLI extension
+        run: |
+          az extension add --name load --yes
+
+      - name: Resolve resource names
+        id: vars
+        run: |
+          UID_VAL="${{ inputs.deploy_uid }}"
+          ENV="${{ inputs.environment || 'dev' }}"
+          RG="rg-${UID_VAL}-taskify-${ENV}"
+          ALT_NAME="alt-${UID_VAL}-taskify-${ENV}"
+          AI_NAME="ai-${UID_VAL}-taskify-${ENV}"
+
+          echo "uid=${UID_VAL}"              >> "$GITHUB_OUTPUT"
+          echo "environment=${ENV}"          >> "$GITHUB_OUTPUT"
+          echo "resource_group=${RG}"        >> "$GITHUB_OUTPUT"
+          echo "load_test_name=${ALT_NAME}"  >> "$GITHUB_OUTPUT"
+          echo "app_insights_name=${AI_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Azure Load Testing resource
+        run: |
+          az load create \
+            --name "${{ steps.vars.outputs.load_test_name }}" \
+            --resource-group "${{ steps.vars.outputs.resource_group }}" \
+            --location eastus \
+            --output none 2>/dev/null || echo "Load Testing resource already exists"
+
+      - name: Create and run load test
+        id: load_test
+        run: |
+          TEST_ID="perf-run-$(date +%Y%m%d-%H%M%S)"
+          echo "test_run_id=${TEST_ID}" >> "$GITHUB_OUTPUT"
+          echo "test_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+          # Create the test
+          az load test create \
+            --name "${{ steps.vars.outputs.load_test_name }}" \
+            --resource-group "${{ steps.vars.outputs.resource_group }}" \
+            --test-id "${TEST_ID}" \
+            --test-plan concept/tests/performance/locustfile.py \
+            --engine-instances 1 \
+            --output none
+
+          # Start the test run
+          az load test-run create \
+            --name "${{ steps.vars.outputs.load_test_name }}" \
+            --resource-group "${{ steps.vars.outputs.resource_group }}" \
+            --test-id "${TEST_ID}" \
+            --test-run-id "${TEST_ID}-run" \
+            --output none
+
+          echo "test_end=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for test completion
+        run: |
+          echo "Waiting for load test to complete..."
+          MAX_WAIT=600
+          INTERVAL=15
+          ELAPSED=0
+          while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
+            STATUS=$(az load test-run show \
+              --name "${{ steps.vars.outputs.load_test_name }}" \
+              --resource-group "${{ steps.vars.outputs.resource_group }}" \
+              --test-run-id "${{ steps.load_test.outputs.test_run_id }}-run" \
+              --query "status" -o tsv 2>/dev/null || echo "UNKNOWN")
+
+            echo "  Status: ${STATUS} (${ELAPSED}s / ${MAX_WAIT}s)"
+
+            if [ "$STATUS" = "DONE" ] || [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "CANCELLED" ]; then
+              echo "Load test finished with status: ${STATUS}"
+              break
+            fi
+            sleep "$INTERVAL"
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          if [ "$ELAPSED" -ge "$MAX_WAIT" ]; then
+            echo "::error::Load test timed out after ${MAX_WAIT}s"
+            exit 1
+          fi
+
+          if [ "$STATUS" = "FAILED" ]; then
+            echo "::error::Load test failed"
+            exit 1
+          fi
+
+      - name: Download test results
+        run: |
+          mkdir -p cloud-results
+          az load test-run download-files \
+            --name "${{ steps.vars.outputs.load_test_name }}" \
+            --resource-group "${{ steps.vars.outputs.resource_group }}" \
+            --test-run-id "${{ steps.load_test.outputs.test_run_id }}-run" \
+            --path cloud-results \
+            --force \
+            --output none || echo "::warning::Could not download all result files"
+
+      - name: Upload cloud test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results-cloud
+          path: cloud-results/
+          retention-days: 30
+
+      - name: Query Application Insights for errors
+        id: ai_query
+        run: |
+          AI_NAME="${{ steps.vars.outputs.app_insights_name }}"
+          RG="${{ steps.vars.outputs.resource_group }}"
+          START="${{ steps.load_test.outputs.test_start }}"
+          END="${{ steps.load_test.outputs.test_end }}"
+
+          # Query for exceptions during the test window
+          ERRORS=$(az monitor app-insights query \
+            --app "$AI_NAME" \
+            --resource-group "$RG" \
+            --analytics-query "
+              exceptions
+              | where timestamp between(datetime('${START}') .. datetime('${END}'))
+              | summarize ErrorCount=count() by type, outerMessage
+              | order by ErrorCount desc
+              | take 20
+            " \
+            --output json 2>/dev/null || echo '{"tables":[{"rows":[]}]}')
+
+          # Query for failed requests during the test window
+          FAILED_REQS=$(az monitor app-insights query \
+            --app "$AI_NAME" \
+            --resource-group "$RG" \
+            --analytics-query "
+              requests
+              | where timestamp between(datetime('${START}') .. datetime('${END}'))
+              | summarize TotalRequests=count(), FailedRequests=countif(success == false),
+                          AvgDuration=avg(duration), P95Duration=percentile(duration, 95)
+              | extend ErrorRate=round(100.0 * FailedRequests / TotalRequests, 2)
+            " \
+            --output json 2>/dev/null || echo '{"tables":[{"rows":[]}]}')
+
+          echo "errors<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$ERRORS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          echo "failed_reqs<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$FAILED_REQS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Post cloud test summary
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Azure Load Test Results
+
+          | Property | Value |
+          |----------|-------|
+          | Test Run ID | ${{ steps.load_test.outputs.test_run_id }}-run |
+          | Environment | ${{ steps.vars.outputs.environment }} |
+          | Resource Group | ${{ steps.vars.outputs.resource_group }} |
+          | Load Test Resource | ${{ steps.vars.outputs.load_test_name }} |
+
+          ### Application Insights — Errors During Test Window
+
+          ```json
+          ${{ steps.ai_query.outputs.errors }}
+          ```
+
+          ### Application Insights — Request Performance
+
+          ```json
+          ${{ steps.ai_query.outputs.failed_reqs }}
+          ```
+
+          > **Note**: Review the full results in the uploaded `performance-results-cloud` artifact.
+          EOF

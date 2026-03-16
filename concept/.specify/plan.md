@@ -161,6 +161,32 @@ This plan outlines the implementation sequence for the Taskify team productivity
 
 ---
 
+## Stage 7: Performance Testing
+
+**Duration**: 1 day
+**Owner**: qa-engineer, cloud-architect, python-developer
+
+### Deliverables
+1. Locust performance test suite (Python)
+2. Application Insights integration (Bicep)
+3. Azure Load Testing resource (Bicep)
+4. GitHub Actions performance testing pipeline
+5. GitHub Agentic Workflow for dynamic performance analysis
+6. Copilot skills for performance test generation and analysis
+7. Copilot hooks for performance testing guardrails
+
+### Azure Services
+| Service | Agent | Purpose |
+|---------|-------|---------|
+| Application Insights | app-insights-bicep | APM telemetry for API |
+| Azure Load Testing | cloud-architect | Cloud-scale load testing |
+
+### Dependencies
+- Stage 1 complete (Log Analytics for App Insights)
+- Stage 4 complete (Container Apps deployed for testing)
+
+---
+
 ## Infrastructure-as-Code Organization
 
 ```
