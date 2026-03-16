@@ -24,7 +24,7 @@ param uid string
 param location string
 
 @description('Environment (dev, stg, prd)')
-@allowed(['dev', 'stg', 'prd'])
+@allowed(['dev', 'stg', 'prd', 'perf'])
 param environment string = 'dev'
 
 @secure()
