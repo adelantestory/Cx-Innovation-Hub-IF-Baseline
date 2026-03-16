@@ -37,6 +37,9 @@ param containerRegistryLoginServer string = ''
 @description('Tag for the API container image')
 param apiImageTag string = 'latest'
 
+@description('Azure region for Load Testing (if different from primary location)')
+param loadTestingLocation string = 'westus2'
+
 // ---------------------------------------------------------------------------
 // Stage 1: Foundation
 // ---------------------------------------------------------------------------
@@ -111,6 +114,7 @@ module stage5 'stage5-performance.bicep' = {
     location: location
     environment: environment
     logAnalyticsWorkspaceId: stage1.outputs.logAnalyticsId
+    loadTestingLocation: loadTestingLocation
   }
 }
 

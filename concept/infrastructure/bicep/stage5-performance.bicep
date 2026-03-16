@@ -21,6 +21,9 @@ param environment string = 'dev'
 @description('Resource ID of the Log Analytics Workspace from Stage 1')
 param logAnalyticsWorkspaceId string
 
+@description('Azure region for Load Testing resource (may differ from primary location)')
+param loadTestingLocation string = location
+
 @description('Name of the API Container App (for reference in load tests)')
 param apiContainerAppName string = ''
 
@@ -53,7 +56,7 @@ module loadTesting 'modules/load-testing.bicep' = {
   name: 'load-testing-${uid}'
   params: {
     name: 'lt-${uid}-taskify-${environment}'
-    location: location
+    location: loadTestingLocation
     tags: baseTags
   }
 }
