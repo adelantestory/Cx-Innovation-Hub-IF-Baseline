@@ -245,16 +245,16 @@ jobs:
       matrix:
         scenario:
           - name: browse-projects
-            file: concept/tests/performance/scenarios/test_browse_projects.py
+            file: concept/tests/performance/jmeter/test_browse_projects.jmx
             description: "Browse Projects"
           - name: kanban-board
-            file: concept/tests/performance/scenarios/test_kanban_board.py
+            file: concept/tests/performance/jmeter/test_kanban_board.jmx
             description: "Kanban Board Flow"
           - name: comments
-            file: concept/tests/performance/scenarios/test_comments.py
+            file: concept/tests/performance/jmeter/test_comments.jmx
             description: "Comment Activity"
           - name: health-check
-            file: concept/tests/performance/scenarios/test_health.py
+            file: concept/tests/performance/jmeter/test_health.jmx
             description: "Health Check"
 
     steps:
@@ -318,14 +318,22 @@ jobs:
           RG="${{ steps.vars.outputs.resource_group }}"
           API_URL="${{ steps.vars.outputs.api_url }}"
 
-          # Create the test
+          # Extract host, port, and protocol from API_URL for JMeter env vars
+          PROTOCOL=$(echo "$API_URL" | grep -oP '^https?')
+          HOST=$(echo "$API_URL" | sed 's|https\?://||' | sed 's|/.*||' | sed 's|:.*||')
+          PORT=$(echo "$API_URL" | grep -oP ':\d+' | tr -d ':')
+          if [ -z "$PORT" ]; then
+            [ "$PROTOCOL" = "https" ] && PORT=443 || PORT=80
+          fi
+
+          # Create the test with JMeter .jmx test plan
           az load test create \
             --name "$LT_NAME" \
             --resource-group "$RG" \
             --test-id "${TEST_ID}" \
             --test-plan "${{ matrix.scenario.file }}" \
             --engine-instances 1 \
-            --env TASKIFY_BASE_URL="${API_URL}" \
+            --env TASKIFY_HOST="${HOST}" TASKIFY_PORT="${PORT}" TASKIFY_PROTOCOL="${PROTOCOL}" \
             --output none
 
           # Start the test run
