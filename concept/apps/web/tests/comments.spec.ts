@@ -14,7 +14,7 @@
 import { test, expect } from './base';
 
 test.describe('Comments', () => {
-  test('add a new comment to a task', { tag: ['@prod-safe'] }, async ({ page }) => {
+  test('add a new comment to a task', { tag: ['@smoke','@prod-safe'] }, async ({ page }) => {
     // Requirement: "leave an unlimited number of comments for a particular card"
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();

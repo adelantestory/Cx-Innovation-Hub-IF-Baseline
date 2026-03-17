@@ -112,7 +112,7 @@ test.describe('Drag and Drop', () => {
     await expect(targetColumn.getByText(cardText)).toBeVisible({ timeout: 10000 });
   });
 
-  test('move a card backward to the previous column', { tag: ['@uat', '@prod-safe'] }, async ({ page }) => {
+  test('move a card backward to the previous column', { tag: ['@smoke','@uat', '@prod-safe'] }, async ({ page }) => {
     // Pick the first card from a column that can move left
     const columns = ['done', 'in_review', 'in_progress'] as const;
     const prevColumn: Record<string, string> = {

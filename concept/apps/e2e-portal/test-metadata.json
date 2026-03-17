@@ -35,7 +35,8 @@
       "@dev",
       "@qa",
       "@uat",
-      "@prod-safe"
+      "@prod-safe",
+      "@smoke"
     ]
   },
   {
@@ -244,7 +245,8 @@
       "seed-data",
       "@qa",
       "@uat",
-      "@prod-safe"
+      "@prod-safe",
+      "@smoke"
     ]
   },
   {
@@ -351,7 +353,7 @@
   {
     "specFile": "dragAndDrop.spec.ts",
     "testSuite": "Drag and Drop",
-    "testName": "move a card from \"To Do\" to \"In Progress\" using keyboard drag",
+    "testName": "move a card to the next column",
     "summary": "A task card can be picked up and moved from the To Do column to In Progress using keyboard shortcuts, simulating a drag-and-drop action.",
     "objective": "Verify that keyboard-based drag and drop moves a card from the To Do column to the In Progress column.",
     "flow": [
@@ -392,40 +394,7 @@
   {
     "specFile": "dragAndDrop.spec.ts",
     "testSuite": "Drag and Drop",
-    "testName": "move a card from \"In Progress\" to \"In Review\"",
-    "summary": "A task card in the In Progress column can be moved forward to the In Review column using keyboard drag.",
-    "objective": "Verify keyboard drag moves a card from In Progress to In Review.",
-    "flow": [
-      {
-        "description": "Log in as Alex Rivera and open Website Redesign",
-        "action": "Navigate to the board"
-      },
-      {
-        "description": "Focus the 'Implement responsive navigation bar' card in In Progress",
-        "action": "Give keyboard focus to the card"
-      },
-      {
-        "description": "Pick up the card with Space, move right with Arrow, and drop with Space",
-        "action": "Perform keyboard drag sequence"
-      },
-      {
-        "description": "The card now appears in the In Review column",
-        "action": "Verify card is in the In Review droppable area"
-      }
-    ],
-    "tags": [
-      "drag-and-drop",
-      "accessibility",
-      "keyboard",
-      "kanban",
-      "@uat",
-      "@prod-safe"
-    ]
-  },
-  {
-    "specFile": "dragAndDrop.spec.ts",
-    "testSuite": "Drag and Drop",
-    "testName": "move a card backward from \"Done\" to \"In Review\"",
+    "testName": "move a card backward to the previous column",
     "summary": "A task card can also be moved backward—from the Done column back to In Review—confirming that drag works in both directions.",
     "objective": "Verify that cards can be dragged backward (right-to-left) between columns using the left arrow key.",
     "flow": [
@@ -453,7 +422,8 @@
       "kanban",
       "regression",
       "@uat",
-      "@prod-safe"
+      "@prod-safe",
+      "@smoke"
     ]
   },
   {
@@ -583,7 +553,8 @@
       "visual",
       "card-highlight",
       "edge-case",
-      "@prod-safe"
+      "@prod-safe",
+      "@smoke"
     ]
   },
   {
@@ -622,7 +593,8 @@
       "comments",
       "interaction",
       "data-integrity",
-      "@prod-safe"
+      "@prod-safe",
+      "@smoke"
     ]
   },
   {

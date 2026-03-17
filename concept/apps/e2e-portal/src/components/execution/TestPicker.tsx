@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import type { TestSuite } from "../../types";
 
-const ENV_TAGS = ["@dev", "@qa", "@uat", "@prod-safe"] as const;
+const ENV_TAGS = ["@smoke", "@dev", "@qa", "@uat", "@prod-safe"] as const;
 const ENV_TAG_COLORS: Record<string, string> = {
+  "@smoke": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
   "@dev": "bg-blue-500/20 text-blue-400 border-blue-500/30",
   "@qa": "bg-amber-500/20 text-amber-400 border-amber-500/30",
   "@uat": "bg-purple-500/20 text-purple-400 border-purple-500/30",

@@ -22,7 +22,7 @@ test.describe('User Selection', () => {
     await page.goto('/');
   });
 
-  test('displays Taskify heading and five user cards on launch', { tag: ['@dev', '@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
+  test('displays Taskify heading and five user cards on launch', { tag: ['@smoke','@dev', '@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Requirement: "give you a list of the five users to pick from"
     await expect(page.getByRole('heading', { name: 'Taskify' })).toBeVisible();
     await expect(page.getByText('Select your user to get started')).toBeVisible();

@@ -57,7 +57,7 @@ test.describe('Card Highlight', () => {
     expect(jordanBg).not.toEqual(alexBg);
   });
 
-  test('unassigned cards use the default (non-highlighted) style', { tag: ['@prod-safe'] }, async ({ page }) => {
+  test('unassigned cards use the default (non-highlighted) style', { tag: ['@smoke','@prod-safe'] }, async ({ page }) => {
     // Mobile App MVP has an unassigned task: "Create onboarding flow"
     await page.goto('/');
     await page.getByRole('button').filter({ hasText: 'Alex Rivera' }).click();

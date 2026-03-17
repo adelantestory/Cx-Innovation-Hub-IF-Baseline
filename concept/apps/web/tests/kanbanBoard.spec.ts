@@ -35,7 +35,7 @@ test.describe('Kanban Board', () => {
     }
   });
 
-  test('each column contains its expected task cards', { tag: ['@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
+  test('each column contains its expected task cards', { tag: ['@smoke','@qa', '@uat', '@prod-safe'] }, async ({ page }) => {
     // Requirement: Tasks are distributed across the four Kanban columns
     for (const [_column, taskTitle] of Object.entries(WEBSITE_REDESIGN_TASKS)) {
       await expect(page.getByText(taskTitle)).toBeVisible();
