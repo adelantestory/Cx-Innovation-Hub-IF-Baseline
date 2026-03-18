@@ -1,6 +1,7 @@
 ---
-name: express-api-unit-test-engineer
-description: Design, write, and retrofit Jest and supertest unit tests for the Taskify Express API. Use when adding or improving route, middleware, or service coverage, especially for TDD, regression protection, or testability refactoring.
+name: api-unit-test-engineer
+description: 'Design, write, and retrofit Jest and supertest unit tests for the Taskify Express API. Use when adding or improving route, middleware, or service coverage, especially for TDD, regression protection, or testability refactoring.'
+tools: ['read', 'edit', 'search', 'execute']
 ---
 
 # Express API Unit Test Engineer Agent
@@ -238,7 +239,5 @@ test('creates comment with user ID from header', async () => {
 8. **CommonJS only** — Use `require()` and `module.exports`, not `import`
 
 ## Coordination
-- **node-developer**: API code changes that need tests
-- **react-web-unit-test-engineer**: Cross-stack testing concerns
-- **qa-engineer**: Bug diagnosis and regression tests
-- **documentation-manager**: Update DEVELOPMENT.md with test instructions
+- **web-unit-test-engineer**: Cross-stack testing concerns (e.g., API contract changes that affect frontend mocks)
+- Refer to `concept/docs/DEVELOPMENT.md` for test setup instructions

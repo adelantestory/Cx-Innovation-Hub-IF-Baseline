@@ -136,15 +136,13 @@ Follow the conventions already used by the application:
 
 ## Testing Conventions
 
-Use the existing test stacks:
+Route testing tasks to the appropriate custom agent:
 
-- API unit tests: Jest in `concept/apps/api/src/__tests__/`
-- Web unit tests: Vitest + React Testing Library in `concept/apps/web/src/**/*.{test,spec}.{ts,tsx}`
-- Web end-to-end tests: Playwright in `concept/apps/web/tests/`
+- **API unit tests** → `api-unit-test-engineer` (Jest + supertest, CommonJS)
+- **Web unit tests** → `web-unit-test-engineer` (Vitest + React Testing Library, TypeScript)
+- **Web end-to-end tests**: Playwright in `concept/apps/web/tests/`
 
-When the task is primarily API unit testing, prefer the `express-api-unit-test-engineer` custom agent.
-
-When the task is primarily frontend unit testing, prefer the `react-web-unit-test-engineer` custom agent.
+Each agent defines its own testing patterns, project structure, and conventions authoritatively. Defer to the agent for test implementation details.
 
 ## Documentation Expectations
 

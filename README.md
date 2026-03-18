@@ -70,50 +70,25 @@ Use the checked-in docs under `concept/docs/` and `deliverables/` as the current
 | `DEVELOPMENT.md` | Developer setup guide |
 | `AZURE_CONFIG.json` | Central configuration schema |
 
-## Agents
+## Custom Agents
 
-### Support Roles (7)
-| Agent | Purpose |
-|-------|---------|
-| `project-manager` | Scope, coordination, deliverables |
-| `business-analyst` | Discovery, requirements, gaps |
-| `cloud-architect` | Architecture, AZURE_CONFIG.json |
-| `subscription-expert` | Subscription config, resource providers |
-| `spec-kit-expert` | GitHub Spec Kit documentation |
-| `document-writer` | Technical documentation |
-| `cost-analyst` | Cost estimation |
+The following custom Copilot agents are defined in `.github/agents/`:
 
-### Service Agents (64)
-All service agents are trained on the limitations of the MCAPS environment and will seek to deploy infrastructure in alignment with internal policies.
+| Agent | File | Purpose |
+|-------|------|---------|
+| `api-unit-test-engineer` | `api-unit-test-engineer.md` | Jest + supertest unit tests for the Express API |
+| `web-unit-test-engineer` | `web-unit-test-engineer.md` | Vitest + React Testing Library unit tests for the React web app |
 
-Each of 16 Azure services has 4 agents: `-architect`, `-developer`, `-terraform`, `-bicep`
-
-**Current Services:**
-* API Management
-* Application Insights
-* Azure Functions
-* Azure OpenAI
-* Azure SQL
-* Blob Storage
-* Container Apps
-* Container Apps Environment
-* Container Registry
-* Cosmos DB
-* Key Vault
-* Log Analytics
-* Redis Cache
-* Service Bus
-* User-Managed Identity
-* Web Apps
+Both agents support two operational modes: **TDD Greenfield** (test-first for new code) and **Retrofit** (adding tests to existing untested code). See each agent file for full testing patterns and conventions.
 
 ## Critical Files
 
-| File | Purpose | Owner |
-|------|---------|-------|
-| `.github/copilot-instructions.md` | Repository-specific Copilot guidance | — |
-| `.github/agents/*.md` | Custom Copilot agent definitions | — |
-| `concept/.specify/memory/constitution.md` | Technical constraints | — |
-| `concept/AZURE_CONFIG.json` | Resource configuration | `cloud-architect` |
+| File | Purpose |
+|------|---------|
+| `.github/copilot-instructions.md` | Repository-specific Copilot guidance |
+| `.github/agents/*.md` | Custom Copilot agent definitions |
+| `concept/.specify/memory/constitution.md` | Innovation Factory principles and constraints |
+| `concept/AZURE_CONFIG.json` | Resource configuration |
 
 ---
 

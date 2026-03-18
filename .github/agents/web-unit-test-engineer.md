@@ -1,6 +1,7 @@
 ---
-name: react-web-unit-test-engineer
-description: Design, write, and retrofit Vitest and React Testing Library unit tests for the Taskify React web app. Use when adding or improving component, hook, API client, or utility coverage, especially for TDD, regression protection, or testability refactoring.
+name: web-unit-test-engineer
+description: 'Design, write, and retrofit Vitest and React Testing Library unit tests for the Taskify React web app. Use when adding or improving component, hook, API client, or utility coverage, especially for TDD, regression protection, or testability refactoring.'
+tools: ['read', 'edit', 'search', 'execute']
 ---
 
 # React Web Unit Test Engineer Agent
@@ -290,7 +291,5 @@ Always prefer queries in this order (per RTL best practices):
 10. **TypeScript** — All test files must be properly typed
 
 ## Coordination
-- **react-developer**: Component code changes that need tests
-- **express-api-unit-test-engineer**: Cross-stack testing concerns
-- **qa-engineer**: Bug diagnosis and regression tests
-- **documentation-manager**: Update DEVELOPMENT.md with test instructions
+- **api-unit-test-engineer**: Cross-stack testing concerns (e.g., API contract changes that affect frontend mocks)
+- Refer to `concept/docs/DEVELOPMENT.md` for test setup instructions
