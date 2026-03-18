@@ -708,16 +708,134 @@ jobs:
       - name: Post cloud test summary
         if: always()
         run: |
-          cat >> "$GITHUB_STEP_SUMMARY" <<'SUMMARY_EOF'
-          ## Azure Load Test — ${{ matrix.scenario.description }}
+          echo "## ☁️ Azure Load Test — ${{ matrix.scenario.description }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Property | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Test ID | \`${{ steps.load_test.outputs.test_id }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Scenario | ${{ matrix.scenario.description }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| API URL | ${{ steps.vars.outputs.api_url }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Environment | ${{ steps.vars.outputs.environment }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Resource Group | ${{ steps.vars.outputs.resource_group }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Load Test Resource | ${{ steps.vars.outputs.load_test_name }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Framework | Locust |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          | Property | Value |
-          |----------|-------|
-          | Test ID | ${{ steps.load_test.outputs.test_id }} |
-          | Scenario | ${{ matrix.scenario.description }} |
-          | API URL | ${{ steps.vars.outputs.api_url }} |
-          | Environment | ${{ steps.vars.outputs.environment }} |
-          | Resource Group | ${{ steps.vars.outputs.resource_group }} |
-          | Load Test Resource | ${{ steps.vars.outputs.load_test_name }} |
-          | Framework | Locust |
-          SUMMARY_EOF
+          # --- Parse Locust CSV results (same format as local runs) ---
+          STATS_FILE=$(find cloud-results -name "*_stats.csv" -type f 2>/dev/null | head -1)
+
+          if [ -z "$STATS_FILE" ]; then
+            echo "::warning::No Locust stats CSV found in cloud-results/"
+            echo "**⚠️ No Locust stats CSV found in downloaded results.**" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Contents of cloud-results/:" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            find cloud-results -type f 2>/dev/null | head -20 >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Found stats CSV: ${STATS_FILE}"
+            FAILED=0
+
+            echo "### Performance Threshold Results" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Method | Endpoint | p95 (ms) | Threshold (ms) | Status |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|--------|----------|----------|----------------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+            while IFS=',' read -r TYPE NAME REQ_COUNT FAIL_COUNT MEDIAN AVG MIN MAX AVG_SIZE RPS FAIL_PER_SEC P50 P66 P75 P80 P90 P95 P98 P99 P999 P9999 P100; do
+              if echo "$NAME" | grep -qi "aggregated"; then continue; fi
+
+              TYPE=$(echo "$TYPE" | tr -d '"')
+              NAME=$(echo "$NAME" | tr -d '"')
+              P95_VAL=$(echo "$P95" | tr -d '"' | tr -d ' ')
+
+              if [ -z "$TYPE" ] || [ -z "$P95_VAL" ]; then continue; fi
+
+              case "$TYPE" in
+                GET)        THRESHOLD=500  ;;
+                POST|PATCH) THRESHOLD=1000 ;;
+                *)          THRESHOLD=1000 ;;
+              esac
+
+              if [ "$(echo "$P95_VAL > $THRESHOLD" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+                STATUS="❌ FAIL"
+                echo "::warning::Cloud: ${TYPE} ${NAME} p95=${P95_VAL}ms exceeds threshold ${THRESHOLD}ms"
+                FAILED=1
+              else
+                STATUS="✅ PASS"
+              fi
+
+              echo "| ${TYPE} | ${NAME} | ${P95_VAL} | ${THRESHOLD} | ${STATUS} |" >> "$GITHUB_STEP_SUMMARY"
+            done < <(tail -n +2 "$STATS_FILE")
+
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Error Rate" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+
+            AGG_LINE=$(tail -n +2 "$STATS_FILE" | grep -i "aggregated" || true)
+            if [ -n "$AGG_LINE" ]; then
+              TOTAL_REQS=$(echo "$AGG_LINE" | awk -F',' '{print $3}' | tr -d '"')
+              TOTAL_FAILS=$(echo "$AGG_LINE" | awk -F',' '{print $4}' | tr -d '"')
+
+              if [ "$TOTAL_REQS" -gt 0 ] 2>/dev/null; then
+                ERROR_RATE=$(echo "scale=2; $TOTAL_FAILS * 100 / $TOTAL_REQS" | bc -l)
+                if [ "$(echo "$ERROR_RATE > 1" | bc -l)" = "1" ]; then
+                  echo "| Error Rate | ${ERROR_RATE}% | < 1% | ❌ FAIL |" >> "$GITHUB_STEP_SUMMARY"
+                  echo "::warning::Cloud error rate ${ERROR_RATE}% exceeds 1% threshold"
+                  FAILED=1
+                else
+                  echo "| Error Rate | ${ERROR_RATE}% | < 1% | ✅ PASS |" >> "$GITHUB_STEP_SUMMARY"
+                fi
+              fi
+            fi
+
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Summary" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Users**: ${{ inputs.scenario_users || '50' }} (ramp rate: ${{ inputs.scenario_ramp_rate || '10' }}/s)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Duration**: ${{ inputs.scenario_duration || '3m' }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Total Requests**: ${TOTAL_REQS:-N/A}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Failed Requests**: ${TOTAL_FAILS:-N/A}" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+
+            if [ "$FAILED" = "1" ]; then
+              echo "::warning::Cloud performance thresholds exceeded for ${{ matrix.scenario.description }}"
+            fi
+          fi
+
+          # --- Application Insights Results ---
+          echo "### Application Insights" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          FAILED_REQS='${{ steps.ai_query.outputs.failed_reqs }}'
+          ERRORS='${{ steps.ai_query.outputs.errors }}'
+
+          # Parse request summary from App Insights
+          if [ -n "$FAILED_REQS" ] && echo "$FAILED_REQS" | jq -e '.tables[0].rows | length > 0' > /dev/null 2>&1; then
+            AI_TOTAL=$(echo "$FAILED_REQS" | jq -r '.tables[0].rows[0][0] // "N/A"')
+            AI_FAILED=$(echo "$FAILED_REQS" | jq -r '.tables[0].rows[0][1] // "N/A"')
+            AI_AVG_DURATION=$(echo "$FAILED_REQS" | jq -r '.tables[0].rows[0][2] // "N/A"')
+            AI_P95_DURATION=$(echo "$FAILED_REQS" | jq -r '.tables[0].rows[0][3] // "N/A"')
+            AI_ERROR_RATE=$(echo "$FAILED_REQS" | jq -r '.tables[0].rows[0][4] // "N/A"')
+
+            echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Total Requests (AI) | ${AI_TOTAL} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Failed Requests (AI) | ${AI_FAILED} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Avg Duration (ms) | ${AI_AVG_DURATION} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| P95 Duration (ms) | ${AI_P95_DURATION} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Error Rate (AI) | ${AI_ERROR_RATE}% |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "*No request telemetry found in Application Insights for this time window.*" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Parse exception details from App Insights
+          if [ -n "$ERRORS" ] && echo "$ERRORS" | jq -e '.tables[0].rows | length > 0' > /dev/null 2>&1; then
+            echo "#### Exceptions Detected" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Type | Message | Count |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|------|---------|-------|" >> "$GITHUB_STEP_SUMMARY"
+            echo "$ERRORS" | jq -r '.tables[0].rows[] | "| \(.[0]) | \(.[1]) | \(.[2]) |"' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "*No exceptions detected in Application Insights during the test window.*" >> "$GITHUB_STEP_SUMMARY"
+          fi

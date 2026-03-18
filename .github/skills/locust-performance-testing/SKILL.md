@@ -219,7 +219,20 @@ The **cloud-load-test** job runs each scenario as a separate Azure Load Test. It
 6. Upload `base.py` + `__init__.py` as `ADDITIONAL_ARTIFACTS`
 7. Upload `locust.conf` as `USER_PROPERTIES`
 8. `az load test-run create` to start the test
-9. Poll for completion, download results, query App Insights
+9. Poll for completion, download results
+10. Parse Locust `_stats.csv` and display threshold table + error rate + summary in step summary (matching local run format)
+11. Query App Insights for request telemetry and exceptions, display in step summary
+
+### Cloud Result Reporting
+After each cloud load test completes, the pipeline downloads results and produces a step summary that mirrors the local run format:
+
+1. **Threshold Table**: Parses the Locust `_stats.csv` from downloaded results and displays:
+   - Method | Endpoint | p95 (ms) | Threshold (ms) | Status (same GET < 500ms, POST/PATCH < 1000ms thresholds)
+2. **Error Rate**: Extracts aggregated row from CSV, computes error percentage, checks < 1% threshold
+3. **Summary**: Shows users, duration, total requests, failed requests
+4. **Application Insights**: Displays server-side telemetry from App Insights:
+   - Request summary: total requests, failed requests, avg/p95 duration, error rate
+   - Exception details: type, message, count (top 20)
 
 ### Application Insights Integration
 The API container is instrumented with the `applicationinsights` Node.js SDK. When the `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable is set (via Azure deployment), the SDK auto-collects:
@@ -228,7 +241,7 @@ The API container is instrumented with the `applicationinsights` Node.js SDK. Wh
 - Exceptions and stack traces
 - Performance counters (CPU, memory)
 
-The pipeline's cloud-load-test job queries App Insights after each load test to surface exceptions and error rates in the GitHub Actions step summary.
+The pipeline's cloud-load-test job queries App Insights after each load test and displays the results in the GitHub Actions step summary alongside the Locust CSV results. This gives both client-side (Locust) and server-side (App Insights) perspectives on performance.
 
 ## Existing Scenarios Reference
 
