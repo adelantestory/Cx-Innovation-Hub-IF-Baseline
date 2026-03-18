@@ -67,7 +67,7 @@ on:
       combined_duration:
         description: 'Duration for combined verification run (e.g., 2m, 5m, 10m)'
         required: false
-        default: '2m'
+        default: '3m'
         type: string
       combined_ramp_rate:
         description: 'User spawn rate per second for combined run'
@@ -77,17 +77,17 @@ on:
       scenario_users:
         description: 'Virtual users per individual scenario test'
         required: false
-        default: '20'
+        default: '50'
         type: string
       scenario_duration:
-        description: 'Duration per individual scenario test (e.g., 1m, 5m, 10m)'
+        description: 'Duration per individual scenario test (e.g., 2m, 5m, 10m)'
         required: false
-        default: '1m'
+        default: '3m'
         type: string
       scenario_ramp_rate:
         description: 'User spawn rate per second for scenario tests'
         required: false
-        default: '5'
+        default: '10'
         type: string
   push:
     paths:
@@ -524,9 +524,23 @@ jobs:
           SCENARIOS_DIR="concept/tests/performance/scenarios"
 
           # Resolve Locust run parameters from workflow inputs
-          CLOUD_USERS="${{ inputs.scenario_users || '20' }}"
-          CLOUD_DURATION="${{ inputs.scenario_duration || '1m' }}"
-          CLOUD_RAMP="${{ inputs.scenario_ramp_rate || '5' }}"
+          CLOUD_USERS="${{ inputs.scenario_users || '50' }}"
+          CLOUD_DURATION="${{ inputs.scenario_duration || '3m' }}"
+          CLOUD_RAMP="${{ inputs.scenario_ramp_rate || '10' }}"
+
+          # Convert duration to seconds (Azure Load Testing requires integer)
+          # Supports formats: 3m, 5m, 10m, 300s, or raw seconds
+          if echo "$CLOUD_DURATION" | grep -qE '^[0-9]+m$'; then
+            DURATION_SECS=$(( ${CLOUD_DURATION%m} * 60 ))
+          elif echo "$CLOUD_DURATION" | grep -qE '^[0-9]+s$'; then
+            DURATION_SECS=${CLOUD_DURATION%s}
+          elif echo "$CLOUD_DURATION" | grep -qE '^[0-9]+$'; then
+            DURATION_SECS=$CLOUD_DURATION
+          else
+            echo "::warning::Unrecognized duration format '${CLOUD_DURATION}', defaulting to 180s"
+            DURATION_SECS=180
+          fi
+          echo "Cloud test: ${CLOUD_USERS} users, ${DURATION_SECS}s, ramp ${CLOUD_RAMP}/s"
 
           # Create test with the scenario file as test plan
           # LOCUST_HOST overrides the class-level 'host' attribute
@@ -537,7 +551,7 @@ jobs:
             --test-id "${TEST_ID}" \
             --test-plan "${{ matrix.scenario.file }}" \
             --engine-instances 1 \
-            --env LOCUST_HOST="${API_URL}" TASKIFY_BASE_URL="${API_URL}" LOCUST_USERS="${CLOUD_USERS}" LOCUST_SPAWN_RATE="${CLOUD_RAMP}" LOCUST_RUN_TIME="${CLOUD_DURATION}" \
+            --env LOCUST_HOST="${API_URL}" TASKIFY_BASE_URL="${API_URL}" LOCUST_USERS="${CLOUD_USERS}" LOCUST_SPAWN_RATE="${CLOUD_RAMP}" LOCUST_RUN_TIME="${DURATION_SECS}" \
             --output none
 
           # Upload supporting files (base class + __init__.py) for relative imports
