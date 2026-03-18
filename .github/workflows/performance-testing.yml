@@ -542,21 +542,41 @@ jobs:
           fi
           echo "Cloud test: ${CLOUD_USERS} users, ${DURATION_SECS}s, ramp ${CLOUD_RAMP}/s"
 
-          # Azure Load Testing does not pass --env values as actual environment
-          # variables to the Locust process.  Inject the real API URL directly
-          # into the working copy of base.py so the class-level `host` default
-          # points at the deployed Container App instead of localhost.
+          # --- Layer 1: Patch base.py fallback URL ---
+          # Modify the Python source so the class-level host attribute
+          # points at the real Container App URL instead of localhost.
           sed -i "s|http://localhost:3000|${API_URL}|g" "${SCENARIOS_DIR}/base.py"
           echo "Patched base.py default host → ${API_URL}"
 
-          # Create the load test definition
+          # --- Layer 2: Generate locust.conf ---
+          # Locust natively reads locust.conf from the working directory.
+          # Azure Load Testing supports uploading this as USER_PROPERTIES.
+          cat > "${SCENARIOS_DIR}/locust.conf" << LOCUST_CONF
+          [locust]
+          host = ${API_URL}
+          users = ${CLOUD_USERS}
+          spawn-rate = ${CLOUD_RAMP}
+          run-time = ${DURATION_SECS}s
+          headless = true
+          LOCUST_CONF
+          # Strip leading whitespace from heredoc
+          sed -i 's/^          //' "${SCENARIOS_DIR}/locust.conf"
+          echo "Generated locust.conf:"
+          cat "${SCENARIOS_DIR}/locust.conf"
+
+          # --- Layer 3: Create test with --test-type Locust + env vars ---
+          # Per Azure docs: --test-type Locust is required for proper Locust
+          # env var handling (maps LOCUST_HOST to Load tab Host endpoint).
+          # Ref: https://learn.microsoft.com/en-us/cli/azure/load/test#az-load-test-create
           az load test create \
             --name "$LT_NAME" \
             --resource-group "$RG" \
             --test-id "${TEST_ID}" \
             --test-plan "${{ matrix.scenario.file }}" \
+            --test-type Locust \
             --engine-instances 1 \
-            --env LOCUST_USERS="${CLOUD_USERS}" LOCUST_SPAWN_RATE="${CLOUD_RAMP}" LOCUST_RUN_TIME="${DURATION_SECS}" \
+            --autostop disable \
+            --env LOCUST_HOST="${API_URL}" LOCUST_USERS="${CLOUD_USERS}" LOCUST_SPAWN_RATE="${CLOUD_RAMP}" LOCUST_RUN_TIME="${DURATION_SECS}" \
             --output none
 
           # Upload supporting files (base class + __init__.py) for relative imports
@@ -572,6 +592,16 @@ jobs:
               echo "Uploaded supporting file: ${SUPPORT_FILE}"
             fi
           done
+
+          # Upload locust.conf as Locust configuration file
+          az load test file upload \
+            --name "$LT_NAME" \
+            --resource-group "$RG" \
+            --test-id "${TEST_ID}" \
+            --path "${SCENARIOS_DIR}/locust.conf" \
+            --file-type USER_PROPERTIES \
+            --output none
+          echo "Uploaded locust.conf as USER_PROPERTIES"
 
           # Start the test run
           az load test-run create \
