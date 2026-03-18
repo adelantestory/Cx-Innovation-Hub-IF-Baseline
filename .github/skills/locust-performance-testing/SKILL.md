@@ -166,6 +166,8 @@ The `TaskifyBaseUser` in `scenarios/base.py` handles:
 - `wait_time = between(1, 3)` — random wait between tasks
 - `host` — from `TASKIFY_BASE_URL` env var (default: `http://localhost:3000`)
 
+**Important:** For cloud execution, the pipeline's 3-layer approach overrides `http://localhost:3000` with the real API URL (see Cloud Load Testing below). You do NOT need to change `base.py` for cloud tests.
+
 ### Pipeline Integration (Automatic)
 The GitHub Actions workflow (`performance-testing.yml`) auto-discovers scenarios:
 1. **discover-scenarios** job scans `scenarios/test_*.py` and builds a JSON matrix
@@ -181,13 +183,43 @@ The pipeline accepts these `workflow_dispatch` inputs to control load intensity:
 | Input | Default | Used In | Description |
 |-------|---------|---------|-------------|
 | `combined_users` | `50` | local-verification | Virtual users for combined run |
-| `combined_duration` | `2m` | local-verification | Duration (e.g., `2m`, `5m`, `10m`) |
+| `combined_duration` | `3m` | local-verification | Duration (e.g., `2m`, `5m`, `10m`) |
 | `combined_ramp_rate` | `10` | local-verification | Users spawned per second |
-| `scenario_users` | `20` | local-scenario-tests | Virtual users per individual scenario |
-| `scenario_duration` | `1m` | local-scenario-tests | Duration per scenario test |
-| `scenario_ramp_rate` | `5` | local-scenario-tests | Users spawned per second per scenario |
+| `scenario_users` | `50` | local-scenario-tests + cloud-load-test | Virtual users per individual scenario |
+| `scenario_duration` | `3m` | local-scenario-tests + cloud-load-test | Duration per scenario test |
+| `scenario_ramp_rate` | `10` | local-scenario-tests + cloud-load-test | Users spawned per second per scenario |
+| `run_cloud_tests` | `false` | cloud-load-test | Enable Azure Load Testing cloud runs |
+| `target_url` | _(auto-detected)_ | cloud-load-test | Override API URL (auto-detects from Container App if blank) |
 
 **To stress-test the system:** Increase `combined_users` to 200–500+ and `scenario_users` to 100+ via the "Run workflow" button. Increase duration to `5m` or `10m` for sustained load. These values are also available on push-triggered runs via their defaults.
+
+### Cloud Load Testing (Azure Load Testing)
+The **cloud-load-test** job runs each scenario as a separate Azure Load Test. It uses a **3-layer approach** to ensure the correct target host:
+
+| Layer | Mechanism | Purpose |
+|-------|-----------|--------|
+| 1. `sed` patch | Replaces `http://localhost:3000` in `base.py` with the real API URL before upload | Bakes URL into Python source as fallback |
+| 2. `locust.conf` | Generated with `host`, `users`, `spawn-rate`, `run-time` and uploaded as `USER_PROPERTIES` | Locust natively reads config files |
+| 3. `--test-type Locust` + `--env LOCUST_HOST` | CLI flags on `az load test create` | Maps LOCUST_HOST to Azure Load tab's Host endpoint |
+
+**Critical requirements for cloud tests:**
+- `--test-type Locust` is **required** on `az load test create` — without it, Azure does not properly map Locust-specific env vars to the Load tab
+- `--autostop disable` prevents premature test cancellation during ramp-up
+- Duration must be an **integer in seconds** for `LOCUST_RUN_TIME` (Azure rejects Locust formats like `3m`). The pipeline converts automatically (e.g., `3m` → `180`)
+- Supporting files (`base.py`, `__init__.py`) must be uploaded as `ADDITIONAL_ARTIFACTS`
+- `locust.conf` must be uploaded as `USER_PROPERTIES` (not `ADDITIONAL_ARTIFACTS`)
+- A **warm-up step** curls the API health/users/projects endpoints before creating load tests (Container Apps have `minReplicas: 0` and may be cold)
+
+**Cloud test flow per scenario:**
+1. Auto-detect API URL from Container App FQDN (or use `target_url` input)
+2. Warm up the Container App with retried health checks
+3. `sed`-patch `base.py` with the real URL
+4. Generate `locust.conf` with host + load config
+5. `az load test create` with `--test-type Locust`, env vars, autostop disabled
+6. Upload `base.py` + `__init__.py` as `ADDITIONAL_ARTIFACTS`
+7. Upload `locust.conf` as `USER_PROPERTIES`
+8. `az load test-run create` to start the test
+9. Poll for completion, download results, query App Insights
 
 ### Application Insights Integration
 The API container is instrumented with the `applicationinsights` Node.js SDK. When the `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable is set (via Azure deployment), the SDK auto-collects:
