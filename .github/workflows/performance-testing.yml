@@ -52,6 +52,8 @@ on:
         default: false
         type: boolean
   push:
+    branches:
+      - 'demo/performance-testing'
     paths:
       - 'concept/tests/performance/**'
 
@@ -238,7 +240,7 @@ jobs:
   cloud-load-test:
     name: "Azure Load Test — Locust"
     needs: local-verification
-    if: github.event.inputs.run_cloud_tests == 'true'
+    if: github.event.inputs.run_cloud_tests == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/demo/performance-testing')
     runs-on: ubuntu-latest
 
     steps:
