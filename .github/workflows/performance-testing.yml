@@ -205,7 +205,7 @@ jobs:
           echo "| Method | Endpoint | p95 (ms) | Threshold (ms) | Status |" >> "$GITHUB_STEP_SUMMARY"
           echo "|--------|----------|----------|----------------|--------|" >> "$GITHUB_STEP_SUMMARY"
 
-          tail -n +2 "$STATS_FILE" | while IFS=',' read -r TYPE NAME REQ_COUNT FAIL_COUNT MEDIAN AVG MIN MAX AVG_SIZE RPS FAIL_PER_SEC P50 P66 P75 P80 P90 P95 P98 P99 P999 P9999 P100; do
+          while IFS=',' read -r TYPE NAME REQ_COUNT FAIL_COUNT MEDIAN AVG MIN MAX AVG_SIZE RPS FAIL_PER_SEC P50 P66 P75 P80 P90 P95 P98 P99 P999 P9999 P100; do
             if echo "$NAME" | grep -qi "aggregated"; then continue; fi
 
             TYPE=$(echo "$TYPE" | tr -d '"')
@@ -229,7 +229,7 @@ jobs:
             fi
 
             echo "| ${TYPE} | ${NAME} | ${P95_VAL} | ${THRESHOLD} | ${STATUS} |" >> "$GITHUB_STEP_SUMMARY"
-          done
+          done < <(tail -n +2 "$STATS_FILE")
 
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### Error Rate" >> "$GITHUB_STEP_SUMMARY"
@@ -343,28 +343,44 @@ jobs:
         run: |
           STATS_FILE="concept/tests/performance/results/${{ matrix.scenario.name }}_stats.csv"
           FAILED=0
-          [ ! -f "$STATS_FILE" ] && echo "::error::Stats CSV not found" && exit 1
+
+          if [ ! -f "$STATS_FILE" ]; then
+            echo "::error::Stats CSV not found: $STATS_FILE"
+            exit 1
+          fi
 
           echo "## ${{ matrix.scenario.description }} — Threshold Results" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Method | Endpoint | p95 (ms) | Threshold (ms) | Status |" >> "$GITHUB_STEP_SUMMARY"
           echo "|--------|----------|----------|----------------|--------|" >> "$GITHUB_STEP_SUMMARY"
 
-          tail -n +2 "$STATS_FILE" | while IFS=',' read -r TYPE NAME REQ_COUNT FAIL_COUNT MEDIAN AVG MIN MAX AVG_SIZE RPS FAIL_PER_SEC P50 P66 P75 P80 P90 P95 P98 P99 P999 P9999 P100; do
+          while IFS=',' read -r TYPE NAME REQ_COUNT FAIL_COUNT MEDIAN AVG MIN MAX AVG_SIZE RPS FAIL_PER_SEC P50 P66 P75 P80 P90 P95 P98 P99 P999 P9999 P100; do
             if echo "$NAME" | grep -qi "aggregated"; then continue; fi
-            TYPE=$(echo "$TYPE" | tr -d '"'); NAME=$(echo "$NAME" | tr -d '"')
+
+            TYPE=$(echo "$TYPE" | tr -d '"')
+            NAME=$(echo "$NAME" | tr -d '"')
             P95_VAL=$(echo "$P95" | tr -d '"' | tr -d ' ')
-            [ -z "$TYPE" ] || [ -z "$P95_VAL" ] && continue
-            case "$TYPE" in GET) THRESHOLD=500;; POST|PATCH) THRESHOLD=1000;; *) THRESHOLD=1000;; esac
+
+            if [ -z "$TYPE" ] || [ -z "$P95_VAL" ]; then continue; fi
+
+            case "$TYPE" in
+              GET)        THRESHOLD=500  ;;
+              POST|PATCH) THRESHOLD=1000 ;;
+              *)          THRESHOLD=1000 ;;
+            esac
+
             if [ "$(echo "$P95_VAL > $THRESHOLD" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
               echo "| ${TYPE} | ${NAME} | ${P95_VAL} | ${THRESHOLD} | ❌ FAIL |" >> "$GITHUB_STEP_SUMMARY"
               FAILED=1
             else
               echo "| ${TYPE} | ${NAME} | ${P95_VAL} | ${THRESHOLD} | ✅ PASS |" >> "$GITHUB_STEP_SUMMARY"
             fi
-          done
+          done < <(tail -n +2 "$STATS_FILE")
 
-          [ "$FAILED" = "1" ] && echo "::error::${{ matrix.scenario.description }} thresholds exceeded" && exit 1
+          if [ "$FAILED" = "1" ]; then
+            echo "::error::${{ matrix.scenario.description }} thresholds exceeded"
+            exit 1
+          fi
 
       - name: Tear down Docker Compose
         if: always()
