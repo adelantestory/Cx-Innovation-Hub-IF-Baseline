@@ -489,6 +489,28 @@ jobs:
           echo "api_url=${TARGET_URL}" >> "$GITHUB_OUTPUT"
           echo "Resolved API URL: ${TARGET_URL}"
 
+      - name: Warm up Container App (wake from cold start)
+        run: |
+          API_URL="${{ steps.vars.outputs.api_url }}"
+          echo "Warming up API at ${API_URL}..."
+          MAX_ATTEMPTS=12
+          ATTEMPT=0
+          until curl -sf --max-time 10 "${API_URL}/api/health" > /dev/null 2>&1; do
+            ATTEMPT=$((ATTEMPT + 1))
+            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+              echo "::warning::API did not respond after ${MAX_ATTEMPTS} attempts (may be cold-starting)"
+              break
+            fi
+            echo "  Attempt ${ATTEMPT}/${MAX_ATTEMPTS} — waiting 10s for container to start..."
+            sleep 10
+          done
+          if [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; then
+            echo "API is warm and responding (attempt ${ATTEMPT})"
+          fi
+          # Hit a few more endpoints to fully warm the connection pool
+          curl -sf --max-time 10 "${API_URL}/api/users" > /dev/null 2>&1 || true
+          curl -sf --max-time 10 "${API_URL}/api/projects" > /dev/null 2>&1 || true
+
       - name: Create and run load test — ${{ matrix.scenario.description }}
         id: load_test
         run: |
@@ -501,16 +523,21 @@ jobs:
           API_URL="${{ steps.vars.outputs.api_url }}"
           SCENARIOS_DIR="concept/tests/performance/scenarios"
 
+          # Resolve Locust run parameters from workflow inputs
+          CLOUD_USERS="${{ inputs.scenario_users || '20' }}"
+          CLOUD_DURATION="${{ inputs.scenario_duration || '1m' }}"
+          CLOUD_RAMP="${{ inputs.scenario_ramp_rate || '5' }}"
+
           # Create test with the scenario file as test plan
-          # LOCUST_HOST is Locust's native env var — it overrides the class-level
-          # 'host' attribute, ensuring tests target the deployed API (not localhost).
+          # LOCUST_HOST overrides the class-level 'host' attribute
+          # LOCUST_USERS / LOCUST_SPAWN_RATE / LOCUST_RUN_TIME control load shape
           az load test create \
             --name "$LT_NAME" \
             --resource-group "$RG" \
             --test-id "${TEST_ID}" \
             --test-plan "${{ matrix.scenario.file }}" \
             --engine-instances 1 \
-            --env LOCUST_HOST="${API_URL}" TASKIFY_BASE_URL="${API_URL}" \
+            --env LOCUST_HOST="${API_URL}" TASKIFY_BASE_URL="${API_URL}" LOCUST_USERS="${CLOUD_USERS}" LOCUST_SPAWN_RATE="${CLOUD_RAMP}" LOCUST_RUN_TIME="${CLOUD_DURATION}" \
             --output none
 
           # Upload supporting files (base class + __init__.py) for relative imports
