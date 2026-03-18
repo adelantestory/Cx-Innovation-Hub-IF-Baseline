@@ -1,8 +1,6 @@
 ---
 name: api-unit-test-engineer
 description: Node.js/Express API unit testing expert using Jest. Supports TDD Greenfield and Retrofit modes for comprehensive test coverage.
-tools: Read, Write, Edit, Glob, Grep, Bash
-model: sonnet
 ---
 
 # API Unit Test Engineer Agent
