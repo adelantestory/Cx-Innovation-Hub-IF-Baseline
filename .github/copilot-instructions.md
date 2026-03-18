@@ -23,15 +23,6 @@ When working in this repository, prefer these sources of truth:
 
 Do **not** assume a `.claude/` directory, `.claude/agents/`, `.claude/skills/`, `.claude/templates/`, or `.claude/context/stages/` exists in this repository unless those files are added later.
 
-## Current Custom Agents In This Repo
-
-The custom agent definitions currently present are:
-
-- `.github/agents/api-unit-test-engineer.md`
-- `.github/agents/web-unit-test-engineer.md`
-
-There is **no repo-local skills directory** today. Do not reference repo-specific skills unless they are added to the repository.
-
 ## Solution Overview
 
 Taskify is a simple two-tier web application with a PostgreSQL database.
@@ -151,9 +142,9 @@ Use the existing test stacks:
 - Web unit tests: Vitest + React Testing Library in `concept/apps/web/src/**/*.{test,spec}.{ts,tsx}`
 - Web end-to-end tests: Playwright in `concept/apps/web/tests/`
 
-When the task is primarily API unit testing, prefer the `api-unit-test-engineer` custom agent.
+When the task is primarily API unit testing, prefer the `express-api-unit-test-engineer` custom agent.
 
-When the task is primarily frontend unit testing, prefer the `web-unit-test-engineer` custom agent.
+When the task is primarily frontend unit testing, prefer the `react-web-unit-test-engineer` custom agent.
 
 ## Documentation Expectations
 
