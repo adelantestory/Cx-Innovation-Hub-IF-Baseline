@@ -1,8 +1,6 @@
 ---
 name: web-unit-test-engineer
 description: React/TypeScript frontend unit testing expert using Vitest and React Testing Library. Supports TDD Greenfield and Retrofit modes.
-tools: Read, Write, Edit, Glob, Grep, Bash
-model: sonnet
 ---
 
 # Web Unit Test Engineer Agent
