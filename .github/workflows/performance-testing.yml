@@ -316,9 +316,12 @@ jobs:
           cd concept/tests/performance
           mkdir -p results
 
+          # Strip the leading path since we already cd'd into the perf directory
+          SCENARIO_FILE=$(echo "${{ matrix.scenario.file }}" | sed 's|^concept/tests/performance/||')
+
           # Run individual scenario using the module path so relative imports work
           python -m locust \
-            -f ${{ matrix.scenario.file }} \
+            -f "${SCENARIO_FILE}" \
             --host=http://localhost:3000 \
             --headless \
             -u 20 \
@@ -326,8 +329,6 @@ jobs:
             -t 1m \
             --csv=results/${{ matrix.scenario.name }} \
             --html=results/${{ matrix.scenario.name }}_report.html
-        env:
-          PYTHONPATH: concept/tests/performance
 
       - name: Upload results — ${{ matrix.scenario.description }}
         if: always()
