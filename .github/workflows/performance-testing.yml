@@ -542,16 +542,21 @@ jobs:
           fi
           echo "Cloud test: ${CLOUD_USERS} users, ${DURATION_SECS}s, ramp ${CLOUD_RAMP}/s"
 
-          # Create test with the scenario file as test plan
-          # LOCUST_HOST overrides the class-level 'host' attribute
-          # LOCUST_USERS / LOCUST_SPAWN_RATE / LOCUST_RUN_TIME control load shape
+          # Azure Load Testing does not pass --env values as actual environment
+          # variables to the Locust process.  Inject the real API URL directly
+          # into the working copy of base.py so the class-level `host` default
+          # points at the deployed Container App instead of localhost.
+          sed -i "s|http://localhost:3000|${API_URL}|g" "${SCENARIOS_DIR}/base.py"
+          echo "Patched base.py default host → ${API_URL}"
+
+          # Create the load test definition
           az load test create \
             --name "$LT_NAME" \
             --resource-group "$RG" \
             --test-id "${TEST_ID}" \
             --test-plan "${{ matrix.scenario.file }}" \
             --engine-instances 1 \
-            --env LOCUST_HOST="${API_URL}" TASKIFY_BASE_URL="${API_URL}" LOCUST_USERS="${CLOUD_USERS}" LOCUST_SPAWN_RATE="${CLOUD_RAMP}" LOCUST_RUN_TIME="${DURATION_SECS}" \
+            --env LOCUST_USERS="${CLOUD_USERS}" LOCUST_SPAWN_RATE="${CLOUD_RAMP}" LOCUST_RUN_TIME="${DURATION_SECS}" \
             --output none
 
           # Upload supporting files (base class + __init__.py) for relative imports
