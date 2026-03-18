@@ -502,13 +502,15 @@ jobs:
           SCENARIOS_DIR="concept/tests/performance/scenarios"
 
           # Create test with the scenario file as test plan
+          # LOCUST_HOST is Locust's native env var — it overrides the class-level
+          # 'host' attribute, ensuring tests target the deployed API (not localhost).
           az load test create \
             --name "$LT_NAME" \
             --resource-group "$RG" \
             --test-id "${TEST_ID}" \
             --test-plan "${{ matrix.scenario.file }}" \
             --engine-instances 1 \
-            --env TASKIFY_BASE_URL="${API_URL}" \
+            --env LOCUST_HOST="${API_URL}" TASKIFY_BASE_URL="${API_URL}" \
             --output none
 
           # Upload supporting files (base class + __init__.py) for relative imports
