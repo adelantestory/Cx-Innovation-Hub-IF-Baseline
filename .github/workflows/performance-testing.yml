@@ -1,8 +1,9 @@
 # =============================================================================
 # Performance Testing
 # =============================================================================
-# Runs performance tests using Locust against a local Docker Compose stack and,
+# Runs Locust performance tests against a local Docker Compose stack and,
 # optionally, against deployed Azure infrastructure via Azure Load Testing.
+# Both local and cloud tests use the same Locust test plan (locustfile.py).
 #
 # Authentication (cloud tests only): OIDC federated credentials (no stored secrets).
 #   Required GitHub environment secrets:
@@ -232,30 +233,13 @@ jobs:
           echo "Docker Compose services stopped and volumes removed"
 
   # ---------------------------------------------------------------------------
-  # cloud-load-test: Run each scenario as a separate Azure Load Test (matrix)
+  # cloud-load-test: Run Locust via Azure Load Testing against deployed infra
   # ---------------------------------------------------------------------------
   cloud-load-test:
-    name: "Azure Load Test — ${{ matrix.scenario.description }}"
+    name: "Azure Load Test — Locust"
     needs: local-verification
     if: github.event.inputs.run_cloud_tests == 'true'
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        scenario:
-          - name: browse-projects
-            file: concept/tests/performance/jmeter/test_browse_projects.jmx
-            description: "Browse Projects"
-          - name: kanban-board
-            file: concept/tests/performance/jmeter/test_kanban_board.jmx
-            description: "Kanban Board Flow"
-          - name: comments
-            file: concept/tests/performance/jmeter/test_comments.jmx
-            description: "Comment Activity"
-          - name: health-check
-            file: concept/tests/performance/jmeter/test_health.jmx
-            description: "Health Check"
 
     steps:
       - name: Checkout repository
@@ -307,10 +291,10 @@ jobs:
           echo "api_url=${TARGET_URL}" >> "$GITHUB_OUTPUT"
           echo "Resolved API URL: ${TARGET_URL}"
 
-      - name: Create and run load test — ${{ matrix.scenario.description }}
+      - name: Create and run load test
         id: load_test
         run: |
-          TEST_ID="perf-${{ matrix.scenario.name }}-$(date +%Y%m%d-%H%M%S)"
+          TEST_ID="perf-locust-$(date +%Y%m%d-%H%M%S)"
           echo "test_id=${TEST_ID}" >> "$GITHUB_OUTPUT"
           echo "test_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
@@ -318,22 +302,15 @@ jobs:
           RG="${{ steps.vars.outputs.resource_group }}"
           API_URL="${{ steps.vars.outputs.api_url }}"
 
-          # Extract host, port, and protocol from API_URL for JMeter env vars
-          PROTOCOL=$(echo "$API_URL" | grep -oP '^https?')
-          HOST=$(echo "$API_URL" | sed 's|https\?://||' | sed 's|/.*||' | sed 's|:.*||')
-          PORT=$(echo "$API_URL" | grep -oP ':\d+' | tr -d ':')
-          if [ -z "$PORT" ]; then
-            [ "$PROTOCOL" = "https" ] && PORT=443 || PORT=80
-          fi
-
-          # Create the test with JMeter .jmx test plan
+          # Create the test with Locust test plan (all 4 scenarios in one file)
           az load test create \
             --name "$LT_NAME" \
             --resource-group "$RG" \
             --test-id "${TEST_ID}" \
-            --test-plan "${{ matrix.scenario.file }}" \
+            --test-plan "concept/tests/performance/locustfile.py" \
+            --framework "Locust" \
             --engine-instances 1 \
-            --env TASKIFY_HOST="${HOST}" TASKIFY_PORT="${PORT}" TASKIFY_PROTOCOL="${PROTOCOL}" \
+            --env TASKIFY_BASE_URL="${API_URL}" \
             --output none
 
           # Start the test run
@@ -348,7 +325,7 @@ jobs:
 
       - name: Wait for test completion
         run: |
-          echo "Waiting for load test '${{ matrix.scenario.description }}' to complete..."
+          echo "Waiting for Locust load test to complete..."
           MAX_WAIT=600
           INTERVAL=15
           ELAPSED=0
@@ -390,11 +367,11 @@ jobs:
             --force \
             --output none || echo "::warning::Could not download all result files"
 
-      - name: Upload cloud test results — ${{ matrix.scenario.description }}
+      - name: Upload cloud test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: performance-results-cloud-${{ matrix.scenario.name }}
+          name: performance-results-cloud-locust
           path: cloud-results/
           retention-days: 30
 
@@ -440,20 +417,21 @@ jobs:
           echo "$FAILED_REQS" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
 
-      - name: Post cloud test summary — ${{ matrix.scenario.description }}
+      - name: Post cloud test summary
         if: always()
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" <<EOF
-          ## Azure Load Test Results — ${{ matrix.scenario.description }}
+          ## Azure Load Test Results — Locust (All Scenarios)
 
           | Property | Value |
           |----------|-------|
-          | Scenario | ${{ matrix.scenario.description }} |
           | Test ID | ${{ steps.load_test.outputs.test_id }} |
           | API URL | ${{ steps.vars.outputs.api_url }} |
           | Environment | ${{ steps.vars.outputs.environment }} |
           | Resource Group | ${{ steps.vars.outputs.resource_group }} |
           | Load Test Resource | ${{ steps.vars.outputs.load_test_name }} |
+          | Framework | Locust |
+          | Scenarios | Browse Projects, Kanban Board, Comments, Health Check |
 
           ### Application Insights — Errors During Test Window
 
@@ -467,5 +445,5 @@ jobs:
           ${{ steps.ai_query.outputs.failed_reqs }}
           \`\`\`
 
-          > **Note**: Review the full results in the uploaded \`performance-results-cloud-${{ matrix.scenario.name }}\` artifact.
+          > **Note**: Review the full results in the uploaded \`performance-results-cloud-locust\` artifact.
           EOF

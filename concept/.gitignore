@@ -12,3 +12,10 @@ node_modules/
 
 # Docker
 docker-compose.override.yml
+
+# Python
+__pycache__/
+*.pyc
+
+# Performance test results (generated)
+tests/performance/results/
