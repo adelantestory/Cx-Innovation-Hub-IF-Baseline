@@ -7,11 +7,16 @@ Threshold: GET p95 < 500 ms.
 
 from locust import task
 
-from .base import TaskifyBaseUser
+try:
+    from .base import TaskifyBaseUser
+except ImportError:
+    from base import TaskifyBaseUser
 
 
 class HealthCheckUser(TaskifyBaseUser):
     """User that continuously hits the health endpoint."""
+
+    weight = 1
 
     @task
     def health_check(self):

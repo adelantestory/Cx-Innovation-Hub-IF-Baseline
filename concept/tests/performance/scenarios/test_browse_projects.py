@@ -9,11 +9,16 @@ import random
 
 from locust import task
 
-from .base import TaskifyBaseUser
+try:
+    from .base import TaskifyBaseUser
+except ImportError:
+    from base import TaskifyBaseUser
 
 
 class BrowseProjectsUser(TaskifyBaseUser):
     """User that repeatedly browses and inspects projects."""
+
+    weight = 3
 
     @task
     def browse_projects(self):

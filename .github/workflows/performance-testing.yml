@@ -3,7 +3,15 @@
 # =============================================================================
 # Runs Locust performance tests against a local Docker Compose stack and,
 # optionally, against deployed Azure infrastructure via Azure Load Testing.
-# Both local and cloud tests use the same Locust test plan (locustfile.py).
+#
+# Scenarios are auto-discovered from concept/tests/performance/scenarios/test_*.py
+# — add a new file and it automatically runs in the pipeline.
+#
+# Pipeline structure:
+#   1. discover-scenarios  — scans scenarios/ folder, outputs dynamic JSON matrix
+#   2. local-verification  — runs ALL scenarios combined via locustfile.py
+#   3. local-scenario-tests — matrix: each scenario runs individually in parallel
+#   4. cloud-load-test      — matrix: each scenario as a separate Azure Load Test
 #
 # Authentication (cloud tests only): OIDC federated credentials (no stored secrets).
 #   Required GitHub environment secrets:
@@ -66,10 +74,57 @@ concurrency:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # local-verification: Run Locust against local Docker Compose stack
+  # discover-scenarios: Auto-detect test_*.py files for matrix jobs
+  # ---------------------------------------------------------------------------
+  discover-scenarios:
+    name: Discover Scenarios
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.scan.outputs.matrix }}
+      count: ${{ steps.scan.outputs.count }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scan for scenario files
+        id: scan
+        run: |
+          SCENARIOS_DIR="concept/tests/performance/scenarios"
+          MATRIX_JSON="["
+          FIRST=true
+          COUNT=0
+
+          for FILE in ${SCENARIOS_DIR}/test_*.py; do
+            [ -f "$FILE" ] || continue
+            COUNT=$((COUNT + 1))
+
+            # Derive name and description from filename
+            BASENAME=$(basename "$FILE" .py)                        # test_browse_projects
+            SCENARIO_NAME="${BASENAME#test_}"                       # browse_projects
+            DISPLAY_NAME=$(echo "$SCENARIO_NAME" | sed 's/_/ /g; s/\b\(.\)/\u\1/g')  # Browse Projects
+
+            if [ "$FIRST" = true ]; then
+              FIRST=false
+            else
+              MATRIX_JSON+=","
+            fi
+            MATRIX_JSON+="{\"name\":\"${SCENARIO_NAME}\",\"file\":\"${FILE}\",\"description\":\"${DISPLAY_NAME}\"}"
+          done
+          MATRIX_JSON+="]"
+
+          echo "Discovered ${COUNT} scenario(s):"
+          echo "$MATRIX_JSON" | jq .
+
+          echo "matrix=${MATRIX_JSON}" >> "$GITHUB_OUTPUT"
+          echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+
+  # ---------------------------------------------------------------------------
+  # local-verification: Run ALL scenarios combined via locustfile.py
   # ---------------------------------------------------------------------------
   local-verification:
     name: Local Performance Verification
+    needs: discover-scenarios
     runs-on: ubuntu-latest
 
     steps:
@@ -114,7 +169,7 @@ jobs:
       - name: Create results directory
         run: mkdir -p concept/tests/performance/results
 
-      - name: Run Locust performance tests
+      - name: Run Locust — all scenarios combined
         run: |
           cd concept/tests/performance
           locust -f locustfile.py \
@@ -130,7 +185,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: performance-results-local
+          name: performance-results-local-combined
           path: concept/tests/performance/results/
           retention-days: 30
 
@@ -145,45 +200,29 @@ jobs:
             exit 1
           fi
 
-          echo "## Performance Threshold Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Performance Threshold Results — Combined" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Method | Endpoint | p95 (ms) | Threshold (ms) | Status |" >> "$GITHUB_STEP_SUMMARY"
           echo "|--------|----------|----------|----------------|--------|" >> "$GITHUB_STEP_SUMMARY"
 
-          # Process each row (skip header and Aggregated row)
           tail -n +2 "$STATS_FILE" | while IFS=',' read -r TYPE NAME REQ_COUNT FAIL_COUNT MEDIAN AVG MIN MAX AVG_SIZE RPS FAIL_PER_SEC P50 P66 P75 P80 P90 P95 P98 P99 P999 P9999 P100; do
-            # Skip the Aggregated row
-            if echo "$NAME" | grep -qi "aggregated"; then
-              continue
-            fi
+            if echo "$NAME" | grep -qi "aggregated"; then continue; fi
 
-            # Clean quotes from fields
             TYPE=$(echo "$TYPE" | tr -d '"')
             NAME=$(echo "$NAME" | tr -d '"')
             P95_VAL=$(echo "$P95" | tr -d '"' | tr -d ' ')
 
-            # Skip empty lines
-            if [ -z "$TYPE" ] || [ -z "$P95_VAL" ]; then
-              continue
-            fi
+            if [ -z "$TYPE" ] || [ -z "$P95_VAL" ]; then continue; fi
 
-            # Determine threshold based on method
             case "$TYPE" in
-              GET)
-                THRESHOLD=500
-                ;;
-              POST|PATCH)
-                THRESHOLD=1000
-                ;;
-              *)
-                THRESHOLD=1000
-                ;;
+              GET)       THRESHOLD=500  ;;
+              POST|PATCH) THRESHOLD=1000 ;;
+              *)         THRESHOLD=1000 ;;
             esac
 
-            # Compare p95 against threshold
             if [ "$(echo "$P95_VAL > $THRESHOLD" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
               STATUS="❌ FAIL"
-              echo "::warning file=concept/tests/performance/locustfile.py::${TYPE} ${NAME} p95=${P95_VAL}ms exceeds threshold ${THRESHOLD}ms"
+              echo "::warning::${TYPE} ${NAME} p95=${P95_VAL}ms exceeds threshold ${THRESHOLD}ms"
               FAILED=1
             else
               STATUS="✅ PASS"
@@ -192,7 +231,6 @@ jobs:
             echo "| ${TYPE} | ${NAME} | ${P95_VAL} | ${THRESHOLD} | ${STATUS} |" >> "$GITHUB_STEP_SUMMARY"
           done
 
-          # Check overall error rate from the Aggregated row
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### Error Rate" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -234,13 +272,116 @@ jobs:
           echo "Docker Compose services stopped and volumes removed"
 
   # ---------------------------------------------------------------------------
-  # cloud-load-test: Run Locust via Azure Load Testing against deployed infra
+  # local-scenario-tests: Run each scenario individually (matrix, parallel)
+  # ---------------------------------------------------------------------------
+  local-scenario-tests:
+    name: "Local — ${{ matrix.scenario.description }}"
+    needs: [discover-scenarios, local-verification]
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ${{ fromJson(needs.discover-scenarios.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: concept/tests/performance/requirements.txt
+
+      - name: Install Locust and dependencies
+        run: pip install -r concept/tests/performance/requirements.txt
+
+      - name: Start Docker Compose services
+        run: |
+          cd concept
+          docker compose up -d --wait
+
+      - name: Wait for API health
+        run: |
+          MAX_WAIT=30; INTERVAL=2; ELAPSED=0
+          until curl -sf http://localhost:3000/api/health > /dev/null 2>&1; do
+            [ "$ELAPSED" -ge "$MAX_WAIT" ] && echo "::error::API timeout" && exit 1
+            sleep "$INTERVAL"; ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+      - name: Run Locust — ${{ matrix.scenario.description }}
+        run: |
+          cd concept/tests/performance
+          mkdir -p results
+
+          # Run individual scenario using the module path so relative imports work
+          python -m locust \
+            -f ${{ matrix.scenario.file }} \
+            --host=http://localhost:3000 \
+            --headless \
+            -u 20 \
+            -r 5 \
+            -t 1m \
+            --csv=results/${{ matrix.scenario.name }} \
+            --html=results/${{ matrix.scenario.name }}_report.html
+        env:
+          PYTHONPATH: concept/tests/performance
+
+      - name: Upload results — ${{ matrix.scenario.description }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results-local-${{ matrix.scenario.name }}
+          path: concept/tests/performance/results/
+          retention-days: 30
+
+      - name: Check thresholds — ${{ matrix.scenario.description }}
+        if: success()
+        run: |
+          STATS_FILE="concept/tests/performance/results/${{ matrix.scenario.name }}_stats.csv"
+          FAILED=0
+          [ ! -f "$STATS_FILE" ] && echo "::error::Stats CSV not found" && exit 1
+
+          echo "## ${{ matrix.scenario.description }} — Threshold Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Method | Endpoint | p95 (ms) | Threshold (ms) | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|----------|----------|----------------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+          tail -n +2 "$STATS_FILE" | while IFS=',' read -r TYPE NAME REQ_COUNT FAIL_COUNT MEDIAN AVG MIN MAX AVG_SIZE RPS FAIL_PER_SEC P50 P66 P75 P80 P90 P95 P98 P99 P999 P9999 P100; do
+            if echo "$NAME" | grep -qi "aggregated"; then continue; fi
+            TYPE=$(echo "$TYPE" | tr -d '"'); NAME=$(echo "$NAME" | tr -d '"')
+            P95_VAL=$(echo "$P95" | tr -d '"' | tr -d ' ')
+            [ -z "$TYPE" ] || [ -z "$P95_VAL" ] && continue
+            case "$TYPE" in GET) THRESHOLD=500;; POST|PATCH) THRESHOLD=1000;; *) THRESHOLD=1000;; esac
+            if [ "$(echo "$P95_VAL > $THRESHOLD" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+              echo "| ${TYPE} | ${NAME} | ${P95_VAL} | ${THRESHOLD} | ❌ FAIL |" >> "$GITHUB_STEP_SUMMARY"
+              FAILED=1
+            else
+              echo "| ${TYPE} | ${NAME} | ${P95_VAL} | ${THRESHOLD} | ✅ PASS |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+          [ "$FAILED" = "1" ] && echo "::error::${{ matrix.scenario.description }} thresholds exceeded" && exit 1
+
+      - name: Tear down Docker Compose
+        if: always()
+        run: cd concept && docker compose down -v
+
+  # ---------------------------------------------------------------------------
+  # cloud-load-test: Run each scenario as a separate Azure Load Test (matrix)
   # ---------------------------------------------------------------------------
   cloud-load-test:
-    name: "Azure Load Test — Locust"
-    needs: local-verification
+    name: "Azure Load Test — ${{ matrix.scenario.description }}"
+    needs: [discover-scenarios, local-scenario-tests]
     if: github.event.inputs.run_cloud_tests == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/demo/performance-testing')
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ${{ fromJson(needs.discover-scenarios.outputs.matrix) }}
 
     steps:
       - name: Checkout repository
@@ -254,8 +395,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PERF }}
 
       - name: Install Azure Load Testing CLI extension
-        run: |
-          az extension add --name load --yes
+        run: az extension add --name load --yes
 
       - name: Resolve resource names and API URL
         id: vars
@@ -272,7 +412,6 @@ jobs:
           echo "load_test_name=${LT_NAME}"   >> "$GITHUB_OUTPUT"
           echo "app_insights_name=${AI_NAME}" >> "$GITHUB_OUTPUT"
 
-          # Resolve API URL: explicit input > auto-detect from Container App
           TARGET_URL="${{ inputs.target_url }}"
           if [ -z "$TARGET_URL" ]; then
             echo "Auto-detecting API URL from Container App ca-${UID_VAL}-taskify-api..."
@@ -292,26 +431,41 @@ jobs:
           echo "api_url=${TARGET_URL}" >> "$GITHUB_OUTPUT"
           echo "Resolved API URL: ${TARGET_URL}"
 
-      - name: Create and run load test
+      - name: Create and run load test — ${{ matrix.scenario.description }}
         id: load_test
         run: |
-          TEST_ID="perf-locust-$(date +%Y%m%d-%H%M%S)"
+          TEST_ID="perf-${{ matrix.scenario.name }}-$(date +%Y%m%d-%H%M%S)"
           echo "test_id=${TEST_ID}" >> "$GITHUB_OUTPUT"
           echo "test_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
           LT_NAME="${{ steps.vars.outputs.load_test_name }}"
           RG="${{ steps.vars.outputs.resource_group }}"
           API_URL="${{ steps.vars.outputs.api_url }}"
+          SCENARIOS_DIR="concept/tests/performance/scenarios"
 
-          # Create the test with Locust test plan (auto-detected from .py extension)
+          # Create test with the scenario file as test plan
           az load test create \
             --name "$LT_NAME" \
             --resource-group "$RG" \
             --test-id "${TEST_ID}" \
-            --test-plan "concept/tests/performance/locustfile.py" \
+            --test-plan "${{ matrix.scenario.file }}" \
             --engine-instances 1 \
             --env TASKIFY_BASE_URL="${API_URL}" \
             --output none
+
+          # Upload supporting files (base class + __init__.py) for relative imports
+          for SUPPORT_FILE in "${SCENARIOS_DIR}/base.py" "${SCENARIOS_DIR}/__init__.py"; do
+            if [ -f "$SUPPORT_FILE" ]; then
+              az load test file upload \
+                --name "$LT_NAME" \
+                --resource-group "$RG" \
+                --test-id "${TEST_ID}" \
+                --path "$SUPPORT_FILE" \
+                --file-type ADDITIONAL_ARTIFACTS \
+                --output none
+              echo "Uploaded supporting file: ${SUPPORT_FILE}"
+            fi
+          done
 
           # Start the test run
           az load test-run create \
@@ -325,7 +479,7 @@ jobs:
 
       - name: Wait for test completion
         run: |
-          echo "Waiting for Locust load test to complete..."
+          echo "Waiting for '${{ matrix.scenario.description }}' load test to complete..."
           MAX_WAIT=600
           INTERVAL=15
           ELAPSED=0
@@ -352,7 +506,7 @@ jobs:
           fi
 
           if [ "$STATUS" = "FAILED" ]; then
-            echo "::error::Load test failed"
+            echo "::error::Load test '${{ matrix.scenario.description }}' failed"
             exit 1
           fi
 
@@ -367,11 +521,11 @@ jobs:
             --force \
             --output none || echo "::warning::Could not download all result files"
 
-      - name: Upload cloud test results
+      - name: Upload cloud test results — ${{ matrix.scenario.description }}
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: performance-results-cloud-locust
+          name: performance-results-cloud-${{ matrix.scenario.name }}
           path: cloud-results/
           retention-days: 30
 
@@ -383,7 +537,6 @@ jobs:
           START="${{ steps.load_test.outputs.test_start }}"
           END="${{ steps.load_test.outputs.test_end }}"
 
-          # Query for exceptions during the test window
           ERRORS=$(az monitor app-insights query \
             --app "$AI_NAME" \
             --resource-group "$RG" \
@@ -396,7 +549,6 @@ jobs:
             " \
             --output json 2>/dev/null || echo '{"tables":[{"rows":[]}]}')
 
-          # Query for failed requests during the test window
           FAILED_REQS=$(az monitor app-insights query \
             --app "$AI_NAME" \
             --resource-group "$RG" \
@@ -420,30 +572,16 @@ jobs:
       - name: Post cloud test summary
         if: always()
         run: |
-          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
-          ## Azure Load Test Results — Locust (All Scenarios)
+          cat >> "$GITHUB_STEP_SUMMARY" <<'SUMMARY_EOF'
+          ## Azure Load Test — ${{ matrix.scenario.description }}
 
           | Property | Value |
           |----------|-------|
           | Test ID | ${{ steps.load_test.outputs.test_id }} |
+          | Scenario | ${{ matrix.scenario.description }} |
           | API URL | ${{ steps.vars.outputs.api_url }} |
           | Environment | ${{ steps.vars.outputs.environment }} |
           | Resource Group | ${{ steps.vars.outputs.resource_group }} |
           | Load Test Resource | ${{ steps.vars.outputs.load_test_name }} |
           | Framework | Locust |
-          | Scenarios | Browse Projects, Kanban Board, Comments, Health Check |
-
-          ### Application Insights — Errors During Test Window
-
-          \`\`\`json
-          ${{ steps.ai_query.outputs.errors }}
-          \`\`\`
-
-          ### Application Insights — Request Performance
-
-          \`\`\`json
-          ${{ steps.ai_query.outputs.failed_reqs }}
-          \`\`\`
-
-          > **Note**: Review the full results in the uploaded \`performance-results-cloud-locust\` artifact.
-          EOF
+          SUMMARY_EOF

@@ -9,11 +9,16 @@ import random
 
 from locust import task
 
-from .base import TaskifyBaseUser, STATUS_CYCLE
+try:
+    from .base import TaskifyBaseUser, STATUS_CYCLE
+except ImportError:
+    from base import TaskifyBaseUser, STATUS_CYCLE
 
 
 class KanbanBoardUser(TaskifyBaseUser):
     """User that interacts with the Kanban board."""
+
+    weight = 4
 
     @task
     def kanban_board_flow(self):

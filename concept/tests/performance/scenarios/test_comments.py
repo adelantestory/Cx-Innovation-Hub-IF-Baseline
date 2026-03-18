@@ -9,7 +9,10 @@ import random
 
 from locust import task
 
-from .base import TaskifyBaseUser
+try:
+    from .base import TaskifyBaseUser
+except ImportError:
+    from base import TaskifyBaseUser
 
 COMMENT_TEXTS = [
     "Looks good, moving forward.",
@@ -25,6 +28,8 @@ COMMENT_TEXTS = [
 
 class CommentActivityUser(TaskifyBaseUser):
     """User that reads and posts comments."""
+
+    weight = 2
 
     @task
     def comment_activity(self):
