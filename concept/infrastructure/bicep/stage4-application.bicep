@@ -39,6 +39,9 @@ param managedIdentityClientId string
 @description('Key Vault URI for secret retrieval')
 param keyVaultUri string
 
+@description('Application Insights connection string for telemetry')
+param appInsightsConnectionString string = ''
+
 // ---------------------------------------------------------------------------
 // Variables
 // ---------------------------------------------------------------------------
@@ -76,6 +79,7 @@ module containerAppApi 'modules/container-app.bicep' = {
       { name: 'PGDATABASE', value: 'taskify' }
       { name: 'PGPORT', value: '5432' }
       { name: 'PGSSLMODE', value: 'require' }
+      { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsightsConnectionString }
     ]
   }
 }

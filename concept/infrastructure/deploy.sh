@@ -420,6 +420,17 @@ deploy_stage4() {
   local cr_name
   cr_name=$(jq -r '.stages.stage3.resources.containerRegistry.name' "$CONFIG_FILE")
 
+  # Read App Insights connection string if Stage 5 has been deployed
+  local appi_connection_string
+  appi_connection_string=$(jq -r '.stages.stage5.resources.appInsights.connectionString // ""' "$CONFIG_FILE" 2>/dev/null || echo "")
+  if [[ -n "$appi_connection_string" && "$appi_connection_string" != "null" ]]; then
+    log_info "Application Insights connection string found — will configure telemetry."
+  else
+    appi_connection_string=""
+    log_warn "Application Insights not yet deployed (Stage 5). Containers will run without telemetry."
+    log_warn "Re-deploy Stage 4 after Stage 5 to enable Application Insights."
+  fi
+
   if [[ -z "$cae_id" || "$cae_id" == "null" ]]; then
     log_error "Container Apps Environment not found. Deploy Stage 3 first."
     exit 1
@@ -457,6 +468,7 @@ deploy_stage4() {
                  managedIdentityId="$mi_id" \
                  managedIdentityClientId="$mi_client_id" \
                  keyVaultUri="$kv_uri" \
+                 appInsightsConnectionString="$appi_connection_string" \
     --query "properties.outputs" \
     --output json)
 

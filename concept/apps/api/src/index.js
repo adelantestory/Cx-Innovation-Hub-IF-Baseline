@@ -4,17 +4,37 @@
 // Express.js REST API server for the Taskify Kanban board application.
 //
 // Startup sequence:
-//   1. Initialize database connection (Key Vault or env vars)
-//   2. Register middleware (CORS, JSON parsing, error handling)
-//   3. Mount route handlers
-//   4. Start HTTP server
+//   1. Initialize Application Insights (if connection string is configured)
+//   2. Initialize database connection (Key Vault or env vars)
+//   3. Register middleware (CORS, JSON parsing, error handling)
+//   4. Mount route handlers
+//   5. Start HTTP server
 //
 // Environment variables:
-//   PORT                 - HTTP listen port (default: 3000)
-//   AZURE_KEY_VAULT_URL  - Key Vault URI (empty = local mode)
-//   CORS_ORIGIN          - Allowed CORS origin (default: *)
+//   PORT                                  - HTTP listen port (default: 3000)
+//   AZURE_KEY_VAULT_URL                   - Key Vault URI (empty = local mode)
+//   CORS_ORIGIN                           - Allowed CORS origin (default: *)
+//   APPLICATIONINSIGHTS_CONNECTION_STRING  - App Insights connection string
 //   See CONFIGURATION.md for full list.
 // =============================================================================
+
+// ---------------------------------------------------------------------------
+// Application Insights — must be initialized before other imports
+// ---------------------------------------------------------------------------
+const aiConnectionString = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING;
+if (aiConnectionString) {
+  const appInsights = require("applicationinsights");
+  appInsights
+    .setup(aiConnectionString)
+    .setAutoCollectRequests(true)
+    .setAutoCollectPerformance(true, true)
+    .setAutoCollectExceptions(true)
+    .setAutoCollectDependencies(true)
+    .setAutoCollectConsole(true, true)
+    .setDistributedTracingMode(appInsights.DistributedTracingModes.AI_AND_W3C)
+    .start();
+  console.log("Application Insights initialized");
+}
 
 const express = require("express");
 const cors = require("cors");

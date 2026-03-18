@@ -59,6 +59,36 @@ on:
         required: false
         default: false
         type: boolean
+      combined_users:
+        description: 'Virtual users for combined verification run'
+        required: false
+        default: '50'
+        type: string
+      combined_duration:
+        description: 'Duration for combined verification run (e.g., 2m, 5m, 10m)'
+        required: false
+        default: '2m'
+        type: string
+      combined_ramp_rate:
+        description: 'User spawn rate per second for combined run'
+        required: false
+        default: '10'
+        type: string
+      scenario_users:
+        description: 'Virtual users per individual scenario test'
+        required: false
+        default: '20'
+        type: string
+      scenario_duration:
+        description: 'Duration per individual scenario test (e.g., 1m, 5m, 10m)'
+        required: false
+        default: '1m'
+        type: string
+      scenario_ramp_rate:
+        description: 'User spawn rate per second for scenario tests'
+        required: false
+        default: '5'
+        type: string
   push:
     paths:
       - 'concept/tests/performance/**'
@@ -170,14 +200,19 @@ jobs:
         run: mkdir -p concept/tests/performance/results
 
       - name: Run Locust — all scenarios combined
+        env:
+          LOCUST_USERS: ${{ inputs.combined_users || '50' }}
+          LOCUST_DURATION: ${{ inputs.combined_duration || '2m' }}
+          LOCUST_RAMP_RATE: ${{ inputs.combined_ramp_rate || '10' }}
         run: |
           cd concept/tests/performance
+          echo "Running with ${LOCUST_USERS} users, ramp ${LOCUST_RAMP_RATE}/s, duration ${LOCUST_DURATION}"
           locust -f locustfile.py \
             --host=http://localhost:3000 \
             --headless \
-            -u 50 \
-            -r 10 \
-            -t 2m \
+            -u "${LOCUST_USERS}" \
+            -r "${LOCUST_RAMP_RATE}" \
+            -t "${LOCUST_DURATION}" \
             --csv=results/taskify \
             --html=results/report.html
 
@@ -254,8 +289,8 @@ jobs:
 
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Users**: 50 (ramp rate: 10/s)" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Duration**: 2 minutes" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Users**: ${{ inputs.combined_users || '50' }} (ramp rate: ${{ inputs.combined_ramp_rate || '10' }}/s)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Duration**: ${{ inputs.combined_duration || '2m' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Total Requests**: ${TOTAL_REQS:-N/A}" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Failed Requests**: ${TOTAL_FAILS:-N/A}" >> "$GITHUB_STEP_SUMMARY"
 
@@ -312,6 +347,10 @@ jobs:
           done
 
       - name: Run Locust — ${{ matrix.scenario.description }}
+        env:
+          LOCUST_USERS: ${{ inputs.scenario_users || '20' }}
+          LOCUST_DURATION: ${{ inputs.scenario_duration || '1m' }}
+          LOCUST_RAMP_RATE: ${{ inputs.scenario_ramp_rate || '5' }}
         run: |
           cd concept/tests/performance
           mkdir -p results
@@ -319,14 +358,16 @@ jobs:
           # Strip the leading path since we already cd'd into the perf directory
           SCENARIO_FILE=$(echo "${{ matrix.scenario.file }}" | sed 's|^concept/tests/performance/||')
 
+          echo "Running ${{ matrix.scenario.description }} with ${LOCUST_USERS} users, ramp ${LOCUST_RAMP_RATE}/s, duration ${LOCUST_DURATION}"
+
           # Run individual scenario using the module path so relative imports work
           python -m locust \
             -f "${SCENARIO_FILE}" \
             --host=http://localhost:3000 \
             --headless \
-            -u 20 \
-            -r 5 \
-            -t 1m \
+            -u "${LOCUST_USERS}" \
+            -r "${LOCUST_RAMP_RATE}" \
+            -t "${LOCUST_DURATION}" \
             --csv=results/${{ matrix.scenario.name }} \
             --html=results/${{ matrix.scenario.name }}_report.html
 

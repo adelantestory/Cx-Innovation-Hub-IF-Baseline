@@ -84,6 +84,22 @@ module stage3 'stage3-containers.bicep' = {
 }
 
 // ---------------------------------------------------------------------------
+// Stage 5: Performance (deployed before Stage 4 so App Insights connection
+// string is available for container environment variables)
+// ---------------------------------------------------------------------------
+
+module stage5 'stage5-performance.bicep' = {
+  name: 'stage5-${uid}'
+  params: {
+    uid: uid
+    location: location
+    environment: environment
+    logAnalyticsWorkspaceId: stage1.outputs.logAnalyticsId
+    loadTestingLocation: loadTestingLocation
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Stage 4: Application (conditional — only when images are available)
 // ---------------------------------------------------------------------------
 
@@ -100,21 +116,7 @@ module stage4 'stage4-application.bicep' = if (deployApps) {
     managedIdentityId: stage1.outputs.managedIdentityId
     managedIdentityClientId: stage1.outputs.managedIdentityClientId
     keyVaultUri: stage1.outputs.keyVaultUri
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Stage 5: Performance
-// ---------------------------------------------------------------------------
-
-module stage5 'stage5-performance.bicep' = {
-  name: 'stage5-${uid}'
-  params: {
-    uid: uid
-    location: location
-    environment: environment
-    logAnalyticsWorkspaceId: stage1.outputs.logAnalyticsId
-    loadTestingLocation: loadTestingLocation
+    appInsightsConnectionString: stage5.outputs.appInsightsConnectionString
   }
 }
 
