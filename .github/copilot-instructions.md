@@ -18,7 +18,6 @@ When working in this repository, prefer these sources of truth:
 - `README.md` for top-level repository orientation
 - `.github/copilot-instructions.md` for Copilot-specific repo guidance
 - `.github/agents/*.md` for the custom testing agents currently defined in the repo
-- `concept/.specify/memory/constitution.md` for project principles that apply to the sample solution
 - `concept/docs/*.md` for architecture, configuration, deployment, and development guidance
 
 Do **not** assume a `.claude/` directory, `.claude/agents/`, `.claude/skills/`, `.claude/templates/`, or `.claude/context/stages/` exists in this repository unless those files are added later.

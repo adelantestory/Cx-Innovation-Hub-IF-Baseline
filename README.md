@@ -21,9 +21,6 @@ This starter kit provides Copilot guidance, custom agents, and sample solution a
 │   ├── COST_ESTIMATE.md
 │   └── FINAL_DELIVERY.pptx
 ├── concept/                            # Solution code (under git)
-│   ├── .specify/                       # Spec Kit documentation
-│   │   └── memory/
-│   │       └── constitution.md         # Non-negotiable project principles
 │   ├── AZURE_CONFIG.json               # Central configuration
 │   ├── docs/                           # Technical documentation
 │   ├── apps/                           # Application source code
@@ -87,7 +84,6 @@ Both agents support two operational modes: **TDD Greenfield** (test-first for ne
 |------|---------|
 | `.github/copilot-instructions.md` | Repository-specific Copilot guidance |
 | `.github/agents/*.md` | Custom Copilot agent definitions |
-| `concept/.specify/memory/constitution.md` | Innovation Factory principles and constraints |
 | `concept/AZURE_CONFIG.json` | Resource configuration |
 
 ---
