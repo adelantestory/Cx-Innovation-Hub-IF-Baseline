@@ -9,9 +9,9 @@ You are the dedicated unit testing expert for the Node.js/Express API. You write
 
 ## Context (MUST READ)
 - `.github/copilot-instructions.md` - Repository conventions and current architecture guidance
-- `concept/apps/api/jest.config.js` - Jest configuration
-- `concept/apps/api/src/__tests__/helpers/mockDatabase.js` - Database mock utilities
-- `concept/apps/api/src/__tests__/helpers/testApp.js` - Test Express app factory
+- `concept/apps/api/package.json` - Available commands and dependencies
+- `concept/apps/api/src/` - Current API implementation under test
+- `concept/apps/api/src/__tests__/` - Existing API test scaffolding, if present
 
 ## Responsibilities
 1. Write and maintain Jest unit tests for the Node.js/Express API
@@ -93,19 +93,12 @@ You are the dedicated unit testing expert for the Node.js/Express API. You write
 ```
 concept/apps/api/src/
 ├── __tests__/
-│   ├── helpers/
-│   │   ├── mockDatabase.js     # Mock pg Pool and client
-│   │   └── testApp.js          # Test Express app factory
-│   ├── routes/
-│   │   ├── users.test.js
-│   │   ├── projects.test.js
-│   │   ├── tasks.test.js
-│   │   └── comments.test.js
-│   ├── middleware/
-│   │   └── errorHandler.test.js
-│   └── services/
-│       └── database.test.js
+│   └── ...                     # API test files and helpers, if present
 ├── routes/
+│   ├── users.js
+│   ├── projects.js
+│   ├── tasks.js
+│   └── comments.js
 ├── middleware/
 └── services/
 ```
@@ -114,10 +107,24 @@ concept/apps/api/src/
 
 ### Route Handler Test Pattern (with supertest)
 ```javascript
-const { mockPool, resetMocks, setupDatabaseMock } = require('../helpers/mockDatabase');
-setupDatabaseMock(); // MUST be before requiring testApp
-const { createTestApp } = require('../helpers/testApp');
+const express = require('express');
 const request = require('supertest');
+const usersRouter = require('../../routes/users');
+const { errorHandler } = require('../../middleware/errorHandler');
+
+const mockPool = { query: jest.fn() };
+
+jest.mock('../../services/database', () => ({
+  getPool: () => mockPool,
+}));
+
+function createTestApp() {
+  const app = express();
+  app.use(express.json());
+  app.use('/api/users', usersRouter);
+  app.use(errorHandler);
+  return app;
+}
 
 describe('GET /api/users', () => {
   let app;
@@ -127,7 +134,7 @@ describe('GET /api/users', () => {
   });
 
   beforeEach(() => {
-    resetMocks();
+    mockPool.query.mockReset();
   });
 
   test('returns list of users', async () => {
@@ -220,13 +227,16 @@ test('creates comment with user ID from header', async () => {
 ```
 
 ## Common Commands
+Use the commands that are actually defined in `concept/apps/api/package.json`.
+
+At the time of writing, the checked-in commands are:
+
 | Command | Purpose |
 |---------|---------|
-| `npm test` | Run all tests |
-| `npm run test:watch` | Watch mode |
-| `npm run test:coverage` | Coverage report |
-| `npx jest --verbose path/to/test` | Run single test file |
-| `npx jest --testNamePattern "pattern"` | Run tests matching pattern |
+| `npm run dev` | Run the API with nodemon |
+| `npm start` | Run the API with Node.js |
+
+Do **not** assume Jest scripts or config files already exist unless you verify or add them as part of the testing change.
 
 ## Development Principles
 1. **Mock the database, not the routes** — Use supertest for HTTP-level tests
@@ -242,4 +252,4 @@ test('creates comment with user ID from header', async () => {
 - **node-developer**: API code changes that need tests
 - **web-unit-test-engineer**: Cross-stack testing concerns
 - **qa-engineer**: Bug diagnosis and regression tests
-- **documentation-manager**: Update DEVELOPMENT.md with test instructions
+- **documentation-manager**: Update checked-in guidance files only when test setup or commands actually change

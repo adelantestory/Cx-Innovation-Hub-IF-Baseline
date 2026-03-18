@@ -14,24 +14,14 @@ This starter kit provides Copilot guidance, custom agents, and sample solution a
 ```
 .
 ├── artifacts/                          # Customer-provided discovery materials
-├── deliverables/                       # Client-facing deliverables
-│   ├── SCOPE_OF_WORK.md
-│   ├── AS_BUILT.md
-│   ├── POST_MORTEM.md
-│   ├── COST_ESTIMATE.md
-│   └── FINAL_DELIVERY.pptx
 ├── concept/                            # Solution code (under git)
-│   ├── .specify/                       # Spec Kit documentation
-│   │   └── memory/
-│   │       └── constitution.md         # Non-negotiable project principles
-│   ├── AZURE_CONFIG.json               # Central configuration
-│   ├── docs/                           # Technical documentation
 │   ├── apps/                           # Application source code
-│   ├── infrastructure/                 # Terraform/Bicep modules
-│   └── sql/                            # Database scripts
+│   │   ├── api/                        # Node.js + Express backend
+│   │   └── web/                        # React + Vite frontend
+│   └── docker-compose.yml              # Local multi-service workflow
 └── .github/
-    ├── copilot-instructions.md         # Repository-specific Copilot guidance
     ├── agents/                         # Custom Copilot agent definitions
+    ├── copilot-instructions.md         # Repository-specific Copilot guidance
     └── workflows/                      # CI/CD workflows
 ```
 
@@ -56,64 +46,36 @@ This starter kit provides Copilot guidance, custom agents, and sample solution a
 
 ## Templates
 
-Use the checked-in docs under `concept/docs/` and `deliverables/` as the current repository guidance surface. Do not assume a `.claude/templates/` directory exists unless it is added later.
+Use the checked-in guidance under `.github/` plus the application assets under `concept/` as the current repository guidance surface. Do not assume a `.claude/templates/` directory exists unless it is added later.
 
 | Document | Purpose |
 |----------|---------|
-| `SCOPE_OF_WORK.md` | Engagement scope and success criteria |
-| `AS_BUILT.md` | Final solution state and architecture |
-| `POST_MORTEM.md` | Gap analysis and learnings |
-| `COST_ESTIMATE.md` | Azure cost projections |
-| `ARCHITECTURE.md` | Solution architecture |
-| `CONFIGURATION.md` | Service configuration reference |
-| `DEPLOYMENT.md` | Infrastructure deployment guide |
-| `DEVELOPMENT.md` | Developer setup guide |
-| `AZURE_CONFIG.json` | Central configuration schema |
+| `README.md` | Repository orientation |
+| `.github/copilot-instructions.md` | Repository-specific Copilot guidance |
+| `.github/agents/*.agent.md` | Custom Copilot agent definitions |
+| `concept/docker-compose.yml` | Local multi-service development workflow |
+| `concept/apps/api/package.json` | Backend commands and dependencies |
+| `concept/apps/web/package.json` | Frontend commands and dependencies |
 
 ## Agents
 
-### Support Roles (7)
+### Support Roles
 | Agent | Purpose |
 |-------|---------|
-| `project-manager` | Scope, coordination, deliverables |
-| `business-analyst` | Discovery, requirements, gaps |
-| `cloud-architect` | Architecture, AZURE_CONFIG.json |
-| `subscription-expert` | Subscription config, resource providers |
-| `spec-kit-expert` | GitHub Spec Kit documentation |
-| `document-writer` | Technical documentation |
-| `cost-analyst` | Cost estimation |
+| `api-unit-test-engineer` | Node.js/Express API unit testing guidance |
+| `web-unit-test-engineer` | React frontend unit testing guidance |
 
-### Service Agents (64)
-All service agents are trained on the limitations of the MCAPS environment and will seek to deploy infrastructure in alignment with internal policies.
-
-Each of 16 Azure services has 4 agents: `-architect`, `-developer`, `-terraform`, `-bicep`
-
-**Current Services:**
-* API Management
-* Application Insights
-* Azure Functions
-* Azure OpenAI
-* Azure SQL
-* Blob Storage
-* Container Apps
-* Container Apps Environment
-* Container Registry
-* Cosmos DB
-* Key Vault
-* Log Analytics
-* Redis Cache
-* Service Bus
-* User-Managed Identity
-* Web Apps
+Only the checked-in custom agents should be treated as available unless additional agent files are added later.
 
 ## Critical Files
 
 | File | Purpose | Owner |
 |------|---------|-------|
 | `.github/copilot-instructions.md` | Repository-specific Copilot guidance | — |
-| `.github/agents/*.md` | Custom Copilot agent definitions | — |
-| `concept/.specify/memory/constitution.md` | Technical constraints | — |
-| `concept/AZURE_CONFIG.json` | Resource configuration | `cloud-architect` |
+| `.github/agents/*.agent.md` | Custom Copilot agent definitions | — |
+| `concept/docker-compose.yml` | Local development stack | — |
+| `concept/apps/api/package.json` | Backend commands and dependencies | — |
+| `concept/apps/web/package.json` | Frontend commands and dependencies | — |
 
 ---
 

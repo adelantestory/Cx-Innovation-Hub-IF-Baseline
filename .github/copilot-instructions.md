@@ -17,9 +17,10 @@ When working in this repository, prefer these sources of truth:
 
 - `README.md` for top-level repository orientation
 - `.github/copilot-instructions.md` for Copilot-specific repo guidance
-- `.github/agents/*.md` for the custom testing agents currently defined in the repo
-- `concept/.specify/memory/constitution.md` for project principles that apply to the sample solution
-- `concept/docs/*.md` for architecture, configuration, deployment, and development guidance
+- `.github/agents/*.agent.md` for the custom testing agents currently defined in the repo
+- `concept/docker-compose.yml` for the local multi-service workflow
+- `concept/apps/api/package.json` and `concept/apps/web/package.json` for available commands
+- `concept/apps/api/src/` and `concept/apps/web/src/` for current implementation details
 
 Do **not** assume a `.claude/` directory, `.claude/agents/`, `.claude/skills/`, `.claude/templates/`, or `.claude/context/stages/` exists in this repository unless those files are added later.
 
@@ -27,8 +28,8 @@ Do **not** assume a `.claude/` directory, `.claude/agents/`, `.claude/skills/`, 
 
 The custom agent definitions currently present are:
 
-- `.github/agents/api-unit-test-engineer.md`
-- `.github/agents/web-unit-test-engineer.md`
+- `.github/agents/api-unit-test-engineer.agent.md`
+- `.github/agents/web-unit-test-engineer.agent.md`
 
 There is **no repo-local skills directory** today. Do not reference repo-specific skills unless they are added to the repository.
 
@@ -43,8 +44,7 @@ Taskify is a simple two-tier web application with a PostgreSQL database.
 - **Web**: `concept/apps/web/`
   - React 18 + TypeScript + Vite
   - Tailwind CSS
-- **Database**: `concept/sql/`
-  - PostgreSQL schema and seed scripts
+- **Database**: PostgreSQL used by the application and local Docker Compose stack
 
 Key routes and behaviors:
 
@@ -85,32 +85,19 @@ Alternative local workflows are also supported:
 - API from `concept/apps/api`
   - `npm install`
   - `npm run dev`
-  - `npm test`
+  - `npm start`
 - Web from `concept/apps/web`
   - `npm install`
   - `npm run dev`
   - `npm run build`
-  - `npm test`
-  - `npm run test:e2e`
 
-Use `concept/docs/DEVELOPMENT.md` as the source of truth for local setup details and environment variables.
+Use `concept/docker-compose.yml` plus the app `package.json` files as the source of truth for local setup details, environment variables, and available commands.
 
 ## Infrastructure Reality
 
-The infrastructure implementation currently present in the repo is **Bicep-first**.
+The checked-in implementation in this repo snapshot is focused on the application code under `concept/apps/` plus the local Docker Compose workflow in `concept/docker-compose.yml`.
 
-- Bicep lives under `concept/infrastructure/bicep/`
-- The staged templates are:
-  - `stage1-foundation.bicep`
-  - `stage2-data.bicep`
-  - `stage3-containers.bicep`
-  - `stage4-application.bicep`
-- Reusable modules live under `concept/infrastructure/bicep/modules/`
-- Deployment orchestration currently lives in `concept/infrastructure/deploy.sh`
-
-Do **not** assume a complete Terraform implementation exists unless you verify files under `concept/infrastructure/terraform/`.
-
-Do **not** assume a `concept/infrastructure/bicep/main.bicep` file exists unless you verify it in the repo.
+Do **not** assume Bicep, Terraform, deployment scripts, or additional infrastructure folders exist unless you verify them in the repository first.
 
 ## Azure and Prototype Constraints
 
@@ -140,16 +127,16 @@ Follow the conventions already used by the application:
 - API code uses **CommonJS**, not ESM
 - Web code uses **TypeScript + ESM**
 - Reuse existing project structure and naming before introducing new folders or abstractions
-- Keep SQL scripts in `concept/sql/` numerically ordered
 - Update docs when behavior or setup instructions change
 
 ## Testing Conventions
 
-Use the existing test stacks:
+Use the existing application layout when adding tests:
 
-- API unit tests: Jest in `concept/apps/api/src/__tests__/`
-- Web unit tests: Vitest + React Testing Library in `concept/apps/web/src/**/*.{test,spec}.{ts,tsx}`
-- Web end-to-end tests: Playwright in `concept/apps/web/tests/`
+- API test scaffolding currently lives under `concept/apps/api/src/__tests__/`
+- Web test-related files currently live under `concept/apps/web/src/test/`
+
+Do **not** assume additional test configs, scripts, or end-to-end suites exist unless you verify them first.
 
 When the task is primarily API unit testing, prefer the `api-unit-test-engineer` custom agent.
 
@@ -157,11 +144,13 @@ When the task is primarily frontend unit testing, prefer the `web-unit-test-engi
 
 ## Documentation Expectations
 
-Prefer updating existing docs over inventing new ones. The most relevant docs for this repo are:
+Prefer updating existing guidance files over inventing new ones. The most relevant checked-in guidance files for this repo are:
 
-- `concept/docs/ARCHITECTURE.md`
-- `concept/docs/CONFIGURATION.md`
-- `concept/docs/DEPLOYMENT.md`
-- `concept/docs/DEVELOPMENT.md`
+- `README.md`
+- `.github/copilot-instructions.md`
+- `.github/agents/*.agent.md`
+- `concept/docker-compose.yml`
+- `concept/apps/api/package.json`
+- `concept/apps/web/package.json`
 
 If you update instructions or workflows, make sure they stay aligned with the real repository contents and actual Taskify implementation.
