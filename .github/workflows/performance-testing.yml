@@ -303,13 +303,12 @@ jobs:
           RG="${{ steps.vars.outputs.resource_group }}"
           API_URL="${{ steps.vars.outputs.api_url }}"
 
-          # Create the test with Locust test plan (all 4 scenarios in one file)
+          # Create the test with Locust test plan (auto-detected from .py extension)
           az load test create \
             --name "$LT_NAME" \
             --resource-group "$RG" \
             --test-id "${TEST_ID}" \
             --test-plan "concept/tests/performance/locustfile.py" \
-            --framework "Locust" \
             --engine-instances 1 \
             --env TASKIFY_BASE_URL="${API_URL}" \
             --output none
