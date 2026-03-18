@@ -52,10 +52,9 @@ on:
         default: false
         type: boolean
   push:
-    branches:
-      - 'demo/performance-testing'
     paths:
       - 'concept/tests/performance/**'
+      - '.github/workflows/performance-testing.yml'
 
 permissions:
   id-token: write
