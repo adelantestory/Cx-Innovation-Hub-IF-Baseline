@@ -34,8 +34,12 @@
     "text": "Three sample projects available for selection",
     "source": "Taskify Product Description",
     "category": "Project Management",
-    "coveredBy": [],
-    "suggestion": "Add test: 'project list displays exactly 3 sample projects' — verify project count and names on the project list page"
+    "coveredBy": [
+      { "specFile": "projectList.spec.ts", "testName": "project list displays exactly 3 sample projects" },
+      { "specFile": "projectList.spec.ts", "testName": "each project card shows name and description" },
+      { "specFile": "projectList.spec.ts", "testName": "clicking a project navigates to its Kanban board" }
+    ],
+    "suggestion": null
   },
   {
     "id": "REQ-05",

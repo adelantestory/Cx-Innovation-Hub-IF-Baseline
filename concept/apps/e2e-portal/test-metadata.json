@@ -756,5 +756,94 @@
       "data-integrity",
       "@prod-safe"
     ]
+  },
+  {
+    "id": "project-list-count",
+    "title": "project list displays exactly 3 sample projects",
+    "specFile": "projectList.spec.ts",
+    "steps": [
+      {
+        "description": "Navigate to the app and select a user",
+        "action": "Open '/' and click the 'Alex Rivera' user card"
+      },
+      {
+        "description": "Verify the Projects heading is visible",
+        "action": "Check for the 'Projects' heading on the page"
+      },
+      {
+        "description": "Verify all 3 seed projects appear (Website Redesign, Mobile App MVP, API Integration)",
+        "action": "Assert each project button is visible"
+      },
+      {
+        "description": "Verify there are exactly 3 project cards",
+        "action": "Count buttons inside the grid and assert count is 3"
+      }
+    ],
+    "tags": [
+      "project-list",
+      "smoke",
+      "data-integrity",
+      "@smoke",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
+  },
+  {
+    "id": "project-list-details",
+    "title": "each project card shows name and description",
+    "specFile": "projectList.spec.ts",
+    "steps": [
+      {
+        "description": "Navigate to the app and select a user",
+        "action": "Open '/' and click the 'Alex Rivera' user card"
+      },
+      {
+        "description": "For each project, verify the card shows its name",
+        "action": "Assert button with project name is visible"
+      },
+      {
+        "description": "For each project, verify the card shows its description",
+        "action": "Assert description text is visible within the card"
+      }
+    ],
+    "tags": [
+      "project-list",
+      "card-content",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
+  },
+  {
+    "id": "project-list-navigation",
+    "title": "clicking a project navigates to its Kanban board",
+    "specFile": "projectList.spec.ts",
+    "steps": [
+      {
+        "description": "Navigate to the app and select a user",
+        "action": "Open '/' and click the 'Alex Rivera' user card"
+      },
+      {
+        "description": "Click the 'Website Redesign' project card",
+        "action": "Click the project button"
+      },
+      {
+        "description": "Verify Kanban columns are displayed (To Do, In Progress)",
+        "action": "Assert column headings are visible"
+      },
+      {
+        "description": "Verify the back navigation link is available",
+        "action": "Assert '← Projects' link is visible"
+      }
+    ],
+    "tags": [
+      "project-list",
+      "navigation",
+      "kanban",
+      "@qa",
+      "@uat",
+      "@prod-safe"
+    ]
   }
 ]
