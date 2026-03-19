@@ -758,10 +758,12 @@
     ]
   },
   {
-    "id": "project-list-count",
-    "title": "project list displays exactly 3 sample projects",
     "specFile": "projectList.spec.ts",
-    "steps": [
+    "testSuite": "Project List",
+    "testName": "project list displays exactly 3 sample projects",
+    "summary": "After selecting a user, the project list page shows exactly three sample projects: Website Redesign, Mobile App MVP, and API Integration.",
+    "objective": "Verify the project list page displays all three seed projects with correct names.",
+    "flow": [
       {
         "description": "Navigate to the app and select a user",
         "action": "Open '/' and click the 'Alex Rivera' user card"
@@ -790,10 +792,12 @@
     ]
   },
   {
-    "id": "project-list-details",
-    "title": "each project card shows name and description",
     "specFile": "projectList.spec.ts",
-    "steps": [
+    "testSuite": "Project List",
+    "testName": "each project card shows name and description",
+    "summary": "Each project card displays both its name and description text from the seed data.",
+    "objective": "Verify that project cards render both the project name and description.",
+    "flow": [
       {
         "description": "Navigate to the app and select a user",
         "action": "Open '/' and click the 'Alex Rivera' user card"
@@ -816,10 +820,12 @@
     ]
   },
   {
-    "id": "project-list-navigation",
-    "title": "clicking a project navigates to its Kanban board",
     "specFile": "projectList.spec.ts",
-    "steps": [
+    "testSuite": "Project List",
+    "testName": "clicking a project navigates to its Kanban board",
+    "summary": "Clicking a project card navigates to the Kanban board view showing columns and a back link.",
+    "objective": "Verify that clicking a project transitions to the Kanban board with column headings and back navigation.",
+    "flow": [
       {
         "description": "Navigate to the app and select a user",
         "action": "Open '/' and click the 'Alex Rivera' user card"
