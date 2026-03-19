@@ -130,6 +130,49 @@ python -m locust -f scenarios/test_{scenario_name}.py --host=http://localhost:30
 python -m locust -f locustfile.py --host=http://localhost:3000 --headless -u 10 -r 5 -t 30s
 ```
 
+### Step 5: Run locally in Locust Web UI (default)
+
+After creating the scenario, **always** launch Locust with its web UI so the user can observe the test live. The Locust web UI runs on `http://localhost:8089` by default.
+
+**Procedure:**
+
+1. **Kill any existing Locust process** on port 8089 to avoid conflicts:
+   ```powershell
+   Get-NetTCPConnection -LocalPort 8089 -ErrorAction SilentlyContinue | Select-Object OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
+   ```
+
+2. **Start Locust in the background** with `--autostart`, targeting only the new scenario file. The `--autostart` flag starts the test immediately while keeping the web UI available for live monitoring:
+   ```bash
+   cd concept/tests/performance
+   python -m locust -f scenarios/test_{scenario_name}.py \
+       --host={target_host} \
+       -u {users} \
+       --spawn-rate {spawn_rate} \
+       -t {duration} \
+       --autostart
+   ```
+   - `--host` — the target API URL (use cloud endpoint if provided, otherwise `http://localhost:3000`)
+   - `-u` — number of virtual users
+   - `--spawn-rate` — users spawned per second (compute from ramp-up: `users / ramp_up_seconds`, minimum 1)
+   - `-t` — test duration (e.g., `900s`, `5m`)
+   - `--autostart` — begins the test immediately; the web UI at `http://localhost:8089` remains available for live charts and stats
+   - Do **NOT** pass `--headless` — we want the web UI available for monitoring
+
+3. **Open the Locust UI in VS Code Simple Browser** using the VS Code command:
+   ```
+   simpleBrowser.show  →  http://localhost:8089
+   ```
+   Use the `run_vscode_command` tool (deferred — load via `tool_search_tool_regex` first):
+   ```
+   command: simpleBrowser.show
+   args: ["http://localhost:8089"]
+   ```
+   This opens the Locust dashboard inside VS Code's integrated Simple Browser panel ([VS Code 1.112+ Simple Browser](https://code.visualstudio.com/updates/v1_112#_debug-web-apps-with-the-integrated-browser)).
+
+4. The test is already running. The user can observe live charts, stats, and failures in the Locust web UI without needing to click Start.
+
+**Spawn-rate calculation:** When a ramp-up period is specified (e.g., 180s for 100 users), calculate `spawn_rate = ceil(users / ramp_up_seconds)`. Example: 100 users / 180s ≈ 1 user/s.
+
 ## Rules
 
 ### Naming Conventions
@@ -251,6 +294,7 @@ The pipeline's cloud-load-test job queries App Insights after each load test and
 | `test_kanban_board.py` | `KanbanBoardUser` | 4 | Load task board, drag-drop status change |
 | `test_comments.py` | `CommentActivityUser` | 2 | View task comments, post new comment |
 | `test_health.py` | `HealthCheckUser` | 1 | Lightweight health endpoint probe |
+| `test_peak_traffic.py` | `PeakTrafficUser` | 5 | Peak traffic simulation against /api/users |
 
 ## API Endpoints Available
 
