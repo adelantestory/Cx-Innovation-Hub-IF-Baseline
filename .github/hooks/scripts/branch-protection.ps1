@@ -15,7 +15,7 @@
 param([string]$HookPhase)
 
 $ALLOWED_BRANCH = "demo/performance-testing"
-$Input = [Console]::In.ReadToEnd()
+$RawInput = [Console]::In.ReadToEnd()
 
 function Block-Action {
     param([string]$Reason)
@@ -66,7 +66,7 @@ if ($HookPhase -eq "session-start") {
 # ---------------------------------------------------------------------------
 if ($HookPhase -eq "pre-tool") {
     try {
-        $ToolData = $Input | ConvertFrom-Json -ErrorAction Stop
+        $ToolData = $RawInput | ConvertFrom-Json -ErrorAction Stop
     } catch {
         Pass-Through
     }
