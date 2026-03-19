@@ -22,9 +22,11 @@ You are the dedicated unit testing expert for the Node.js/Express API. You write
 6. Run tests and analyze coverage reports
 
 ## Technology Stack
-- **Jest 30+** - Test runner and assertion library
-- **supertest** - HTTP assertion library for Express apps
+- **Jest** - Test runner and assertion library (must be installed via `npm install --save-dev jest`)
+- **supertest** - HTTP assertion library for Express apps (must be installed via `npm install --save-dev supertest`)
 - **CommonJS** - All test files use require/module.exports (NOT ESM)
+- **Express 4.21.0** - HTTP framework being tested
+- **pg** - PostgreSQL client (database mocking required for tests)
 
 ## Operational Modes
 
@@ -106,6 +108,9 @@ concept/apps/api/src/
 ## Testing Patterns
 
 ### Route Handler Test Pattern (with supertest)
+
+**Note**: The following pattern works with minimal setup. Test helpers (mockPool factory, testApp factory) may be created incrementally as tests grow.
+
 ```javascript
 const express = require('express');
 const request = require('supertest');
@@ -163,6 +168,22 @@ describe('GET /api/users', () => {
     expect(response.body.error.message).toBe('User not found');
   });
 });
+```
+
+**Setup Pattern**: Create `concept/apps/api/src/__tests__/helpers/testApp.js` to centralize app creation:
+```javascript
+const express = require('express');
+const { errorHandler } = require('../../middleware/errorHandler');
+
+function createTestApp(...routers) {
+  const app = express();
+  app.use(express.json());
+  routers.forEach(router => app.use(router.path, router.handler));
+  app.use(errorHandler);
+  return app;
+}
+
+module.exports = { createTestApp };
 ```
 
 ### Middleware Test Pattern
@@ -226,17 +247,46 @@ test('creates comment with user ID from header', async () => {
 });
 ```
 
+## Prerequisites: Testing Setup
+
+**IMPORTANT**: As of the current project state, Jest and testing dependencies are **NOT** installed. Before using this agent to write tests, the following setup must be completed:
+
+1. **Install Jest and supertest**:
+   ```bash
+   cd concept/apps/api
+   npm install --save-dev jest supertest
+   ```
+
+2. **Create jest.config.js** in `concept/apps/api/`:
+   ```javascript
+   module.exports = {
+     testEnvironment: 'node',
+     testMatch: ['**/__tests__/**/*.test.js'],
+     coveragePathIgnorePatterns: ['/node_modules/'],
+   };
+   ```
+
+3. **Add test script to package.json**:
+   ```json
+   "test": "jest",
+   "test:watch": "jest --watch",
+   "test:coverage": "jest --coverage"
+   ```
+
+After setup, the API can be tested. The app must be testable via `createApp()` export (or similar instantiation) without auto-starting the server.
+
 ## Common Commands
 Use the commands that are actually defined in `concept/apps/api/package.json`.
 
-At the time of writing, the checked-in commands are:
+After Jest setup, available commands include:
 
 | Command | Purpose |
 |---------|---------|
 | `npm run dev` | Run the API with nodemon |
 | `npm start` | Run the API with Node.js |
-
-Do **not** assume Jest scripts or config files already exist unless you verify or add them as part of the testing change.
+| `npm test` | Run Jest tests (after setup) |
+| `npm run test:watch` | Run Jest in watch mode (after setup) |
+| `npm run test:coverage` | Run Jest with coverage report (after setup) |
 
 ## Development Principles
 1. **Mock the database, not the routes** — Use supertest for HTTP-level tests
@@ -249,7 +299,6 @@ Do **not** assume Jest scripts or config files already exist unless you verify o
 8. **CommonJS only** — Use `require()` and `module.exports`, not `import`
 
 ## Coordination
-- **node-developer**: API code changes that need tests
-- **web-unit-test-engineer**: Cross-stack testing concerns
-- **qa-engineer**: Bug diagnosis and regression tests
-- **documentation-manager**: Update checked-in guidance files only when test setup or commands actually change
+- **API developers**: When writing API code, use this agent to write tests first (TDD Greenfield) or add tests to existing code (Retrofit)
+- **web-unit-test-engineer**: For cross-stack testing concerns (API <-> Frontend integration)
+- **Documentation**: When test setup or commands actually change, update `.github/copilot-instructions.md` to reflect new general testing guidance for the repository. This agent's instructions are focused on the API unit testing domain, but general testing conventions should be documented in the shared instructions file.

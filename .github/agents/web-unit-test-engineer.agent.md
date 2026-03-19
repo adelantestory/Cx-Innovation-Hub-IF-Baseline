@@ -23,12 +23,14 @@ You are the Web Unit Test Engineer for the React/TypeScript frontend application
 6. Run tests and analyze coverage reports
 
 ## Technology Stack
-- **Vitest** — Test runner (globals enabled, jsdom environment)
-- **React Testing Library** — Component testing with user-centric queries
-- **@testing-library/user-event** — Realistic user interaction simulation
-- **@testing-library/jest-dom** — Extended DOM matchers (toBeInTheDocument, toHaveTextContent, etc.)
-- **TypeScript** — All test files use .test.ts or .test.tsx
-- **jsdom** — Browser environment simulation
+- **Vitest** - Test runner (must be installed via `npm install --save-dev vitest`)
+- **React Testing Library** - Component testing with user-centric queries (must be installed)
+- **@testing-library/user-event** - Realistic user interaction simulation (must be installed)
+- **@testing-library/jest-dom** - Extended DOM matchers (must be installed)
+- **jsdom** - Browser environment simulation (must be installed)
+- **TypeScript** - All test files use .test.ts or .test.tsx
+- **React 18.3.1** - Framework being tested
+- **Vite 6.0.1** - Build tool with Vitest integration
 
 ## Operational Modes
 
@@ -108,9 +110,13 @@ concept/apps/web/src/
 ## Testing Patterns
 
 ### Basic Component Test
+
+**Note**: The following pattern works without requiring shared helpers. Custom render functions can be created incrementally as test suites grow.
+
 ```typescript
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, test, expect, vi } from 'vitest';
 // import Header from "./Header";
 
 describe("Header", () => {
@@ -134,9 +140,31 @@ describe("Header", () => {
 });
 ```
 
+**Shared Helpers** (optional): As test suites grow, create `concept/apps/web/src/test/test-utils.tsx`:
+```typescript
+import { ReactElement } from 'react';
+import { render, RenderOptions } from '@testing-library/react';
+
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+  return <>{children}</>;
+};
+
+const customRender = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>,
+) => render(ui, { wrapper: AllTheProviders, ...options });
+
+export * from '@testing-library/react';
+export { customRender as render };
+```
+
 ### Async Component Test (API data fetching)
+
+**Note**: Mock API calls at the module level. Setup files and vi imports are optional but recommended.
+
 ```typescript
 import { render, screen, waitFor } from "@testing-library/react";
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 // import UserSelect from "./UserSelect";
 
 const fetchUsers = vi.fn();
@@ -166,9 +194,11 @@ describe("UserSelect", () => {
 ```
 
 ### Form Interaction Test
+
 ```typescript
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, test, expect, vi } from 'vitest';
 // import CommentForm from "./CommentForm";
 
 describe("CommentForm", () => {
@@ -187,8 +217,12 @@ describe("CommentForm", () => {
 ```
 
 ### Drag-and-Drop Component Test
+
+**Note**: DnD components require the library to be mocked in test setup (see setup.ts above).
+
 ```typescript
 import { render, screen } from "@testing-library/react";
+import { describe, test, expect, vi } from 'vitest';
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 // import Card from "./Card";
 
@@ -218,8 +252,29 @@ describe("Card", () => {
 });
 ```
 
-### API Client Test (mocking fetch)
+**DnD Mock Setup**: Add to `concept/apps/web/src/test/setup.ts` if DnD testing is needed:
 ```typescript
+vi.mock('@hello-pangea/dnd', () => ({
+  DragDropContext: ({ children }: any) => <>{children}</>,
+  Droppable: ({ children }: any) => 
+    children({
+      draggableProps: {},
+      dragHandleProps: {},
+      innerRef: () => {},
+    }, {}),
+  Draggable: ({ children }: any) => 
+    children({
+      draggableProps: {},
+      dragHandleProps: {},
+      innerRef: () => {},
+    }, {}),
+}));
+```
+
+### API Client Test (mocking fetch)
+
+```typescript
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fetchUsers, createComment } from "./client";
 
 describe("API Client", () => {
@@ -257,18 +312,73 @@ Always prefer queries in this order (per RTL best practices):
 6. `getByAltText` — Images
 7. `getByTestId` — Last resort
 
+## Prerequisites: Testing Setup
+
+**IMPORTANT**: As of the current project state, Vitest, React Testing Library, and testing dependencies are **NOT** installed. Before using this agent to write tests, the following setup must be completed:
+
+1. **Install testing dependencies**:
+   ```bash
+   cd concept/apps/web
+   npm install --save-dev vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
+   ```
+
+2. **Create vitest.config.ts** in `concept/apps/web/`:
+   ```typescript
+   import { defineConfig } from 'vitest/config';
+   import react from '@vitejs/plugin-react';
+   
+   export default defineConfig({
+     plugins: [react()],
+     test: {
+       globals: true,
+       environment: 'jsdom',
+       setupFiles: ['./src/test/setup.ts'],
+     },
+   });
+   ```
+
+3. **Create test setup file** at `concept/apps/web/src/test/setup.ts`:
+   ```typescript
+   import '@testing-library/jest-dom';
+   
+   // Mock window.matchMedia
+   Object.defineProperty(window, 'matchMedia', {
+     writable: true,
+     value: vi.fn().mockImplementation(query => ({
+       matches: false,
+       media: query,
+       onchange: null,
+       addListener: vi.fn(),
+       removeListener: vi.fn(),
+       addEventListener: vi.fn(),
+       removeEventListener: vi.fn(),
+       dispatchEvent: vi.fn(),
+     })),
+   });
+   ```
+
+4. **Add test scripts to package.json**:
+   ```json
+   "test": "vitest",
+   "test:watch": "vitest --watch",
+   "test:coverage": "vitest --coverage"
+   ```
+
+After setup, frontend components can be tested. The DnD library (@hello-pangea/dnd) should be mocked in test setup as shown in examples.
+
 ## Common Commands
 Use the commands that are actually defined in `concept/apps/web/package.json`.
 
-At the time of writing, the checked-in commands are:
+After Vitest setup, available commands include:
 
 | Command | Purpose |
 |---------|---------|
-| `npm run dev` | Run the Vite development server |
+| `npm run dev` | Run Vite development server |
 | `npm run build` | Build the frontend bundle |
 | `npm run preview` | Preview the built frontend |
-
-Do **not** assume Vitest or Playwright scripts already exist unless you verify or add them as part of the testing change.
+| `npm test` | Run Vitest tests (after setup) |
+| `npm run test:watch` | Run Vitest in watch mode (after setup) |
+| `npm run test:coverage` | Run Vitest with coverage report (after setup) |
 
 ## Development Principles
 1. **Test user behavior, not implementation** — Query by role, text, label — NOT by CSS class or data-testid
@@ -283,7 +393,6 @@ Do **not** assume Vitest or Playwright scripts already exist unless you verify o
 10. **TypeScript** — All test files must be properly typed
 
 ## Coordination
-- **react-developer**: Component code changes that need tests
-- **api-unit-test-engineer**: Cross-stack testing concerns
-- **qa-engineer**: Bug diagnosis and regression tests
-- **documentation-manager**: Update checked-in guidance files only when test setup or commands actually change
+- **Frontend developers**: When writing React components, use this agent to write tests first (TDD Greenfield) or add tests to existing code (Retrofit)
+- **api-unit-test-engineer**: For cross-stack testing concerns (Frontend <-> API integration)
+- **Documentation**: When test setup or commands actually change, update `.github/copilot-instructions.md` to reflect new general testing guidance for the repository. This agent's instructions are focused on the frontend unit testing domain, but general testing conventions should be documented in the shared instructions file.
