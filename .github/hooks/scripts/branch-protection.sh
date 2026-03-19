@@ -9,7 +9,7 @@
 #   PreToolUse   — blocks git commands that create branches, push to wrong
 #                  branches, or rewrite history
 #
-# Input:  JSON via stdin (VS Code / Copilot hooks protocol)
+# Input:  JSON via stdin (VS Code Copilot hooks protocol)
 # Output: JSON via stdout
 # Exit:   0 = pass, 2 = block
 # =============================================================================
@@ -17,14 +17,12 @@ set -euo pipefail
 
 ALLOWED_BRANCH="demo/performance-testing"
 HOOK_PHASE="${1:-}"
-INPUT=$(cat)
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 block() {
   local reason="$1"
-  echo "{\"continue\":true,\"systemMessage\":\"❌ BLOCKED — ${reason}\"}" >&2
   cat <<EOF
 {
   "hookSpecificOutput": {
@@ -34,21 +32,11 @@ block() {
   }
 }
 EOF
-  exit 2
-}
-
-pass() {
-  echo '{}' # no-op output
   exit 0
 }
 
-warn() {
-  local msg="$1"
-  cat <<EOF
-{
-  "systemMessage": "⚠️ ${msg}"
-}
-EOF
+pass() {
+  echo '{}'
   exit 0
 }
 
@@ -85,24 +73,22 @@ EOF
 fi
 
 # ---------------------------------------------------------------------------
-# PreToolUse — inspect tool invocations for disallowed git operations
+# PreToolUse — read stdin only here (avoids blocking pipe for other events)
 # ---------------------------------------------------------------------------
 if [ "$HOOK_PHASE" = "pre-tool" ]; then
 
+  INPUT=$(cat)
+
+  # Parse tool_name — VS Code Copilot uses "run_in_terminal" for terminal commands
   TOOL_NAME=$(echo "$INPUT" | grep -o '"tool_name"\s*:\s*"[^"]*"' | head -1 | sed 's/.*: *"//;s/"//' || echo "")
-  TOOL_INPUT=$(echo "$INPUT" | grep -o '"tool_input"\s*:\s*{[^}]*}' | head -1 || echo "")
 
-  # Only inspect terminal / bash / shell tool invocations
-  case "$TOOL_NAME" in
-    run_in_terminal|bash|terminal|shell|execute_command)
-      ;;
-    *)
-      pass
-      ;;
-  esac
+  if [ "$TOOL_NAME" != "run_in_terminal" ]; then
+    pass
+  fi
 
-  # Extract the command string from tool input
-  COMMAND=$(echo "$TOOL_INPUT" | grep -oE '"command"\s*:\s*"[^"]*"' | head -1 | sed 's/.*: *"//;s/"//' || echo "")
+  # Extract the command string from tool_input
+  COMMAND=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('command',''))" 2>/dev/null || \
+            echo "$INPUT" | grep -oP '"command"\s*:\s*"\K[^"]*' || echo "")
 
   if [ -z "$COMMAND" ]; then
     pass
@@ -114,8 +100,7 @@ if [ "$HOOK_PHASE" = "pre-tool" ]; then
   fi
 
   # --- Rule 2: Block pushes to wrong branches ---
-  if echo "$COMMAND" | grep -qE 'git\s+push'; then
-    # Check if pushing to a branch other than allowed
+  if echo "$COMMAND" | grep -qE 'git\s+push\s+\S+\s+\S+'; then
     PUSH_TARGET=$(echo "$COMMAND" | grep -oE 'git\s+push\s+\S+\s+(\S+)' | awk '{print $NF}' || echo "")
     if [ -n "$PUSH_TARGET" ] && [ "$PUSH_TARGET" != "$ALLOWED_BRANCH" ]; then
       block "Push to '${PUSH_TARGET}' is not allowed. Only '${ALLOWED_BRANCH}' is permitted."
