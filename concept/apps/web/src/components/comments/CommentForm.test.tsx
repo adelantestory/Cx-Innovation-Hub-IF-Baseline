@@ -174,7 +174,6 @@ describe('CommentForm', () => {
     });
 
     it('should not call onSubmit if input is empty', async () => {
-      const user = userEvent.setup();
       render(<CommentForm onSubmit={mockOnSubmit} />);
 
       // Try to click submit without typing anything

@@ -89,7 +89,7 @@ describe("API Client", () => {
 
       expect(result).toEqual(mockUsers);
       expect(result).toHaveLength(2);
-      expect(result[0].name).toBe("Alice Johnson");
+      expect(result[0]!.name).toBe("Alice Johnson");
     });
 
     test("rejects on HTTP error", async () => {
@@ -145,7 +145,7 @@ describe("API Client", () => {
       });
 
       expect(result).toEqual(mockProjects);
-      expect(result[0].name).toBe("Website Redesign");
+      expect(result[0]!.name).toBe("Website Redesign");
     });
 
     test("rejects on HTTP error", async () => {
@@ -307,7 +307,7 @@ describe("API Client", () => {
       });
 
       expect(result).toEqual(mockTasks);
-      expect(result[0].title).toBe("Design mockups");
+      expect(result[0]!.title).toBe("Design mockups");
     });
 
     test("rejects on HTTP error", async () => {
@@ -732,7 +732,7 @@ describe("API Client", () => {
       });
 
       expect(result).toEqual(mockComments);
-      expect(result[0].content).toBe("This looks great!");
+      expect(result[0]!.content).toBe("This looks great!");
     });
 
     test("rejects on HTTP error", async () => {
@@ -927,7 +927,7 @@ describe("API Client", () => {
         mockFetchResponse(mockComment)
       );
 
-      const result = await client.updateComment(commentId, userId, newContent);
+      await client.updateComment(commentId, userId, newContent);
 
       expect(fetch).toHaveBeenCalledWith("/api/comments/comment-1", {
         method: "PUT",
@@ -999,7 +999,7 @@ describe("API Client", () => {
         mockFetchResponse(mockResponse)
       );
 
-      const result = await client.deleteComment(commentId, userId);
+      await client.deleteComment(commentId, userId);
 
       expect(fetch).toHaveBeenCalledWith("/api/comments/comment-1", {
         method: "DELETE",
