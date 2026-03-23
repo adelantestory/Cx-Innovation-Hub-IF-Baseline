@@ -17,7 +17,6 @@ When working in this repository, prefer these sources of truth:
 
 - `README.md` for top-level repository orientation
 - `.github/copilot-instructions.md` for Copilot-specific repo guidance
-- `.github/agents/*.agent.md` for the custom testing agents currently defined in the repo
 - `concept/docker-compose.yml` for the local multi-service workflow
 - `concept/apps/api/package.json` and `concept/apps/web/package.json` for available commands
 - `concept/apps/api/src/` and `concept/apps/web/src/` for current implementation details
@@ -26,10 +25,7 @@ Do **not** assume a `.claude/` directory, `.claude/agents/`, `.claude/skills/`, 
 
 ## Current Custom Agents In This Repo
 
-The custom agent definitions currently present are:
-
-- `.github/agents/api-unit-test-engineer.agent.md`
-- `.github/agents/web-unit-test-engineer.agent.md`
+There are **no custom agent definitions currently checked in** to this repository. Custom agents may be added later under `.github/agents/` if needed. Only use custom agents if they are actually present in the repository.
 
 There is **no repo-local skills directory** today. Do not reference repo-specific skills unless they are added to the repository.
 
@@ -138,9 +134,7 @@ Use the existing application layout when adding tests:
 
 Do **not** assume additional test configs, scripts, or end-to-end suites exist unless you verify them first.
 
-When the task is primarily API unit testing, prefer the `api-unit-test-engineer` custom agent.
-
-When the task is primarily frontend unit testing, prefer the `web-unit-test-engineer` custom agent.
+Note: Custom agents for API and frontend testing may be added to the repository in the future. If they become available, use them for their respective testing tasks.
 
 ## Documentation Expectations
 
@@ -148,7 +142,6 @@ Prefer updating existing guidance files over inventing new ones. The most releva
 
 - `README.md`
 - `.github/copilot-instructions.md`
-- `.github/agents/*.agent.md`
 - `concept/docker-compose.yml`
 - `concept/apps/api/package.json`
 - `concept/apps/web/package.json`
