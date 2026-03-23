@@ -36,6 +36,19 @@ This starter kit provides Copilot guidance, custom agents, and sample solution a
 | 5. Evaluate | 12: Final deliverables | 1 day |
 | 6. Hand Off | Ongoing with CSM/Partner | — |
 
+## CI/CD Quality Gate
+
+Pull requests to `main` automatically run quality gate checks:
+
+- **Build**: TypeScript compilation and Vite bundle (`npm run build`)
+- **Lint**: Code style and quality checks with ESLint (`npm run lint`)
+- **Tests**: Unit tests with Vitest (`npm test`)
+- **Coverage**: Test coverage reporting (informational)
+
+These checks **must pass** before PRs can be merged. See [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md) for setup instructions.
+
+**Local Development**: Run `npm run lint` and `npm test` before pushing to catch issues early.
+
 ## Key Constraints
 
 - **10-Day Maximum** — Descope rather than extend

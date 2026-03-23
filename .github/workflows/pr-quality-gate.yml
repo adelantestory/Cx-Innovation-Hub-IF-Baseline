@@ -1,0 +1,78 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'concept/apps/web/**'
+      - '.github/workflows/pr-quality-gate.yml'
+
+jobs:
+  quality-gate:
+    name: Build, Lint, Test & Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'concept/apps/web/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: concept/apps/web
+
+      - name: Build
+        run: npm run build
+        working-directory: concept/apps/web
+
+      - name: Lint
+        run: npm run lint
+        working-directory: concept/apps/web
+
+      - name: Run tests
+        run: npm test -- --run
+        working-directory: concept/apps/web
+
+      - name: Generate coverage report
+        run: npm run test:coverage -- --run
+        working-directory: concept/apps/web
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: concept/apps/web/coverage/
+          retention-days: 30
+
+      - name: Comment coverage on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const coverage = fs.readFileSync('concept/apps/web/coverage/coverage-summary.json', 'utf-8');
+            const summary = JSON.parse(coverage).total;
+            const message = `## Test Coverage Report
+
+            | Metric | Coverage |
+            |--------|----------|
+            | Lines | ${summary.lines.pct}% |
+            | Statements | ${summary.statements.pct}% |
+            | Functions | ${summary.functions.pct}% |
+            | Branches | ${summary.branches.pct}% |
+
+            📊 Full coverage report available in artifacts.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
