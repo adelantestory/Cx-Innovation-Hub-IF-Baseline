@@ -711,7 +711,7 @@ describe("ProjectList", () => {
         expect(screen.getByText("Project Alpha")).toBeInTheDocument();
       });
 
-      const projectButtons = screen.getAllByRole("button").filter((btn) =>
+      const projectButtons = screen.getAllByRole("button").filter((btn: HTMLElement) =>
         /Project (Alpha|Beta|Gamma)/.test(btn.textContent || "")
       );
 

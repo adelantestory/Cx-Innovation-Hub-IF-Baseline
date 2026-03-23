@@ -204,7 +204,7 @@ describe("TaskDetail", () => {
       author_avatar_color: "#FF5733",
     });
     mockUpdateComment.mockResolvedValue({
-      ...mockComments[0],
+      ...mockComments[0]!,
       content: "Updated content",
     });
     mockDeleteComment.mockResolvedValue({ message: "deleted", id: "comment-1" });
@@ -945,7 +945,7 @@ describe("TaskDetail", () => {
     const onTaskDeleted = vi.fn();
 
     mockUpdateComment.mockResolvedValueOnce({
-      ...mockComments[0],
+      ...mockComments[0]!,
       content: "Updated content",
     });
 

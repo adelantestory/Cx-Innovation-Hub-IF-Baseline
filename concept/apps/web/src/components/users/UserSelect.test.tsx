@@ -153,10 +153,9 @@ describe("UserSelect", () => {
 
     // The component renders initial letters in divs with inline style backgroundColor
     // Check that at least one avatar has the expected color
-    const aliceAvatarColor = mockUsers[0].avatar_color;
     // Convert hex to RGB for comparison (jsdom converts styles)
-    expect(avatars.some((el) => el.textContent === "A")).toBe(true);
-    expect(avatars.some((el) => el.textContent === "B")).toBe(true);
+    expect(avatars.some((el: HTMLElement) => el.textContent === "A")).toBe(true);
+    expect(avatars.some((el: HTMLElement) => el.textContent === "B")).toBe(true);
   });
 
   test("renders correct number of user cards", async () => {

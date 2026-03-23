@@ -637,7 +637,7 @@ describe("CommentList", () => {
       ).toBeInTheDocument();
 
       const cancelButtons = screen.getAllByRole("button", { name: /cancel/i });
-      await user.click(cancelButtons[cancelButtons.length - 1]);
+      await user.click(cancelButtons[cancelButtons.length - 1]!);
 
       expect(
         screen.queryByPlaceholderText("Write a reply...")
@@ -835,7 +835,7 @@ describe("CommentList", () => {
       // Find the outer div that has the ml-6 class (the reply container)
       let replyContainer = replyElement.closest("div");
       while (replyContainer && !replyContainer.className.includes("ml-6")) {
-        replyContainer = replyContainer.parentElement;
+        replyContainer = replyContainer.parentElement as HTMLDivElement | null;
       }
 
       expect(replyContainer).toBeTruthy();

@@ -9,7 +9,7 @@
 import { render, screen } from "@/test/test-utils";
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import Column from "./Column";
-import type { Task, TaskStatus } from "../../api/types";
+import type { Task } from "../../api/types";
 
 // Mock the Card component to isolate Column testing
 vi.mock("./Card", () => ({
@@ -381,7 +381,7 @@ describe("Column Component", () => {
   // ==========================================================================
 
   test("task count badge has correct styling classes", () => {
-    const { container } = render(
+    render(
       <Column status="todo" tasks={[createMockTask()]} onCardClick={mockOnCardClick} />
     );
 

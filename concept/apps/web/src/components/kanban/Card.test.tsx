@@ -257,7 +257,7 @@ describe("Card Component", () => {
       description: "With description",
       assigned_user_name: "Frank Wilson",
     });
-    const { container } = render(
+    render(
       <Card task={task} index={0} onClick={mockOnClick} />
     );
 
