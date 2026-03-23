@@ -2,8 +2,8 @@ import type { User } from "../../api/types";
 
 interface HeaderProps {
   user: User;
-  onSwitchUser: (...args: any[]) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  onNavigateHome: (...args: any[]) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  onSwitchUser: () => void;
+  onNavigateHome: () => void;
 }
 
 export default function Header({ user, onSwitchUser, onNavigateHome }: HeaderProps) {

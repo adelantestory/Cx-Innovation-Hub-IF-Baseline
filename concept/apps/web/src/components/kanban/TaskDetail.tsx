@@ -129,8 +129,8 @@ export default function TaskDetail({
 
         <div className="mb-4">
           <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-            {STATUS_LABELS[task.status] ?? task.status}
-          </span>
+              {STATUS_LABELS[task.status]}
+            </span>
         </div>
 
         <div className="mb-4">
