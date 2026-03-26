@@ -2,8 +2,7 @@ name: Run Unit Tests
 
 on:
   pull_request:
-    branches:
-      - 'main'
+    branches: [demo/playwright-testing]
 
 jobs:
   test:
