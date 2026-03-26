@@ -96,7 +96,7 @@ jobs:
           path: concept/apps/web/tests/test results/
           retention-days: 14
 
-      - name: Generate Code Quality Report From Claude And Codex
+      - name: Generate Code Testing Coverage Report From Claude And Codex
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_TOKEN_FOR_COPILOT }}
         run: |
