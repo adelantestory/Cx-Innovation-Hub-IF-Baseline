@@ -96,11 +96,24 @@ jobs:
           path: concept/apps/web/tests/test results/
           retention-days: 14
 
+      
       - name: Generate Code Testing Coverage Report From Claude And Codex
         env:
-          GITHUB_TOKEN: ${{ secrets.CLI_TOKEN_FOR_COPILOT }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.CLI_TOKEN_FOR_COPILOT }}
         run: |
+          node --version || true
+          npm --version || true
+      
           npm install -g @github/copilot
-          copilot -p "check the testing coverage on these playwrigth tests against the \
-            codebase and report any missing requirements testing gaps.Use claude opus4.6 and codex 5.3 models \
-            to create a combined results. Please generate an html report with your findings" --yolo
+      
+          # Optional: sanity check that the token env var is present (won’t print value)
+          if [ -z "$COPILOT_GITHUB_TOKEN" ]; then
+            echo "COPILOT_GITHUB_TOKEN is empty. Check secret name and repository/environment scope."
+            exit 1
+          fi
+      
+          # Run Copilot and save output as HTML.
+          copilot -p "check the testing coverage on these playwrigth tests against the codebase and report any missing requirements testing gaps. Use Claude Opus 4.6 and GPT-5.3-Codex models to create a combined results. Please generate an html report with your findings" \
+            --allow-all-tools \
+            --output-format html > copilot-coverage-report.html
+
