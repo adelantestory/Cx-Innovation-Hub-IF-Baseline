@@ -5,17 +5,22 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon --watch src --ext js,json src/index.js"
+    "dev": "nodemon --watch src --ext js,json src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "pg": "^8.13.0",
-    "cors": "^2.8.5",
     "@azure/identity": "^4.5.0",
-    "@azure/keyvault-secrets": "^4.9.0"
+    "@azure/keyvault-secrets": "^4.9.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "pg": "^8.13.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "jest": "^30.3.0",
+    "nodemon": "^3.1.0",
+    "supertest": "^7.2.2"
   },
   "engines": {
     "node": ">=20.0.0"

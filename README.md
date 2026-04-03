@@ -1,40 +1,28 @@
-# Azure Innovation Factory - Claude Code Starter Kit
+# Azure Innovation Factory - Copilot Starter Kit
 
-This starter kit provides Claude Code agents, templates, and context for implementing Azure solutions through Microsoft's Innovation Factory program. Engagements are **limited to 10 days** and deliver **functional prototypes**, not production systems.
+This starter kit provides Copilot guidance, custom agents, and sample solution assets for implementing Azure solutions through Microsoft's Innovation Factory program. Engagements are **limited to 10 days** and deliver **functional prototypes**, not production systems.
 
 ## Quick Start
 
 1. Copy the contents to your project root
-2. Start Claude Code — agents load automatically
+2. Open the repository in GitHub Copilot-enabled tooling
 3. When prompted, indicate the current process stage (1-12)
-4. Read `CLAUDE.md` for the complete process and agent delegation rules
+4. Read `.github/copilot-instructions.md` for repository-specific guidance
 
 ## Structure
 
 ```
 .
-├── CLAUDE.md                           # Main instructions (READ THIS FIRST)
 ├── artifacts/                          # Customer-provided discovery materials
-├── deliverables/                       # Client-facing deliverables
-│   ├── SCOPE_OF_WORK.md
-│   ├── AS_BUILT.md
-│   ├── POST_MORTEM.md
-│   ├── COST_ESTIMATE.md
-│   └── FINAL_DELIVERY.pptx
 ├── concept/                            # Solution code (under git)
-│   ├── .specify/                       # Spec Kit documentation
-│   │   └── memory/
-│   │       └── constitution.md         # Non-negotiable project principles
-│   ├── AZURE_CONFIG.json               # Central configuration
-│   ├── docs/                           # Technical documentation
 │   ├── apps/                           # Application source code
-│   ├── infrastructure/                 # Terraform/Bicep modules
-│   └── sql/                            # Database scripts
-└── .claude/
-    ├── agents/                         # 71 agent definitions
-    ├── context/
-    │   └── INNOVATION_FACTORY.md       # Program context (agents must read)
-    └── templates/                      # Document templates
+│   │   ├── api/                        # Node.js + Express backend
+│   │   └── web/                        # React + Vite frontend
+│   └── docker-compose.yml              # Local multi-service workflow
+└── .github/
+    ├── agents/                         # Custom Copilot agent definitions
+    ├── copilot-instructions.md         # Repository-specific Copilot guidance
+    └── workflows/                      # CI/CD workflows
 ```
 
 ## Delivery Pipeline
@@ -48,6 +36,19 @@ This starter kit provides Claude Code agents, templates, and context for impleme
 | 5. Evaluate | 12: Final deliverables | 1 day |
 | 6. Hand Off | Ongoing with CSM/Partner | — |
 
+## CI/CD Quality Gate
+
+Pull requests to `main` automatically run quality gate checks:
+
+- **Build**: TypeScript compilation and Vite bundle (`npm run build`)
+- **Lint**: Code style and quality checks with ESLint (`npm run lint`)
+- **Tests**: Unit tests with Vitest (`npm test`)
+- **Coverage**: Test coverage reporting (informational)
+
+These checks **must pass** before PRs can be merged. See [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md) for setup instructions.
+
+**Local Development**: Run `npm run lint` and `npm test` before pushing to catch issues early.
+
 ## Key Constraints
 
 - **10-Day Maximum** — Descope rather than extend
@@ -58,65 +59,37 @@ This starter kit provides Claude Code agents, templates, and context for impleme
 
 ## Templates
 
-All deliverables use templates from `.claude/templates/`:
+Use the checked-in guidance under `.github/` plus the application assets under `concept/` as the current repository guidance surface. Do not assume a `.claude/templates/` directory exists unless it is added later.
 
 | Document | Purpose |
 |----------|---------|
-| `SCOPE_OF_WORK.md` | Engagement scope and success criteria |
-| `AS_BUILT.md` | Final solution state and architecture |
-| `POST_MORTEM.md` | Gap analysis and learnings |
-| `COST_ESTIMATE.md` | Azure cost projections |
-| `ARCHITECTURE.md` | Solution architecture |
-| `CONFIGURATION.md` | Service configuration reference |
-| `DEPLOYMENT.md` | Infrastructure deployment guide |
-| `DEVELOPMENT.md` | Developer setup guide |
-| `AZURE_CONFIG.json` | Central configuration schema |
+| `README.md` | Repository orientation |
+| `.github/copilot-instructions.md` | Repository-specific Copilot guidance |
+| `.github/agents/*.agent.md` | Custom Copilot agent definitions |
+| `concept/docker-compose.yml` | Local multi-service development workflow |
+| `concept/apps/api/package.json` | Backend commands and dependencies |
+| `concept/apps/web/package.json` | Frontend commands and dependencies |
 
 ## Agents
 
-### Support Roles (7)
+### Support Roles
 | Agent | Purpose |
 |-------|---------|
-| `project-manager` | Scope, coordination, deliverables |
-| `business-analyst` | Discovery, requirements, gaps |
-| `cloud-architect` | Architecture, AZURE_CONFIG.json |
-| `subscription-expert` | Subscription config, resource providers |
-| `spec-kit-expert` | GitHub Spec Kit documentation |
-| `document-writer` | Technical documentation |
-| `cost-analyst` | Cost estimation |
+| `api-unit-test-engineer` | Node.js/Express API unit testing guidance |
+| `web-unit-test-engineer` | React frontend unit testing guidance |
 
-### Service Agents (64)
-All service agents are trained on the limitations of the MCAPS environment and will seek to deploy infrastructure in alignment with internal policies.
-
-Each of 16 Azure services has 4 agents: `-architect`, `-developer`, `-terraform`, `-bicep`
-
-**Current Services:**
-* API Management
-* Application Insights
-* Azure Functions
-* Azure OpenAI
-* Azure SQL
-* Blob Storage
-* Container Apps
-* Container Apps Environment
-* Container Registry
-* Cosmos DB
-* Key Vault
-* Log Analytics
-* Redis Cache
-* Service Bus
-* User-Managed Identity
-* Web Apps
+Only the checked-in custom agents should be treated as available unless additional agent files are added later.
 
 ## Critical Files
 
 | File | Purpose | Owner |
 |------|---------|-------|
-| `CLAUDE.md` | Process and agent rules | — |
-| `.claude/context/INNOVATION_FACTORY.md` | Program principles | — |
-| `concept/.specify/memory/constitution.md` | Technical constraints | — |
-| `concept/AZURE_CONFIG.json` | Resource configuration | `cloud-architect` |
+| `.github/copilot-instructions.md` | Repository-specific Copilot guidance | — |
+| `.github/agents/*.agent.md` | Custom Copilot agent definitions | — |
+| `concept/docker-compose.yml` | Local development stack | — |
+| `concept/apps/api/package.json` | Backend commands and dependencies | — |
+| `concept/apps/web/package.json` | Frontend commands and dependencies | — |
 
 ---
 
-**See `CLAUDE.md` for complete instructions.**
+**See `.github/copilot-instructions.md` for current repository instructions.**

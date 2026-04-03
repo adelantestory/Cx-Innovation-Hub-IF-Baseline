@@ -1,0 +1,1227 @@
+
+> taskify-web@1.0.0 test
+> vitest
+
+
+[1m[44m DEV [49m[22m [34mv4.1.1 [39m[90mC:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web[39m
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > renders modal with task title and description
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > renders modal with task title and description
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > displays status label correctly
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > displays status label correctly
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/users/UserSelect.test.tsx > UserSelect > calls fetchUsers on mount
+Warning: An update to UserSelect inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at UserSelect (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/users/UserSelect.tsx:5:23)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/users/UserSelect.test.tsx > UserSelect > calls fetchUsers on mount
+Warning: An update to UserSelect inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at UserSelect (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/users/UserSelect.tsx:5:23)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > displays assigned user name in dropdown
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > displays assigned user name in dropdown
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > displays 'Unassigned' when task has no assigned user
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > displays 'Unassigned' when task has no assigned user
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > renders close button (x)
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > renders close button (x)
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+ [32mΓ£ô[39m src/components/kanban/Card.test.tsx [2m([22m[2m24 tests[22m[2m)[22m[33m 446[2mms[22m[39m
+ [32mΓ£ô[39m src/components/layout/Header.test.tsx [2m([22m[2m17 tests[22m[2m)[22m[33m 844[2mms[22m[39m
+Not implemented: navigation to another Document
+stderr | src/components/users/UserSelect.test.tsx > UserSelect > cleanup: fetchUsers is called exactly once per render
+Warning: An update to UserSelect inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at UserSelect (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/users/UserSelect.tsx:5:23)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/users/UserSelect.test.tsx > UserSelect > cleanup: fetchUsers is called exactly once per render
+Warning: An update to UserSelect inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at UserSelect (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/users/UserSelect.tsx:5:23)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+ [32mΓ£ô[39m src/components/users/UserSelect.test.tsx [2m([22m[2m25 tests[22m[2m)[22m[33m 1265[2mms[22m[39m
+stderr | src/components/kanban/Board.test.tsx > Board Component > creates task with title when form is submitted
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > creates task with title when form is submitted
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > creates task with trimmed title
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > creates task with trimmed title
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > does not submit form with empty title
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > does not submit form with empty title
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > clears form and hides it after successful task creation
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > clears form and hides it after successful task creation
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > adds created task to board state
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > adds created task to board state
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > shows loading state while creating task
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > shows loading state while creating task
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > updates task status when dragged to different column
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > updates task position within same column
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > rolls back optimistic update on API failure
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+ [32mΓ£ô[39m src/components/kanban/Column.test.tsx [2m([22m[2m33 tests[22m[2m)[22m[32m 103[2mms[22m[39m
+ [32mΓ£ô[39m src/api/client.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+stderr | src/components/kanban/Board.test.tsx > Board Component > displays error message when task creation fails
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/Board.test.tsx > Board Component > displays error message when task creation fails
+Warning: An update to Board inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Board (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/Board.tsx:14:18)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+ [31mΓ¥»[39m src/components/kanban/Board.test.tsx [2m([22m[2m34 tests[22m[2m | [22m[31m9 failed[39m[2m)[22m[33m 3598[2mms[22m[39m
+     [32mΓ£ô[39m fetches tasks and users on mount using project ID[32m 34[2mms[22m[39m
+     [32mΓ£ô[39m fetches tasks and users in parallel using Promise.all[32m 6[2mms[22m[39m
+     [32mΓ£ô[39m refetches tasks when project ID changes[32m 6[2mms[22m[39m
+     [32mΓ£ô[39m renders all 4 columns: To Do, In Progress, In Review, Done[32m 37[2mms[22m[39m
+     [32mΓ£ô[39m renders tasks in correct columns based on status[32m 15[2mms[22m[39m
+[31m     [31m├ù[31m renders tasks sorted by position within each column[39m[33m 1025[2mms[22m[39m
+     [32mΓ£ô[39m renders correct task count badge for each column[32m 9[2mms[22m[39m
+     [32mΓ£ô[39m handles empty board (no tasks) with 0 counts[32m 13[2mms[22m[39m
+     [32mΓ£ô[39m toggles new task form when New Task button is clicked[32m 266[2mms[22m[39m
+[31m     [31m├ù[31m creates task with title when form is submitted[39m[32m 24[2mms[22m[39m
+[31m     [31m├ù[31m creates task with trimmed title[39m[32m 19[2mms[22m[39m
+[31m     [31m├ù[31m does not submit form with empty title[39m[32m 14[2mms[22m[39m
+[31m     [31m├ù[31m clears form and hides it after successful task creation[39m[32m 13[2mms[22m[39m
+[31m     [31m├ù[31m adds created task to board state[39m[32m 18[2mms[22m[39m
+[31m     [31m├ù[31m shows loading state while creating task[39m[32m 13[2mms[22m[39m
+     [32mΓ£ô[39m opens TaskDetail modal when task card is clicked[32m 54[2mms[22m[39m
+     [32mΓ£ô[39m closes TaskDetail modal when close button is clicked[32m 166[2mms[22m[39m
+     [32mΓ£ô[39m updates task in board when task is updated in modal[32m 94[2mms[22m[39m
+     [32mΓ£ô[39m removes task from board when task is deleted from modal[32m 139[2mms[22m[39m
+     [32mΓ£ô[39m updates task status when dragged to different column[32m 30[2mms[22m[39m
+     [32mΓ£ô[39m updates task position within same column[32m 31[2mms[22m[39m
+     [32mΓ£ô[39m does not call API if task is dropped in same position[32m 16[2mms[22m[39m
+     [32mΓ£ô[39m does not call API if dropped without destination[32m 16[2mms[22m[39m
+     [32mΓ£ô[39m rolls back optimistic update on API failure[32m 19[2mms[22m[39m
+     [32mΓ£ô[39m displays loading state while fetching data[32m 2[2mms[22m[39m
+     [32mΓ£ô[39m hides loading state after data is fetched[32m 6[2mms[22m[39m
+     [32mΓ£ô[39m displays error state when fetch fails[32m 20[2mms[22m[39m
+     [32mΓ£ô[39m displays retry button when error occurs[32m 12[2mms[22m[39m
+[31m     [31m├ù[31m retries fetching data when retry button is clicked[39m[33m 1073[2mms[22m[39m
+[31m     [31m├ù[31m displays error message when task creation fails[39m[32m 12[2mms[22m[39m
+     [32mΓ£ô[39m renders project name in header[32m 5[2mms[22m[39m
+     [32mΓ£ô[39m calls onBack when back button is clicked[32m 76[2mms[22m[39m
+     [32mΓ£ô[39m renders New Task button in header[32m 9[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m complete workflow: fetch, display, create, and manage tasks [33m 302[2mms[22m[39m
+ [32mΓ£ô[39m src/components/comments/CommentList.test.tsx [2m([22m[2m44 tests[22m[2m)[22m[33m 3798[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should call onEditComment when edit form is submitted [33m 483[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should submit edit on Enter key [33m 416[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should call onAddComment with parent_comment_id when reply submitted [33m 420[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should propagate edit errors properly [33m 529[2mms[22m[39m
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > renders modal overlay with correct styling
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > renders modal overlay with correct styling
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > renders 'Assigned to:' label
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > renders 'Assigned to:' label
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > populates user dropdown with all users
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > populates user dropdown with all users
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > handles task with null description
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > handles task with null description
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > re-renders when task prop changes
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+stderr | src/components/kanban/TaskDetail.test.tsx > TaskDetail > re-renders when task prop changes
+Warning: An update to TaskDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TaskDetail (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/components/kanban/TaskDetail.tsx:16:3)
+    at AllTheProviders (C:/Users/kkraus/source/repos/adelantestory/Cx-Innovation-Hub-IF-Baseline/concept/apps/web/src/test/test-utils.tsx:5:28)
+
+ [32mΓ£ô[39m src/components/kanban/TaskDetail.test.tsx [2m([22m[2m35 tests[22m[2m)[22m[33m 4579[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m saves updated title and description [33m 1448[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m trims whitespace from title and description on save [33m 420[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m cancels edit mode without saving [33m 401[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m completes full workflow: edit, assign, add comment, delete [33m 659[2mms[22m[39m
+ [32mΓ£ô[39m src/components/projects/ProjectList.test.tsx [2m([22m[2m34 tests[22m[2m)[22m[33m 6048[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m submits form with trimmed title and description [33m 805[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m submits form with undefined description when empty [33m 387[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m clears form inputs after successful creation [33m 666[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m hides form after successful creation [33m 405[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m enables create button when title has content [33m 312[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m shows Creating... state while submitting [33m 431[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m prepends newly created project to the list [33m 512[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m displays error when project creation fails [33m 388[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m can create first project from empty state [33m 374[2mms[22m[39m
+ [32mΓ£ô[39m src/components/comments/CommentForm.test.tsx [2m([22m[2m34 tests[22m[2m)[22m[33m 7673[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should show loading state (... button text) during submission [33m 327[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should call onSubmit with trimmed content when form is submitted [33m 371[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should handle multiple submissions sequentially [33m 655[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should trim content with leading and trailing whitespace [33m 654[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should preserve internal whitespace when trimming [33m 372[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should not call onSubmit when Cancel button is clicked [33m 325[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should work correctly for root-level comments (no parentCommentId) [33m 306[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should work correctly for reply comments (with parentCommentId) [33m 326[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should preserve parentCommentId across multiple submissions [33m 622[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should trim content with leading and trailing whitespace [33m 653[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m should preserve internal whitespace when trimming [33m 403[2mms[22m[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 9 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > renders tasks sorted by position within each column
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  First task
+Received:
+  3
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="px-4 py-4"
+      >
+        <div
+          class="flex items-center justify-between mb-4"
+        >
+          <div
+            class="flex items-center gap-3"
+          >
+            <button
+              class="text-sm text-gray-500 hover:text-gray-700"
+            >
+              ΓåÉ Projects
+            </button>
+            <h2
+              class="text-xl font-bold text-gray-900"
+            >
+              Sample Project
+            </h2>
+          </div>
+          <button
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium"
+          >
+            New Task
+          </button>
+        </div>
+        <div
+          data-testid="drag-drop-context"
+        >
+          <div
+            class="grid grid-cols-4 gap-4"
+          >
+            <div
+              data-testid="column-todo"
+            >
+              <div
+                data-testid="column-label-todo"
+              >
+                todo
+              </div>
+              <div
+                data-testid="task-count-todo"
+              >
+                3
+              </div>
+              <div
+                data-testid="task-task-1"
+              >
+                First task
+              </div>
+              <div
+                data-testid="task-task-2"
+              >
+                Second task
+              </div>
+              <div
+                data-testid="task-task-3"
+              >
+                Third task
+              </div>
+            </div>
+            <div
+              data-testid="column-in_progress"
+            >
+              <div
+                data-testid="column-label-in_progress"
+              >
+                in_progress
+              </div>
+              <div
+                data-testid="task-count-in_progress"
+              >
+                0
+              </div>
+            </div>
+            <div
+              data-testid="column-in_review"
+            >
+              <div
+                data-testid="column-label-in_review"
+              >
+                in_review
+              </div>
+              <div
+                data-testid="task-count-in_review"
+              >
+                0
+              </div>
+            </div>
+            <div
+              data-testid="column-done"
+            >
+              <div
+                data-testid="column-label-done"
+              >
+                done
+              </div>
+              <div
+                data-testid="task-count-done"
+              >
+                0
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ Γ¥» src/components/kanban/Board.test.tsx:370:31
+    368|       const todoColumn = screen.getByTestId("column-todo");
+    369|       const taskElements = todoColumn.querySelectorAll('[data-testid^=ΓÇª
+    370|       expect(taskElements[0]).toHaveTextContent("First task");
+       |                               ^
+    371|       expect(taskElements[1]).toHaveTextContent("Second task");
+    372|       expect(taskElements[2]).toHaveTextContent("Third task");
+ Γ¥» runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ Γ¥» checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ Γ¥» Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/9]ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > creates task with title when form is submitted
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/New Task/i`
+
+Here are the accessible roles:
+
+  paragraph:
+
+  Name "":
+  <p
+    class="text-gray-500"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex items-center justify-center py-20"
+    >
+      <p
+        class="text-gray-500"
+      >
+        Loading board...
+      </p>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/components/kanban/Board.test.tsx:487:34
+    485|
+    486|     // Show form
+    487|     const newTaskButton = screen.getByRole("button", { name: /New TaskΓÇª
+       |                                  ^
+    488|     await userEvent.click(newTaskButton);
+    489|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/9]ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > creates task with trimmed title
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/New Task/i`
+
+Here are the accessible roles:
+
+  paragraph:
+
+  Name "":
+  <p
+    class="text-gray-500"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex items-center justify-center py-20"
+    >
+      <p
+        class="text-gray-500"
+      >
+        Loading board...
+      </p>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/components/kanban/Board.test.tsx:521:34
+    519|
+    520|     // Show form
+    521|     const newTaskButton = screen.getByRole("button", { name: /New TaskΓÇª
+       |                                  ^
+    522|     await userEvent.click(newTaskButton);
+    523|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/9]ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > does not submit form with empty title
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/New Task/i`
+
+Here are the accessible roles:
+
+  paragraph:
+
+  Name "":
+  <p
+    class="text-gray-500"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex items-center justify-center py-20"
+    >
+      <p
+        class="text-gray-500"
+      >
+        Loading board...
+      </p>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/components/kanban/Board.test.tsx:552:34
+    550|
+    551|     // Show form
+    552|     const newTaskButton = screen.getByRole("button", { name: /New TaskΓÇª
+       |                                  ^
+    553|     await userEvent.click(newTaskButton);
+    554|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/9]ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > clears form and hides it after successful task creation
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/New Task/i`
+
+Here are the accessible roles:
+
+  paragraph:
+
+  Name "":
+  <p
+    class="text-gray-500"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex items-center justify-center py-20"
+    >
+      <p
+        class="text-gray-500"
+      >
+        Loading board...
+      </p>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/components/kanban/Board.test.tsx:584:34
+    582|
+    583|     // Show form
+    584|     const newTaskButton = screen.getByRole("button", { name: /New TaskΓÇª
+       |                                  ^
+    585|     await userEvent.click(newTaskButton);
+    586|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/9]ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > adds created task to board state
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/New Task/i`
+
+Here are the accessible roles:
+
+  paragraph:
+
+  Name "":
+  <p
+    class="text-gray-500"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex items-center justify-center py-20"
+    >
+      <p
+        class="text-gray-500"
+      >
+        Loading board...
+      </p>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/components/kanban/Board.test.tsx:620:34
+    618|
+    619|     // Show form, type, and submit
+    620|     await userEvent.click(screen.getByRole("button", { name: /New TaskΓÇª
+       |                                  ^
+    621|     await userEvent.type(
+    622|       screen.getByPlaceholderText("Task title..."),
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[6/9]ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > shows loading state while creating task
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/New Task/i`
+
+Here are the accessible roles:
+
+  paragraph:
+
+  Name "":
+  <p
+    class="text-gray-500"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex items-center justify-center py-20"
+    >
+      <p
+        class="text-gray-500"
+      >
+        Loading board...
+      </p>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/components/kanban/Board.test.tsx:649:34
+    647|
+    648|     // Show form, type, and submit
+    649|     await userEvent.click(screen.getByRole("button", { name: /New TaskΓÇª
+       |                                  ^
+    650|     await userEvent.type(
+    651|       screen.getByPlaceholderText("Task title..."),
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[7/9]ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > retries fetching data when retry button is clicked
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <p
+  class="text-red-500 mb-4"
+>
+  Network error
+</p> instead
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="flex items-center justify-center py-20"
+      >
+        <div
+          class="text-center"
+        >
+          <p
+            class="text-red-500 mb-4"
+          >
+            Network error
+          </p>
+          <button
+            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ Γ¥» src/components/kanban/Board.test.tsx:1109:55
+    1107|     await waitFor(() => {
+    1108|       expect(mockFetchTasks).toHaveBeenCalled();
+    1109|       expect(screen.queryByText("Network error")).not.toBeInTheDocumenΓÇª
+       |                                                       ^
+    1110|     });
+    1111|   });
+ Γ¥» runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ Γ¥» checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ Γ¥» Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[8/9]ΓÄ»
+
+ FAIL  src/components/kanban/Board.test.tsx > Board Component > displays error message when task creation fails
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/New Task/i`
+
+Here are the accessible roles:
+
+  paragraph:
+
+  Name "":
+  <p
+    class="text-gray-500"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex items-center justify-center py-20"
+    >
+      <p
+        class="text-gray-500"
+      >
+        Loading board...
+      </p>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/components/kanban/Board.test.tsx:1128:34
+    1126|
+    1127|     // Show form, type, and submit
+    1128|     await userEvent.click(screen.getByRole("button", { name: /New TaskΓÇª
+       |                                  ^
+    1129|     await userEvent.type(
+    1130|       screen.getByPlaceholderText("Task title..."),
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[9/9]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m314 passed[39m[22m[90m (323)[39m
+[2m   Start at [22m 18:05:08
+[2m   Duration [22m 11.00s[2m (transform 1.93s, setup 2.39s, import 4.80s, tests 28.37s, environment 16.94s)[22m
+
+[1m[41m FAIL [49m[22m [31mTests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+^C
