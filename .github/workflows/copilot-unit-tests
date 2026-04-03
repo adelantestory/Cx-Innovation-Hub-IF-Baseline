@@ -28,5 +28,5 @@ jobs:
           npm install -g @github/copilot
           copilot -p "check the code quality from the code commited \
             to this pull request.Use claude opus4.6 and codex 5.3 models \
-            to create a combined results. Please add the results to this PR \
+            to create a combined results. Please add the result to this PR \
             description in a way my team can understand this." --yolo
