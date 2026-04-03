@@ -1,0 +1,32 @@
+name: Run Unit Tests
+
+on:
+  pull_request:
+    branches: [demo/playwright-testing]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Code Quality Report From Claude And Codex
+        env:
+          GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        run: |
+          npm install -g @github/copilot
+          copilot -p "check the code quality from the code commited \
+            to this pull request.Use claude opus4.6 and codex 5.3 models \
+            to create a combined results. Please add the result to this PR \
+            description in a way my team can understand this." --yolo
