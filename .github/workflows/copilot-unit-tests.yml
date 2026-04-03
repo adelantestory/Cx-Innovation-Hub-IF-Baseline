@@ -2,7 +2,7 @@ name: Run Unit Tests
 
 on:
   pull_request:
-    branches: [demo/playwright-testing]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
