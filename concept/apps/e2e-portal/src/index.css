@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-portal-bg;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-portal-border rounded;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c4bfba;
+  }
+}

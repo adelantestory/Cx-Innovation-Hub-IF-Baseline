@@ -1,0 +1,39 @@
+Using artifacts/Taskify Product Description.txt as the source of truth,
+write Playwright E2E tests in concept/apps/web/tests/.
+
+Each test must quote the requirement it covers. Create these files:
+- tests/userSelect.spec.ts      — user selection on launch
+- tests/kanbanBoard.spec.ts     — board renders 4 columns, cards in correct columns
+- tests/dragAndDrop.spec.ts     — move a card between columns
+- tests/comments.spec.ts        — add a comment, edit own, cannot edit/delete others
+- tests/cardHighlight.spec.ts   — current user's cards have distinct styling
+
+Also complete playwright.config.ts with:
+- baseURL: http://localhost:5173
+- webServer config for both API (port 3000) and web (port 5173)
+- chromium only, retries: 1
+
+
+Test Files (in tests)
+
+File				Tests	Requirement Coverage
+userSelect.spec.ts		5	5 user cards on launch, no password, click → project list, Switch User
+kanbanBoard.spec.ts		5	4 columns (To Do/In Progress/In Review/Done), cards in correct columns, card count badges, card click → detail modal
+dragAndDrop.spec.ts		4	Keyboard-based drag (Space + ArrowRight/Left) via @hello-pangea/dnd, forward/backward moves, no data loss
+comments.spec.ts		5	Add comment, edit own, own shows Edit/Delete, others' comments lack Edit/Delete, delete own
+cardHighlight.spec.ts   3	Current user's cards have different backgroundColor, highlight updates on user switch, unassigned cards use default style
+
+
+1. Copilot execute the tests/kanbanBoard.spec.ts test in headed mode and provide a url to the results in a subfolder under tests titled 'test results'
+2. copilot execute the playwright.config.ts and the 5 playwright tests under the 'apps/web/tests' folder in headed mode. Show the results in html and summarize the test results here and explain the reason for any failures.
+
+Requirements:
+- DragDropContext from @hello-pangea/dnd wrapping 4 Column components
+- Map STATUS_COLUMNS to display labels: To Do, In Progress, In Review, Done
+- Highlight cards assigned to currentUser using the design token colors from the stub
+- Column drop zones highlight on drag-over (use --drop-zone-bg token)
+- Optimistic UI for drag: update state immediately, call updateTaskStatus(), rollback on error
+- Include New Task button/form
+- Open TaskDetail modal on card click
+- Match Figma layout and spacing exactly
+Keep the BoardProps interface unchanged.

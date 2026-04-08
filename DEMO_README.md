@@ -29,6 +29,6 @@ Maintain all existing patterns.
 
 ## Reset
 ```bash
-git checkout main && git branch -D demo/spec-driven-agent
-bash setup-demo-branches.sh --only spec-driven-agent
+git checkout main && git branch -D demo/playwright-testing
+bash setup-demo-branches.sh --only playwright-testing
 ```
