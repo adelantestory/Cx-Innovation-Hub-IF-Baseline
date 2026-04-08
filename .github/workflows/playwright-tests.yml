@@ -39,10 +39,16 @@ jobs:
 
       - name: Initialize database
         run: |
-          for f in concept/sql/*.sql; do
-            echo "Running $f..."
-            PGPASSWORD=postgres psql -h localhost -U postgres -d taskify -f "$f"
-          done
+          shopt -s nullglob
+          sql_files=(concept/sql/*.sql)
+          if [[ ${#sql_files[@]} -eq 0 ]]; then
+            echo "No SQL seed files found in concept/sql/ — skipping database initialization."
+          else
+            for f in "${sql_files[@]}"; do
+              echo "Running $f..."
+              PGPASSWORD=postgres psql -h localhost -U postgres -d taskify -f "$f"
+            done
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -93,5 +99,5 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: concept/apps/web/tests/test results/
+          path: concept/apps/web/playwright-report/
           retention-days: 14
