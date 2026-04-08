@@ -32,7 +32,7 @@ export default defineConfig({
     command: 'cd ../.. && docker compose up --build',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 300000,
     stdout: 'pipe',
     stderr: 'pipe',
   },
