@@ -387,6 +387,77 @@ bash setup-demo-branches.sh --only playwright-testing
 ```
 EOF
 
+  cat > README.md << 'EOF'
+# Taskify — Playwright E2E Testing Demo
+
+This branch demonstrates how GitHub Copilot can generate Playwright end-to-end tests from a plain-English product specification.
+
+## What's Here
+
+| Path | Status |
+|------|--------|
+| `concept/apps/api/` | ✅ Full working Express API |
+| `concept/apps/web/` | ✅ Full working React/Vite frontend |
+| `concept/apps/web/playwright.config.ts` | ⚠️ Incomplete stub — Copilot completes it |
+| `concept/apps/web/tests/` | ❌ Empty — Copilot writes the tests |
+
+## Prerequisites
+
+- [Node.js 20+](https://nodejs.org/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+## Getting Started
+
+```bash
+# Start the application stack
+docker compose up -d
+
+# Install dependencies and Playwright browsers
+cd concept/apps/web
+npm install
+npx playwright install chromium
+```
+
+## Running Tests
+
+```bash
+# Run all E2E tests
+npx playwright test
+
+# Run in interactive UI mode
+npx playwright test --ui
+
+# View the last test report
+npx playwright show-report
+```
+
+## Demo Goal
+
+Ask Copilot to write Playwright tests mapped directly to the product spec:
+
+```
+Using the Taskify product description in artifacts/Taskify Product Description.txt
+as the source of truth, write Playwright E2E tests in concept/apps/web/tests/.
+
+Each test must quote the requirement it covers. Create these files:
+- tests/userSelect.spec.ts       — user selection on launch
+- tests/kanbanBoard.spec.ts      — board renders 4 columns, cards in correct columns
+- tests/dragAndDrop.spec.ts      — move a card between columns
+- tests/comments.spec.ts         — add a comment, edit own, cannot edit/delete others
+- tests/cardHighlight.spec.ts    — current user's cards have distinct styling
+
+Also complete playwright.config.ts with baseURL, webServer config for both
+API (port 3000) and web (port 5173), chromium only, and retries: 1.
+```
+
+## Reset This Branch
+
+```bash
+git checkout main && git branch -D demo/playwright-testing
+bash setup-demo-branches.sh --only playwright-testing
+```
+EOF
+
   git add -A
   git commit -m "demo: playwright-testing — full app, Playwright installed, no tests yet"
   log "demo/playwright-testing committed"

@@ -1,39 +1,39 @@
-# Demo Branch: Playwright — Spec to Tests
+# Demo Branch: Spec-Driven Agentic Coding
 ## The Gap
-The full working Taskify app is here. `concept/apps/web/tests/` is empty.
-`playwright.config.ts` is an incomplete stub.
+`concept/apps/api/src/` and `concept/apps/web/src/` are intentionally empty.
+`concept/sql/` has no SQL files.
+The spec, CLAUDE.md, Dockerfiles, and all config files exist.
 
-## Copilot Prompt
+## What Copilot Does
+Reads the spec in `concept/.specify/specify.md` + `CLAUDE.md` and scaffolds:
+- Full Express API with all 12 endpoints
+- Full React frontend with user select → project list → kanban → task detail
+- PostgreSQL schema + seed data
+
+## Copilot Prompt (paste into Agent mode)
 ```
-Using the Taskify product description in artifacts/Taskify Product Description.txt
-as the source of truth, write Playwright E2E tests in concept/apps/web/tests/.
-
-Each test must quote the requirement it covers. Create these files:
-- tests/userSelect.spec.ts  — user selection on launch
-- tests/kanbanBoard.spec.ts — board renders 4 columns, cards appear in correct columns
-- tests/dragAndDrop.spec.ts — move a card between columns
-- tests/comments.spec.ts    — add a comment, edit own, cannot edit/delete others
-- tests/cardHighlight.spec.ts — current user's cards have distinct styling
-
-Also complete playwright.config.ts with:
-- baseURL: http://localhost:5173
-- webServer for both API (port 3000) and web (port 5173)
-- chromium only for demo speed
-- retries: 1
+Read CLAUDE.md and concept/.specify/specify.md.
+Scaffold the complete Taskify application:
+- concept/apps/api/src/ — Node.js/Express API
+- concept/apps/web/src/ — React/Vite/TypeScript frontend
+- concept/sql/ — 001_create_tables.sql and 005_seed_data.sql
+Follow every convention in CLAUDE.md exactly.
 ```
 
-## Running After Copilot Generates Tests
-```bash
-cd concept/apps/web
-npm install
-npx playwright install chromium
-# Start the app first: cd ../../.. && docker compose up -d
-npx playwright test
-npx playwright test --ui   # interactive mode
+## Cascade Spec Change Prompt
+```
+The spec has been updated: tasks now have a priority field (High, Medium, Low, default Medium).
+Update the SQL migration, API endpoints, and the task Card component.
+Maintain all existing patterns.
 ```
 
 ## Reset
 ```bash
+<<<<<<< copilot/vscode-mnqfpwww-4ks6
 git checkout main && git branch -D demo/playwright-testing
 bash setup-demo-branches.sh --only playwright-testing
+=======
+git checkout main && git branch -D demo/spec-driven-agent
+bash setup-demo-branches.sh --only spec-driven-agent
+>>>>>>> main
 ```
