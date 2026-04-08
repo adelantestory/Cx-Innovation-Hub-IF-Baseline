@@ -39,7 +39,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       stdout: 'pipe',
       stderr: 'pipe',
-      timeout: 120_000,
+      timeout: 60_000,
     },
     {
       command: 'npm run dev',
@@ -47,7 +47,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       stdout: 'pipe',
       stderr: 'pipe',
-      timeout: 120_000,
+      timeout: 60_000,
     },
   ],
 });
