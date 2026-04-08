@@ -28,20 +28,12 @@ export default defineConfig({
     },
   ],
 
-  webServer: [
-    {
-      command: 'cd ../api && npm run dev',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      stdout: 'ignore',
-      stderr: 'pipe',
-    },
-    {
-      command: 'npm run dev',
-      url: 'http://localhost:5173',
-      reuseExistingServer: !process.env.CI,
-      stdout: 'ignore',
-      stderr: 'pipe',
-    },
-  ],
+  webServer: {
+    command: 'docker compose up',
+    cwd: '../..',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  },
 });
