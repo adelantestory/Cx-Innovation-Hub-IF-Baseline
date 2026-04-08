@@ -120,3 +120,5 @@ Each of 16 Azure services has 4 agents: `-architect`, `-developer`, `-terraform`
 ---
 
 **See `CLAUDE.md` for complete instructions.**
+
+hello there
