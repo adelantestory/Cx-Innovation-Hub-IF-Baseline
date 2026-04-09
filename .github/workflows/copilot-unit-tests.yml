@@ -23,7 +23,7 @@ jobs:
 
       - name: Generate Code Quality Report From Claude And Codex
         env:
-          GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
         run: |
           npm install -g @github/copilot
           copilot -p "check the code quality from the code commited \
