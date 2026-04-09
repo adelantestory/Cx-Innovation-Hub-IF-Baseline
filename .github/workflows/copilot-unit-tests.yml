@@ -1,13 +1,24 @@
-name: Run Unit Tests
+name: Code Quality Review
 
 on:
   pull_request:
     branches: [main]
   workflow_dispatch:
 
+# Cancel any in-progress run for the same PR/branch to avoid wasting runner minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Minimum permissions required: read the repo and write back to the PR description.
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
-  test:
+  code-quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -17,16 +28,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
 
+      # Use `npm ci` (not `npm install`) for a clean, reproducible install that
+      # respects the lockfile and is faster in CI.
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Generate Code Quality Report From Claude And Codex
+      # The @github/copilot package is declared in package.json.
+      # We invoke it via `npx` so no separate global install is needed.
+      # `--yolo` suppresses interactive confirmations, which is required in CI.
+      - name: Generate Code Quality Report
         env:
           GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
         run: |
-          npm install -g @github/copilot
-          copilot -p "check the code quality from the code commited \
-            to this pull request.Use claude opus4.6 and codex 5.3 models \
-            to create a combined results. Please add the result to this PR \
-            description in a way my team can understand this." --yolo
+          npx copilot -p "Review the code quality of the changes committed \
+            to this pull request. Use claude-opus-4.6 and gpt-5.3-codex models \
+            to produce a combined analysis. Post the results as an update to \
+            this PR description in a clear, team-readable format." --yolo
