@@ -30,14 +30,14 @@ export default defineConfig({
 
   webServer: [
     {
-      command: 'cd ../.. && docker compose up --build api',
+      command: 'cd ../api && npm run dev',
       url: 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
       stdout: 'ignore',
       stderr: 'pipe',
     },
     {
-      command: 'cd ../.. && docker compose up --build web',
+      command: 'npm run dev',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       stdout: 'ignore',
