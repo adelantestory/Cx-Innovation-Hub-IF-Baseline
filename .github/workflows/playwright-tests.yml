@@ -2,21 +2,34 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [demo/playwright-testing]
+    branches:
+      - main
+      - demo/playwright-testing
   pull_request:
-    branches: [demo/playwright-testing]
+    branches:
+      - main
+      - demo/playwright-testing
   workflow_dispatch:
     inputs:
       test_filter:
-        description: "Test filter — use @tag (e.g. @dev, @qa) for environment tags, or a spec filename. Leave blank to run all."
+        description: "Test filter — use @tag (e.g. @smoke, @qa, @uat) for environment tags, or a spec filename. Leave blank to run all."
         required: false
         default: ""
+      browser:
+        description: "Browser to run tests on (chromium, firefox, webkit, or all). Defaults to all."
+        required: false
+        default: "all"
 
 jobs:
   playwright:
-    name: Run Playwright E2E Tests
+    name: Run Playwright E2E Tests (${{ matrix.browser }})
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: ${{ github.event.inputs.browser == 'all' || github.event.inputs.browser == '' ? fromJSON('["chromium","firefox","webkit"]') : fromJSON(format('["{0}"]', github.event.inputs.browser)) }}
 
     services:
       postgres:
@@ -63,7 +76,7 @@ jobs:
 
       - name: Install Playwright browsers
         working-directory: concept/apps/web
-        run: npx playwright install chromium --with-deps
+        run: npx playwright install ${{ matrix.browser }} --with-deps
 
       - name: Run Playwright tests
         working-directory: concept/apps/web
@@ -81,19 +94,19 @@ jobs:
         run: |
           FILTER="${{ github.event.inputs.test_filter }}"
           if [[ "$FILTER" == @* ]]; then
-            npx playwright test --grep "$FILTER"
+            npx playwright test --project="${{ matrix.browser }}" --grep "$FILTER"
           elif [ -n "$FILTER" ]; then
-            npx playwright test $FILTER
+            npx playwright test --project="${{ matrix.browser }}" $FILTER
           else
-            npx playwright test
+            npx playwright test --project="${{ matrix.browser }}"
           fi
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.browser }}-${{ github.run_id }}
           path: |
             concept/apps/web/playwright-report/
             concept/apps/web/test-results/
-          retention-days: 14
+          retention-days: 30

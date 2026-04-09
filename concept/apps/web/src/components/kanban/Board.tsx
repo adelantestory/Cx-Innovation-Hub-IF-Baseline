@@ -165,7 +165,7 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
           onClick={() => setShowNewTask(!showNewTask)}
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium"
         >
-          {showNewTask ? "Cancel" : "New Task"}
+          {showNewTask ? "Cancel" : "+ New Task"}
         </button>
       </div>
 
@@ -179,7 +179,7 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
             type="text"
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
-            placeholder="Task title..."
+            placeholder="Task title…"
             className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
@@ -188,7 +188,7 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
             disabled={creating || !newTaskTitle.trim()}
             className="px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50"
           >
-            {creating ? "Adding..." : "Add Task"}
+            {creating ? "Adding…" : "Add"}
           </button>
         </form>
       )}
@@ -201,6 +201,7 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
               key={status}
               status={status}
               tasks={getColumnTasks(status)}
+              currentUserId={currentUser.id}
               onCardClick={setSelectedTask}
             />
           ))}

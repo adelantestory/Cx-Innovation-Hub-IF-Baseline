@@ -6,6 +6,14 @@ import { defineConfig, devices } from '@playwright/test';
  * The application consists of:
  * - API server running on http://localhost:3000
  * - Web frontend running on http://localhost:5173
+ * 
+ * Browser projects:
+ *   - chromium  (Desktop Chrome)
+ *   - firefox   (Desktop Firefox)
+ *   - webkit    (Desktop Safari)
+ * 
+ * In CI each browser is run as a separate matrix job so failures are
+ * reported independently and don't block each other.
  */
 export default defineConfig({
   testDir: './tests',
@@ -19,12 +27,21 @@ export default defineConfig({
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    video: 'on-first-retry',
   },
 
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
     },
   ],
 

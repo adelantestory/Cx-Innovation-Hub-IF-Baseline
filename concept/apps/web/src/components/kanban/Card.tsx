@@ -3,7 +3,9 @@
 // =============================================================================
 // Renders a single task card within a Kanban column. Draggable via
 // @hello-pangea/dnd. Shows title, assigned user avatar, and comment count
-// indicator. Clicking opens the task detail modal.
+// indicator. Cards assigned to the current user receive a visual highlight
+// (blue ring + data-own attribute) so they stand out on the board.
+// Clicking opens the task detail modal.
 // =============================================================================
 
 import { Draggable } from "@hello-pangea/dnd";
@@ -12,10 +14,13 @@ import type { Task } from "../../api/types";
 interface CardProps {
   task: Task;
   index: number;
+  currentUserId: string;
   onClick: (task: Task) => void;
 }
 
-export default function Card({ task, index, onClick }: CardProps) {
+export default function Card({ task, index, currentUserId, onClick }: CardProps) {
+  const isOwn = task.assigned_user_id === currentUserId;
+
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -23,10 +28,13 @@ export default function Card({ task, index, onClick }: CardProps) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
+          data-own={isOwn ? "true" : undefined}
           onClick={() => onClick(task)}
           className={`bg-white rounded-lg shadow-sm border p-3 mb-2 cursor-pointer transition-shadow ${
             snapshot.isDragging
               ? "shadow-lg border-blue-300"
+              : isOwn
+              ? "border-blue-400 ring-2 ring-blue-200 hover:shadow-md"
               : "border-gray-200 hover:shadow-md"
           }`}
         >
