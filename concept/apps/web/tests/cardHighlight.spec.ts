@@ -155,4 +155,49 @@ test.describe('Card Highlight — Current User', () => {
       /ring|border-blue|border-indigo|highlight|own-card/.test(alexClasses2);
     expect(alexStillHighlighted, "Alex's card should NOT be highlighted when Jordan is logged in").toBeFalsy();
   });
+
+  test('unassigned cards use the default (non-highlighted) style', async ({
+    page,
+  }) => {
+    // Spec: "You will see any cards that are assigned to you…in a different
+    //        color from all the other ones"
+    //
+    // Unassigned cards (assignee = null) must NEVER receive highlight styling
+    // regardless of who is logged in.
+    //
+    // "Create onboarding flow" in Mobile App MVP is seeded with no assignee.
+
+    await page.goto('/');
+    await page.getByText('Alex Rivera').click();
+    await page.getByText('Mobile App MVP').click();
+    await expect(page.getByText('To Do')).toBeVisible();
+
+    // Locate the unassigned "Create onboarding flow" card
+    const unassignedCard = page
+      .locator('[data-rfd-droppable-id="todo"]')
+      .locator('[data-rfd-draggable-id]')
+      .filter({ hasText: 'Create onboarding flow' });
+
+    await expect(unassignedCard).toBeVisible();
+
+    const cardClasses = (await unassignedCard.getAttribute('class')) || '';
+    const cardDataOwn = await unassignedCard.getAttribute('data-own');
+
+    const highlightPatterns = [
+      /ring/,
+      /border-blue/,
+      /border-indigo/,
+      /bg-blue/,
+      /bg-indigo/,
+      /highlight/,
+      /own-card/,
+    ];
+    const hasHighlight = highlightPatterns.some((p) => p.test(cardClasses));
+    const hasDataOwn = cardDataOwn === 'true';
+
+    expect(
+      hasHighlight || hasDataOwn,
+      'Unassigned card should NOT have highlight styling (data-own="true" or a highlight CSS class).'
+    ).toBeFalsy();
+  });
 });

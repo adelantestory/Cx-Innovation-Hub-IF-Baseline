@@ -178,4 +178,32 @@ test.describe('Comments', () => {
     await expect(sarahComment.getByText('Edit', { exact: true })).toHaveCount(0);
     await expect(sarahComment.getByText('Delete', { exact: true })).toHaveCount(0);
   });
+
+  test('own comment shows Edit and Delete buttons', async ({ page }) => {
+    // Spec: "You can edit any comments that you make" /
+    //        "You can delete any comments that you made"
+    //
+    // The Edit and Delete controls must be visible for the author's own comment.
+    await openTaskDetail(page, 'Sarah Chen', 'Design new homepage layout');
+
+    const modal = page.locator('.fixed.inset-0');
+    const commentText = `OwnButtons-${uid}`;
+
+    // Post a comment as Sarah Chen
+    const commentInput = modal.getByPlaceholder('Add a comment...');
+    await commentInput.fill(commentText);
+    await modal.getByRole('button', { name: 'Send' }).click();
+    await expect(modal.getByText(commentText)).toBeVisible();
+
+    // Scope to this specific comment block
+    const commentBlock = modal.locator('.min-w-0').filter({ hasText: commentText });
+
+    // Both Edit and Delete buttons must be rendered for the comment author
+    await expect(commentBlock.getByText('Edit', { exact: true })).toBeVisible();
+    await expect(commentBlock.getByText('Delete', { exact: true })).toBeVisible();
+
+    // Cleanup: delete the comment to avoid polluting future runs
+    await commentBlock.getByText('Delete', { exact: true }).click();
+    await expect(modal.getByText(commentText)).toHaveCount(0);
+  });
 });

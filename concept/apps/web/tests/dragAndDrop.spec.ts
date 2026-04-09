@@ -53,6 +53,40 @@ test.describe('Drag and Drop', () => {
     await expect(targetColumn).toContainText('Design new homepage layout');
   });
 
+  test('move a card backward from "In Progress" to "To Do" via drag-and-drop', async ({
+    page,
+  }) => {
+    // Spec: "drag and drop cards back and forth between different columns"
+    //        "back and forth" — cards can also move left (backward).
+    //
+    // We drag "Implement responsive navigation bar" (seeded in In Progress)
+    // back into the To Do column.
+
+    const card = page.getByText('Implement responsive navigation bar');
+    const sourceColumn = page.locator('[data-rfd-droppable-id="in_progress"]');
+    const targetColumn = page.locator('[data-rfd-droppable-id="todo"]');
+
+    // Confirm card is currently in the In Progress column
+    await expect(sourceColumn).toContainText('Implement responsive navigation bar');
+
+    // Keyboard drag: focus → Space (lift) → ArrowLeft (move one column left → To Do)
+    //                → Space (drop)
+    await card.focus();
+    await page.keyboard.press('Space');        // lift
+    await page.keyboard.press('ArrowLeft');    // move one column left → To Do
+    await page.keyboard.press('Space');        // drop
+
+    // Verify the card now lives in the To Do column
+    await expect(targetColumn).toContainText('Implement responsive navigation bar');
+
+    // Restore: move the card back to In Progress so other tests are unaffected
+    await card.focus();
+    await page.keyboard.press('Space');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Space');
+    await expect(sourceColumn).toContainText('Implement responsive navigation bar');
+  });
+
   test('card status is persisted after drag-and-drop (survives refresh)', async ({
     page,
   }) => {
