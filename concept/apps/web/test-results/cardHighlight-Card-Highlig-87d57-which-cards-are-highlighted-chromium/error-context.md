@@ -1,0 +1,63 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - button "Taskify" [ref=e6] [cursor=pointer]
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - generic [ref=e9]: A
+          - generic [ref=e10]: Alex Rivera
+        - button "Switch User" [ref=e11] [cursor=pointer]
+  - generic [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - button "← Projects" [ref=e15] [cursor=pointer]
+        - heading "Website Redesign" [level=2] [ref=e16]
+      - button "New Task" [ref=e17] [cursor=pointer]
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - heading "To Do" [level=3] [ref=e21]
+          - generic [ref=e22]: "1"
+        - button "Implement responsive navigation bar Build the top navigation component with dropdown menus and mobile hamburger fallback. A Alex Rivera" [ref=e24] [cursor=pointer]:
+          - paragraph [ref=e25]: Implement responsive navigation bar
+          - paragraph [ref=e26]: Build the top navigation component with dropdown menus and mobile hamburger fallback.
+          - generic [ref=e27]:
+            - generic [ref=e28]: A
+            - generic [ref=e29]: Alex Rivera
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - heading "In Progress" [level=3] [ref=e32]
+          - generic [ref=e33]: "2"
+        - generic [ref=e34]:
+          - button "Design new homepage layout Create wireframes and mockups for the new homepage with improved navigation and hero section. J Jordan Kim" [ref=e35] [cursor=pointer]:
+            - paragraph [ref=e36]: Design new homepage layout
+            - paragraph [ref=e37]: Create wireframes and mockups for the new homepage with improved navigation and hero section.
+            - generic [ref=e38]:
+              - generic [ref=e39]: J
+              - generic [ref=e40]: Jordan Kim
+          - button "Nav Test Task 1774359117953" [ref=e41] [cursor=pointer]:
+            - paragraph [ref=e42]: Nav Test Task 1774359117953
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - heading "In Review" [level=3] [ref=e45]
+          - generic [ref=e46]: "2"
+        - generic [ref=e47]:
+          - button "Refactor CSS to Tailwind Migrate existing custom CSS to Tailwind utility classes for consistency. M Morgan Lee" [ref=e48] [cursor=pointer]:
+            - paragraph [ref=e49]: Refactor CSS to Tailwind
+            - paragraph [ref=e50]: Migrate existing custom CSS to Tailwind utility classes for consistency.
+            - generic [ref=e51]:
+              - generic [ref=e52]: M
+              - generic [ref=e53]: Morgan Lee
+          - button "Set up CI/CD pipeline Configure GitHub Actions for automated build, test, and deploy to staging. T Taylor Patel" [ref=e54] [cursor=pointer]:
+            - paragraph [ref=e55]: Set up CI/CD pipeline
+            - paragraph [ref=e56]: Configure GitHub Actions for automated build, test, and deploy to staging.
+            - generic [ref=e57]:
+              - generic [ref=e58]: T
+              - generic [ref=e59]: Taylor Patel
+      - generic [ref=e61]:
+        - heading "Done" [level=3] [ref=e62]
+        - generic [ref=e63]: "0"
+```
