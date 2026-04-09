@@ -65,21 +65,10 @@ jobs:
         working-directory: concept/apps/web
         run: npx playwright install chromium --with-deps
 
-      - name: Preflight diagnostics
-        run: |
-          set -euxo pipefail
-          echo "Node: $(node -v)"
-          echo "NPM: $(npm -v)"
-          echo "Postgres connectivity check"
-          PGPASSWORD=postgres psql -h localhost -U postgres -d taskify -c "select now();"
-          echo "Listening ports before Playwright startup"
-          ss -ltn || true
-
       - name: Run Playwright tests
         working-directory: concept/apps/web
         env:
           CI: true
-          DEBUG: pw:webserver,pw:api
           PGHOST: localhost
           PGUSER: postgres
           PGPASSWORD: postgres
@@ -90,22 +79,13 @@ jobs:
           CORS_ORIGIN: http://localhost:5173
           VITE_API_URL: http://localhost:3000
         run: |
-          set -euxo pipefail
           FILTER="${{ github.event.inputs.test_filter }}"
-
-          CMD="npx playwright test"
           if [[ "$FILTER" == @* ]]; then
-            CMD="npx playwright test --grep \"$FILTER\""
+            npx playwright test --grep "$FILTER"
           elif [ -n "$FILTER" ]; then
-            CMD="npx playwright test $FILTER"
-          fi
-
-          echo "Running: $CMD"
-          if ! bash -lc "$CMD" 2>&1 | tee /tmp/playwright-output.log; then
-            echo "::group::Playwright debug output (tail)"
-            tail -n 300 /tmp/playwright-output.log || true
-            echo "::endgroup::"
-            exit 1
+            npx playwright test $FILTER
+          else
+            npx playwright test
           fi
 
       - name: Upload test report
@@ -113,5 +93,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: concept/apps/web/tests/test results/
+          path: |
+            concept/apps/web/playwright-report/
+            concept/apps/web/test-results/
           retention-days: 14
