@@ -2,9 +2,21 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [demo/playwright-testing]
+    branches:
+      - demo/playwright-testing
+      - main
+    paths:
+      - 'concept/apps/**'
+      - 'concept/sql/**'
+      - '.github/workflows/playwright-tests.yml'
   pull_request:
-    branches: [demo/playwright-testing]
+    branches:
+      - demo/playwright-testing
+      - main
+    paths:
+      - 'concept/apps/**'
+      - 'concept/sql/**'
+      - '.github/workflows/playwright-tests.yml'
   workflow_dispatch:
     inputs:
       test_filter:
@@ -12,11 +24,37 @@ on:
         required: false
         default: ""
 
+# Cancel any in-progress run for the same branch/PR to avoid wasted minutes.
+concurrency:
+  group: playwright-${{ github.ref }}
+  cancel-in-progress: true
+
+# ---------------------------------------------------------------------------
+# Shared environment configuration referenced by both jobs
+# ---------------------------------------------------------------------------
+env:
+  NODE_VERSION: "20"
+  PGHOST: localhost
+  PGUSER: postgres
+  PGPASSWORD: postgres
+  PGDATABASE: taskify
+  PGPORT: 5432
+  PGSSLMODE: disable
+  AZURE_KEY_VAULT_URL: ""
+  CORS_ORIGIN: http://localhost:5173
+  VITE_API_URL: http://localhost:3000
+
 jobs:
-  playwright:
-    name: Run Playwright E2E Tests
+  # ---------------------------------------------------------------------------
+  # Job 1: Smoke tests — fast pass/fail on @smoke-tagged tests only
+  # Runs first to give quick feedback before the full suite begins.
+  # ---------------------------------------------------------------------------
+  smoke:
+    name: Smoke Tests (@smoke)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 8
+    permissions:
+      contents: read
 
     services:
       postgres:
@@ -47,7 +85,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: |
             concept/apps/api/package-lock.json
@@ -61,31 +99,124 @@ jobs:
         working-directory: concept/apps/web
         run: npm ci
 
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('concept/apps/web/package-lock.json') }}
+          restore-keys: |
+            playwright-chromium-${{ runner.os }}-
+
       - name: Install Playwright browsers
         working-directory: concept/apps/web
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install chromium --with-deps
+
+      - name: Install Playwright browser system deps (cache hit)
+        working-directory: concept/apps/web
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Run smoke tests
+        working-directory: concept/apps/web
+        env:
+          CI: true
+        run: npx playwright test --grep "@smoke" --reporter=list,html
+
+      - name: Upload smoke test report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-smoke-report
+          path: concept/apps/web/playwright-report/
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Full E2E suite — runs all tests after smoke tests pass
+  # ---------------------------------------------------------------------------
+  playwright:
+    name: Run Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: smoke
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: taskify
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d taskify"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize database
+        run: |
+          for f in concept/sql/*.sql; do
+            echo "Running $f..."
+            PGPASSWORD=postgres psql -h localhost -U postgres -d taskify -f "$f"
+          done
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            concept/apps/api/package-lock.json
+            concept/apps/web/package-lock.json
+
+      - name: Install API dependencies
+        working-directory: concept/apps/api
+        run: npm ci
+
+      - name: Install Web dependencies
+        working-directory: concept/apps/web
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('concept/apps/web/package-lock.json') }}
+          restore-keys: |
+            playwright-chromium-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        working-directory: concept/apps/web
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      - name: Install Playwright browser system deps (cache hit)
+        working-directory: concept/apps/web
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Run Playwright tests
         working-directory: concept/apps/web
         env:
           CI: true
-          PGHOST: localhost
-          PGUSER: postgres
-          PGPASSWORD: postgres
-          PGDATABASE: taskify
-          PGPORT: 5432
-          PGSSLMODE: disable
-          AZURE_KEY_VAULT_URL: ""
-          CORS_ORIGIN: http://localhost:5173
-          VITE_API_URL: http://localhost:3000
         run: |
           FILTER="${{ github.event.inputs.test_filter }}"
           if [[ "$FILTER" == @* ]]; then
-            npx playwright test --grep "$FILTER"
+            npx playwright test --grep "$FILTER" --reporter=list,html
           elif [ -n "$FILTER" ]; then
-            npx playwright test $FILTER
+            npx playwright test $FILTER --reporter=list,html
           else
-            npx playwright test
+            npx playwright test --reporter=list,html
           fi
 
       - name: Upload test report
@@ -93,5 +224,5 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: concept/apps/web/tests/test results/
+          path: concept/apps/web/playwright-report/
           retention-days: 14
