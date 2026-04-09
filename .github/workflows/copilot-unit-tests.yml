@@ -1,13 +1,23 @@
-name: Run Unit Tests
+name: Code Quality Report
 
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'concept/apps/**'
+      - 'concept/infrastructure/**'
+      - '.github/workflows/copilot-unit-tests.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
-  test:
+  code-quality:
+    name: Generate Code Quality Report
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -17,16 +27,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Generate Code Quality Report From Claude And Codex
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
         run: |
-          npm install -g @github/copilot
-          copilot -p "check the code quality from the code commited \
-            to this pull request.Use claude opus4.6 and codex 5.3 models \
-            to create a combined results. Please add the result to this PR \
+          npx copilot -p "check the code quality from the code committed \
+            to this pull request. Use claude opus4.6 and codex 5.3 models \
+            to create a combined result. Please add the result to this PR \
             description in a way my team can understand this." --yolo
