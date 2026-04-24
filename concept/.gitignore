@@ -1,6 +1,7 @@
 AZURE_CONFIG.json
 
 node_modules/
+dist/
 [Bb]in/
 [Oo]bj/
 .DS_Store
@@ -12,3 +13,7 @@ node_modules/
 
 # Docker
 docker-compose.override.yml
+
+# Playwright
+test-results/
+playwright-report/

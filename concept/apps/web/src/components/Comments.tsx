@@ -55,7 +55,7 @@ export default function Comments({ taskId, currentUser, comments, onCommentsChan
         {comments.map((comment) => {
           const isOwn = comment.user_id === currentUser.id;
           return (
-            <div key={comment.id} className="flex gap-2 min-w-0">
+            <div key={comment.id} className="flex gap-2">
               <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 flex-shrink-0">
                 {comment.author_name.charAt(0)}
               </div>

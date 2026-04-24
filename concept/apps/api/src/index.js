@@ -12,6 +12,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
+  origin: true,
+  allowedHeaders: ['Content-Type', 'X-User-Id'],
   exposedHeaders: ['X-User-Id'],
 }));
 app.use(express.json());

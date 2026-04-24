@@ -28,27 +28,32 @@ export default function Column({ id, title, tasks, currentUser, onCardClick }: P
               snapshot.isDraggingOver ? 'bg-blue-50' : ''
             }`}
           >
-            {tasks.map((task, index) => (
-              <Draggable key={task.id} draggableId={task.id} index={index}>
-                {(dragProvided, dragSnapshot) => (
-                  <div
-                    ref={dragProvided.innerRef}
-                    {...dragProvided.draggableProps}
-                    {...dragProvided.dragHandleProps}
-                    style={{
-                      ...dragProvided.draggableProps.style,
-                      opacity: dragSnapshot.isDragging ? 0.8 : 1,
-                    }}
-                  >
-                    <Card
-                      task={task}
-                      currentUser={currentUser}
-                      onClick={onCardClick}
-                    />
-                  </div>
-                )}
-              </Draggable>
-            ))}
+            {tasks.map((task, index) => {
+              const isOwn = task.assigned_user_id === currentUser.id;
+              return (
+                <Draggable key={task.id} draggableId={task.id} index={index}>
+                  {(dragProvided, dragSnapshot) => (
+                    <div
+                      ref={dragProvided.innerRef}
+                      {...dragProvided.draggableProps}
+                      {...dragProvided.dragHandleProps}
+                      data-own={isOwn ? 'true' : undefined}
+                      className={isOwn ? 'ring-2 ring-blue-400 rounded-lg' : ''}
+                      style={{
+                        ...dragProvided.draggableProps.style,
+                        opacity: dragSnapshot.isDragging ? 0.8 : 1,
+                      }}
+                    >
+                      <Card
+                        task={task}
+                        currentUser={currentUser}
+                        onClick={onCardClick}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              );
+            })}
             {provided.placeholder}
           </div>
         )}
