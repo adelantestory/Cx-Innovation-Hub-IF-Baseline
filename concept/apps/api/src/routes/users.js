@@ -7,7 +7,7 @@ const { getPool } = require('../services/database');
 router.get('/', async (req, res, next) => {
   try {
     const pool = await getPool();
-    const result = await pool.query('SELECT id, name, email, created_at FROM users ORDER BY name');
+    const result = await pool.query('SELECT id, name, role, avatar_color, created_at FROM users ORDER BY name');
     res.json(result.rows);
   } catch (err) {
     next(err);

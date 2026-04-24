@@ -12,7 +12,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: true,
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:4173',
+    /^https?:\/\/.*\.azurecontainerapps\.io$/,
+  ],
   allowedHeaders: ['Content-Type', 'X-User-Id'],
   exposedHeaders: ['X-User-Id'],
 }));
