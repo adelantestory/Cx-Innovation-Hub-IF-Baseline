@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/api.ts","./src/main.tsx","./src/types.ts","./src/components/Board.tsx","./src/components/Card.tsx","./src/components/Column.tsx","./src/components/Comments.tsx","./src/components/Header.tsx","./src/components/ProjectList.tsx","./src/components/TaskDetail.tsx","./src/components/UserSelect.tsx"],"version":"5.9.3"}

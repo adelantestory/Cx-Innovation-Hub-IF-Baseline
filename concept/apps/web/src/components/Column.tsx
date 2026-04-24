@@ -43,7 +43,6 @@ export default function Column({ id, title, tasks, currentUser, onCardClick }: P
                     <Card
                       task={task}
                       currentUser={currentUser}
-                      index={index}
                       onClick={onCardClick}
                     />
                   </div>

@@ -27,6 +27,8 @@ async function getPool() {
     password,
     database: process.env.PGDATABASE || 'taskify',
     port: parseInt(process.env.PGPORT || '5432'),
+    // NOTE: rejectUnauthorized: false skips cert validation — acceptable for prototype only.
+    // Production deployments must set PGSSL=true with a proper CA certificate.
     ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : false,
   });
 

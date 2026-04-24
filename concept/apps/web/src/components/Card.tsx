@@ -3,7 +3,6 @@ import type { Task, User } from '../types';
 interface Props {
   task: Task;
   currentUser: User;
-  index: number;
   onClick: (task: Task) => void;
 }
 

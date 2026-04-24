@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import type { User, Project } from '../types';
+import type { Project } from '../types';
 import { getProjects, createProject } from '../api';
 
 interface Props {
-  currentUser: User;
   onSelectProject: (project: Project) => void;
 }
 

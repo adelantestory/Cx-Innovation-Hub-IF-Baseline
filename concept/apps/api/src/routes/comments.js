@@ -96,7 +96,7 @@ router.put('/:id', async (req, res, next) => {
     const comment = result.rows[0];
     const userResult = await pool.query('SELECT name FROM users WHERE id = $1', [userId]);
     comment.author_name = userResult.rows.length > 0 ? userResult.rows[0].name : null;
-    comment.is_edited = comment.updated_at > comment.created_at;
+    comment.is_edited = new Date(comment.updated_at).getTime() > new Date(comment.created_at).getTime();
 
     res.json(comment);
   } catch (err) {

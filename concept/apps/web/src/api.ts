@@ -49,7 +49,7 @@ export async function updateTask(
   description?: string
 ): Promise<Task> {
   return fetchJSON<Task>(`${API_BASE}/tasks/${taskId}`, {
-    method: 'PATCH',
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title, description }),
   });
@@ -97,8 +97,8 @@ export async function createComment(
 ): Promise<Comment> {
   return fetchJSON<Comment>(`${API_BASE}/tasks/${taskId}/comments`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content, user_id: userId }),
+    headers: { 'Content-Type': 'application/json', 'X-User-Id': userId },
+    body: JSON.stringify({ content }),
   });
 }
 
@@ -108,17 +108,16 @@ export async function updateComment(
   userId: string
 ): Promise<Comment> {
   return fetchJSON<Comment>(`${API_BASE}/comments/${commentId}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content, user_id: userId }),
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-User-Id': userId },
+    body: JSON.stringify({ content }),
   });
 }
 
 export async function deleteComment(commentId: string, userId: string): Promise<void> {
   const res = await fetch(`${API_BASE}/comments/${commentId}`, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: userId }),
+    headers: { 'X-User-Id': userId },
   });
   if (!res.ok) {
     const text = await res.text();

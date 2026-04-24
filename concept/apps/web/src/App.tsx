@@ -46,7 +46,6 @@ export default function App() {
       />
       {currentView === 'projectList' && (
         <ProjectList
-          currentUser={currentUser!}
           onSelectProject={handleSelectProject}
         />
       )}
