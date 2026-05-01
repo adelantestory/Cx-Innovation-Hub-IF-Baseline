@@ -16,16 +16,25 @@
  * Creates an Express rate-limiting middleware.
  *
  * @param {object} options
- * @param {number} options.windowMs  - Time window in milliseconds (default: 60 000 = 1 min)
- * @param {number} options.max       - Maximum requests per window per IP (default: 100)
- * @param {string} [options.message] - Response message when limit is exceeded
- * @returns {import('express').RequestHandler}
+ * @param {number} options.windowMs      - Time window in milliseconds (default: 60 000 = 1 min)
+ * @param {number} options.max           - Maximum requests per window per IP (default: 100)
+ * @param {string} [options.message]     - Response message when limit is exceeded
+ * @param {boolean} [options.trustProxy] - Set true to trust X-Forwarded-For (when behind a known
+ *                                         trusted reverse proxy). Defaults to false to prevent IP
+ *                                         spoofing if the app is exposed directly.
+ * @returns {{ middleware: import('express').RequestHandler, shutdown: () => void }}
  */
-function createRateLimiter({ windowMs = 60_000, max = 100, message = "Too many requests, please try again later." } = {}) {
+function createRateLimiter({
+  windowMs = 60_000,
+  max = 100,
+  message = "Too many requests, please try again later.",
+  trustProxy = false,
+} = {}) {
   // Map<ip, { count: number, resetAt: number }>
   const clients = new Map();
 
-  // Periodically purge expired entries to prevent unbounded memory growth
+  // Periodically purge expired entries to prevent unbounded memory growth.
+  // Store the reference so callers can clear it via shutdown() for clean test teardown.
   const purgeInterval = setInterval(() => {
     const now = Date.now();
     for (const [ip, entry] of clients.entries()) {
@@ -33,11 +42,19 @@ function createRateLimiter({ windowMs = 60_000, max = 100, message = "Too many r
         clients.delete(ip);
       }
     }
-  }, windowMs).unref(); // .unref() prevents the interval from keeping the process alive
+  }, windowMs).unref(); // .unref() prevents the interval from blocking process exit
 
-  return (req, res, next) => {
-    // Use X-Forwarded-For when running behind a reverse proxy (Azure Container Apps)
-    const ip = req.headers["x-forwarded-for"]?.split(",")[0].trim() || req.socket.remoteAddress || "unknown";
+  function middleware(req, res, next) {
+    // Determine client IP.
+    // X-Forwarded-For is only trusted when trustProxy is explicitly enabled to prevent
+    // clients from spoofing their IP if the app is accidentally exposed without a proxy.
+    let ip;
+    if (trustProxy && req.headers["x-forwarded-for"]) {
+      ip = req.headers["x-forwarded-for"].split(",")[0].trim();
+    } else {
+      ip = req.socket.remoteAddress || "unknown";
+    }
+
     const now = Date.now();
 
     let entry = clients.get(ip);
@@ -59,7 +76,14 @@ function createRateLimiter({ windowMs = 60_000, max = 100, message = "Too many r
     }
 
     next();
-  };
+  }
+
+  /** Clears the internal purge interval. Call during graceful shutdown or in tests. */
+  function shutdown() {
+    clearInterval(purgeInterval);
+  }
+
+  return { middleware, shutdown };
 }
 
 module.exports = { createRateLimiter };

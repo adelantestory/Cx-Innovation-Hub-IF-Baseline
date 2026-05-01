@@ -6,7 +6,9 @@
 // =============================================================================
 
 // RFC 4122 UUID pattern — accepts versions 1–5 (time-based, DCE, MD5, random, SHA-1).
-// PostgreSQL UUIDs are stored as version 4 (random) by gen_random_uuid().
+// Intentionally accepts all versions so external UUIDs (e.g., from integrations) are
+// not rejected. PostgreSQL's gen_random_uuid() produces version 4 UUIDs; all seed data
+// in this project uses version 4, so any valid UUID accepted here will work as a PK.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /**

@@ -67,8 +67,15 @@ async function start() {
   // Limit request body size to 64 KB to prevent payload-based DoS attacks
   app.use(express.json({ limit: "64kb" }));
 
-  // Rate limiting: 200 requests per minute per IP across all API endpoints
-  app.use("/api", createRateLimiter({ windowMs: 60_000, max: 200 }));
+  // Rate limiting: 200 requests per minute per IP across all API endpoints.
+  // trustProxy is enabled because Azure Container Apps front requests through a
+  // trusted reverse proxy that sets X-Forwarded-For reliably.
+  const { middleware: rateLimitMiddleware } = createRateLimiter({
+    windowMs: 60_000,
+    max: 200,
+    trustProxy: IS_PRODUCTION,
+  });
+  app.use("/api", rateLimitMiddleware);
 
   // ---------------------------------------------------------------------------
   // Health Check
