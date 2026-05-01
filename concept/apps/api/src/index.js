@@ -21,6 +21,7 @@ const express = require("express");
 const cors = require("cors");
 const { initializePool } = require("./services/database");
 const { errorHandler } = require("./middleware/errorHandler");
+const { createRateLimiter } = require("./middleware/rateLimiter");
 const usersRouter = require("./routes/users");
 const projectsRouter = require("./routes/projects");
 const tasksRouter = require("./routes/tasks");
@@ -65,6 +66,9 @@ async function start() {
 
   // Limit request body size to 64 KB to prevent payload-based DoS attacks
   app.use(express.json({ limit: "64kb" }));
+
+  // Rate limiting: 200 requests per minute per IP across all API endpoints
+  app.use("/api", createRateLimiter({ windowMs: 60_000, max: 200 }));
 
   // ---------------------------------------------------------------------------
   // Health Check

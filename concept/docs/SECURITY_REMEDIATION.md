@@ -147,6 +147,30 @@ app.use(express.json({ limit: "64kb" }));
 
 ---
 
+### 🟠 High — No Rate Limiting on API Endpoints
+
+| | |
+|---|---|
+| **OWASP** | A04:2021 — Insecure Design |
+| **File** | `concept/apps/api/src/index.js`, new `middleware/rateLimiter.js` |
+| **Severity** | High |
+
+**Vulnerability:** All API endpoints were unrestricted — any client could send unlimited requests, enabling brute-force and denial-of-service attacks.
+
+**Remediation:** Added an in-memory sliding-window rate limiter (`middleware/rateLimiter.js`) applied globally to all `/api/*` endpoints:
+
+```javascript
+app.use("/api", createRateLimiter({ windowMs: 60_000, max: 200 }));
+```
+
+- 200 requests per minute per IP
+- Returns `429 Too Many Requests` with `Retry-After` header when exceeded
+- Exposes `X-RateLimit-Limit/Remaining/Reset` headers
+
+**Production note:** This in-memory implementation is suitable for single-replica deployments. For multi-replica Azure Container Apps, replace with a Redis-backed rate limiter (e.g., `express-rate-limit` + `rate-limit-redis`).
+
+---
+
 ### 🟡 Medium — Missing Input Length Validation
 
 | | |
@@ -283,12 +307,13 @@ The following security controls are already correctly implemented in the infrast
 
 | File | Change |
 |------|--------|
-| `concept/apps/api/src/index.js` | Security headers, CORS hardening, explicit body size limit |
+| `concept/apps/api/src/index.js` | Security headers, CORS hardening, explicit body size limit, rate limiting |
 | `concept/apps/api/src/services/database.js` | Enable SSL certificate validation (`rejectUnauthorized: true`) |
 | `concept/apps/api/src/middleware/errorHandler.js` | Sanitize 500 error messages in production |
 | `concept/apps/api/src/middleware/validate.js` | **New** — UUID validation and input length helpers |
+| `concept/apps/api/src/middleware/rateLimiter.js` | **New** — In-memory sliding-window rate limiter (200 req/min/IP) |
 | `concept/apps/api/src/routes/tasks.js` | UUID validation, size limits, user existence check |
 | `concept/apps/api/src/routes/comments.js` | UUID validation, X-User-Id format check, size limits |
 | `concept/apps/api/src/routes/projects.js` | UUID validation, size limits |
 | `concept/apps/api/src/routes/users.js` | UUID validation |
-| `concept/apps/web/nginx.conf` | Security headers including Content-Security-Policy |
+| `concept/apps/web/nginx.conf` | Security headers including Content-Security-Policy (connect-src allows `https:` for Azure cross-domain API calls) |
