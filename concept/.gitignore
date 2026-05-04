@@ -10,5 +10,15 @@ node_modules/
 .env.local
 .env.*.local
 
+# Build outputs
+dist/
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Playwright MCP
+.playwright-mcp/
+
 # Docker
 docker-compose.override.yml
