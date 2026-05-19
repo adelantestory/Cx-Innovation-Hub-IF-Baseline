@@ -6,7 +6,7 @@
 // in requests that require user context (comments).
 // =============================================================================
 
-import type { User, Project, Task, Comment, TaskStatus } from "./types";
+import type { User, Project, Task, Comment, TaskStatus, TaskPriority } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -74,7 +74,12 @@ export function fetchTasks(projectId: string): Promise<Task[]> {
 
 export function createTask(
   projectId: string,
-  data: { title: string; description?: string; assigned_user_id?: string }
+  data: {
+    title: string;
+    description?: string;
+    assigned_user_id?: string;
+    priority?: TaskPriority;
+  }
 ): Promise<Task> {
   return apiFetch<Task>(`/api/projects/${projectId}/tasks`, {
     method: "POST",

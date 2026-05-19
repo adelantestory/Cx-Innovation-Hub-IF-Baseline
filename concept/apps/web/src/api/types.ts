@@ -23,6 +23,7 @@ export interface Project {
 }
 
 export type TaskStatus = "todo" | "in_progress" | "in_review" | "done";
+export type TaskPriority = "High" | "Medium" | "Low";
 
 export interface Task {
   id: string;
@@ -30,6 +31,7 @@ export interface Task {
   title: string;
   description: string | null;
   status: TaskStatus;
+  priority: TaskPriority;
   position: number;
   assigned_user_id: string | null;
   assigned_user_name: string | null;

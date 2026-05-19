@@ -16,7 +16,13 @@ import {
   createTask,
   updateTaskStatus,
 } from "../../api/client";
-import type { Task, TaskStatus, User, Project } from "../../api/types";
+import type {
+  Task,
+  TaskStatus,
+  User,
+  Project,
+  TaskPriority,
+} from "../../api/types";
 import { STATUS_COLUMNS } from "../../api/types";
 
 interface BoardProps {
@@ -33,6 +39,7 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showNewTask, setShowNewTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>("Medium");
   const [creating, setCreating] = useState(false);
 
   const loadData = useCallback(() => {
@@ -103,9 +110,13 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
 
     setCreating(true);
     try {
-      const task = await createTask(project.id, { title: newTaskTitle.trim() });
+      const task = await createTask(project.id, {
+        title: newTaskTitle.trim(),
+        priority: newTaskPriority,
+      });
       setTasks((prev) => [...prev, task]);
       setNewTaskTitle("");
+      setNewTaskPriority("Medium");
       setShowNewTask(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create task");
@@ -183,6 +194,16 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
             className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
+          <select
+            value={newTaskPriority}
+            onChange={(e) => setNewTaskPriority(e.target.value as TaskPriority)}
+            aria-label="Task priority"
+            className="px-2 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
           <button
             type="submit"
             disabled={creating || !newTaskTitle.trim()}
