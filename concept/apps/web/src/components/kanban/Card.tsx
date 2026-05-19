@@ -15,6 +15,12 @@ interface CardProps {
   onClick: (task: Task) => void;
 }
 
+const PRIORITY_STYLES: Record<Task["priority"], string> = {
+  High: "bg-red-100 text-red-700",
+  Medium: "bg-yellow-100 text-yellow-700",
+  Low: "bg-gray-100 text-gray-700",
+};
+
 export default function Card({ task, index, onClick }: CardProps) {
   return (
     <Draggable draggableId={task.id} index={index}>
@@ -30,7 +36,14 @@ export default function Card({ task, index, onClick }: CardProps) {
               : "border-gray-200 hover:shadow-md"
           }`}
         >
-          <p className="text-sm font-medium text-gray-900 mb-2">{task.title}</p>
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <p className="text-sm font-medium text-gray-900">{task.title}</p>
+            <span
+              className={`text-[10px] font-semibold uppercase tracking-wide rounded px-1.5 py-0.5 ${PRIORITY_STYLES[task.priority]}`}
+            >
+              {task.priority}
+            </span>
+          </div>
 
           {task.description && (
             <p className="text-xs text-gray-500 mb-2 line-clamp-2">

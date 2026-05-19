@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     title               TEXT        NOT NULL,
     description         TEXT,
     status              TEXT        NOT NULL DEFAULT 'todo',
+    priority            TEXT        NOT NULL DEFAULT 'Medium' CHECK (priority IN ('High', 'Medium', 'Low')),
     position            INTEGER     NOT NULL DEFAULT 0,
     assigned_user_id    UUID        REFERENCES users(id) ON DELETE SET NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),

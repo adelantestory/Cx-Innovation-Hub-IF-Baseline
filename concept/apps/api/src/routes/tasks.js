@@ -16,6 +16,7 @@ const { createError } = require("../middleware/errorHandler");
 const router = Router();
 
 const VALID_STATUSES = ["todo", "in_progress", "in_review", "done"];
+const VALID_PRIORITIES = ["High", "Medium", "Low"];
 
 /**
  * GET /api/projects/:projectId/tasks
@@ -27,7 +28,7 @@ router.get("/projects/:projectId/tasks", async (req, res, next) => {
     const { rows } = await getPool().query(
       `SELECT
         t.id, t.project_id, t.title, t.description,
-        t.status, t.position, t.assigned_user_id,
+        t.status, t.priority, t.position, t.assigned_user_id,
         t.created_at, t.updated_at,
         u.name AS assigned_user_name,
         u.avatar_color AS assigned_user_avatar_color
@@ -50,9 +51,17 @@ router.get("/projects/:projectId/tasks", async (req, res, next) => {
  */
 router.post("/projects/:projectId/tasks", async (req, res, next) => {
   try {
-    const { title, description, assigned_user_id } = req.body;
+    const { title, description, assigned_user_id, priority } = req.body;
     if (!title || !title.trim()) {
       return next(createError(400, "Task title is required"));
+    }
+    if (priority && !VALID_PRIORITIES.includes(priority)) {
+      return next(
+        createError(
+          400,
+          `Invalid priority. Must be one of: ${VALID_PRIORITIES.join(", ")}`
+        )
+      );
     }
 
     // Get the next position for new tasks in the "todo" column
@@ -63,10 +72,17 @@ router.post("/projects/:projectId/tasks", async (req, res, next) => {
     const nextPos = posRows[0].next_pos;
 
     const { rows } = await getPool().query(
-      `INSERT INTO tasks (project_id, title, description, status, position, assigned_user_id)
-       VALUES ($1, $2, $3, 'todo', $4, $5)
+      `INSERT INTO tasks (project_id, title, description, status, priority, position, assigned_user_id)
+       VALUES ($1, $2, $3, 'todo', $4, $5, $6)
        RETURNING *`,
-      [req.params.projectId, title.trim(), description || null, nextPos, assigned_user_id || null]
+      [
+        req.params.projectId,
+        title.trim(),
+        description || null,
+        priority || "Medium",
+        nextPos,
+        assigned_user_id || null,
+      ]
     );
 
     // Fetch with user details
