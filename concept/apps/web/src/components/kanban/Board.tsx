@@ -6,7 +6,7 @@
 // and opening task detail modals. Uses optimistic UI updates for drag events.
 // =============================================================================
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
 import Column from "./Column";
 import TaskDetail from "./TaskDetail";
@@ -124,24 +124,6 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
     setSelectedTask(null);
   }
 
-  const subtaskCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const t of tasks) {
-      if (t.parent_task_id) {
-        counts[t.parent_task_id] = (counts[t.parent_task_id] || 0) + 1;
-      }
-    }
-    return counts;
-  }, [tasks]);
-
-  const taskTitles = useMemo(() => {
-    const titles: Record<string, string> = {};
-    for (const t of tasks) {
-      titles[t.id] = t.title;
-    }
-    return titles;
-  }, [tasks]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -220,8 +202,6 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
               status={status}
               tasks={getColumnTasks(status)}
               onCardClick={setSelectedTask}
-              subtaskCounts={subtaskCounts}
-              taskTitles={taskTitles}
             />
           ))}
         </div>
@@ -236,8 +216,6 @@ export default function Board({ project, currentUser, onBack }: BoardProps) {
           onClose={() => setSelectedTask(null)}
           onTaskUpdated={handleTaskUpdated}
           onTaskDeleted={handleTaskDeleted}
-          onRefresh={loadData}
-          onTaskSelected={setSelectedTask}
         />
       )}
     </div>
