@@ -152,3 +152,55 @@ Test configuration is in `playwright.config.ts`:
 - Video: Recording configuration for failed tests
 
 See `playwright.config.ts` for full configuration options.
+
+---
+
+## README
+
+### What is This?
+
+This instruction guide provides workflows for testing the **Taskify web application** using Playwright. It covers:
+- Setting up and running the development server
+- Executing Playwright tests in various modes (headed, UI, debug)
+- Capturing and reviewing test screenshots
+- Debugging UI issues and test failures
+- Reviewing test reports and results
+
+### When to Use This
+
+Use these instructions when:
+- Writing or modifying Playwright tests for Taskify
+- Debugging failing tests or UI issues
+- Capturing screenshots for visual regression testing
+- Setting up test environments
+- Reviewing test results and reports
+
+### Key Files & Directories
+
+- **Tests location:** `concept/apps/web/tests/`
+- **Config file:** `concept/apps/web/playwright.config.ts`
+- **Reports:** `concept/apps/web/test-results/` and `concept/apps/web/playwright-report/`
+- **Dev server:** `http://localhost:5173`
+
+### Quick Start
+
+```bash
+# Terminal 1: Start development server
+cd concept/apps/web
+npm run dev
+
+# Terminal 2: Run tests
+cd concept/apps/web
+npm run test              # Run all tests
+npx playwright test --ui # Interactive UI mode
+npx playwright test --debug # Debug mode with inspector
+```
+
+### Best Practices
+
+- Always start the dev server before running tests
+- Use `--headed` mode for visual debugging
+- Use `--debug` mode with Playwright Inspector for step-by-step execution
+- Review screenshots in the HTML report for visual regression detection
+- Keep test selectors stable and avoid brittle selectors
+- Use `page.pause()` to freeze tests at specific points for inspection

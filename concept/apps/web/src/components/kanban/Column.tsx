@@ -14,6 +14,8 @@ interface ColumnProps {
   status: TaskStatus;
   tasks: Task[];
   onCardClick: (task: Task) => void;
+  subtaskCounts?: Record<string, number>;
+  taskTitles?: Record<string, string>;
 }
 
 const COLUMN_COLORS: Record<TaskStatus, string> = {
@@ -30,7 +32,7 @@ const HEADER_COLORS: Record<TaskStatus, string> = {
   done: "text-green-700",
 };
 
-export default function Column({ status, tasks, onCardClick }: ColumnProps) {
+export default function Column({ status, tasks, onCardClick, subtaskCounts, taskTitles }: ColumnProps) {
   return (
     <div className={`${COLUMN_COLORS[status]} rounded-lg p-3 min-h-[200px] flex flex-col`}>
       <div className="flex items-center justify-between mb-3">
@@ -57,6 +59,8 @@ export default function Column({ status, tasks, onCardClick }: ColumnProps) {
                 task={task}
                 index={index}
                 onClick={onCardClick}
+                subtaskCount={subtaskCounts?.[task.id]}
+                parentTitle={task.parent_task_id ? taskTitles?.[task.parent_task_id] : undefined}
               />
             ))}
             {provided.placeholder}

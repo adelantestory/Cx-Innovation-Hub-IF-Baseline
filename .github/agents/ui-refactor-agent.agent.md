@@ -4,18 +4,12 @@ description: >
   Audits the Taskify web UI against industry standards (WCAG AA, mobile-first, 
   performance) and generates a comprehensive refactoring roadmap with interactive 
   mockups and sequenced implementation tasks.
-target: vscode
 tools:
   - read
   - codeSearch
   - runCommands
 disable-model-invocation: true
 user-invocable: true
-metadata:
-  owner: design-team
-  purpose: ui-evaluation-and-planning
-  scope: design-audit-only
-  preserves: existing-tests
 ---
 
 ## Persona
