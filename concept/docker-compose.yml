@@ -102,33 +102,6 @@ services:
     depends_on:
       - api
 
-  # ---------------------------------------------------------------------------
-  # Background Agent (Task Decomposition)
-  # Polls task_jobs table and processes decompose requests
-  # ---------------------------------------------------------------------------
-  agent:
-    build:
-      context: ./apps/agent
-      dockerfile: Dockerfile.dev
-    container_name: taskify-agent
-    restart: unless-stopped
-    environment:
-      PGHOST: db
-      PGUSER: postgres
-      PGPASSWORD: postgres
-      PGDATABASE: taskify
-      PGPORT: 5432
-      API_URL: http://api:3000
-      MOCK_MODE: "true"
-      POLL_INTERVAL: "3000"
-    volumes:
-      - ./apps/agent/src:/app/src:ro
-    depends_on:
-      db:
-        condition: service_healthy
-      api:
-        condition: service_started
-
 volumes:
   pgdata:
     driver: local
