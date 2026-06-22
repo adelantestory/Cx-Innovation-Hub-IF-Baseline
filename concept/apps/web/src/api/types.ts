@@ -34,7 +34,6 @@ export interface Task {
   assigned_user_id: string | null;
   assigned_user_name: string | null;
   assigned_user_avatar_color: string | null;
-  parent_task_id: string | null;
   created_at: string;
   updated_at: string;
 }

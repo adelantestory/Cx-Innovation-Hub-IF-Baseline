@@ -119,20 +119,6 @@ export function deleteTask(id: string): Promise<{ message: string; id: string }>
   });
 }
 
-export function decomposeTask(id: string): Promise<{ id: string; status: string }> {
-  return apiFetch<{ id: string; status: string }>(`/api/tasks/${id}/decompose`, {
-    method: "POST",
-  });
-}
-
-export function fetchSubtasks(taskId: string): Promise<Task[]> {
-  return apiFetch<Task[]>(`/api/tasks/${taskId}/subtasks`);
-}
-
-export function getDecomposeStatus(id: string): Promise<{ status: string; result: unknown }> {
-  return apiFetch<{ status: string; result: unknown }>(`/api/tasks/${id}/decompose/status`);
-}
-
 // ---------------------------------------------------------------------------
 // Comments
 // ---------------------------------------------------------------------------

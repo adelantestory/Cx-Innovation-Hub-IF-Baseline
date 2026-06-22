@@ -27,7 +27,7 @@ router.get("/projects/:projectId/tasks", async (req, res, next) => {
     const { rows } = await getPool().query(
       `SELECT
         t.id, t.project_id, t.title, t.description,
-        t.status, t.position, t.assigned_user_id, t.parent_task_id,
+        t.status, t.position, t.assigned_user_id,
         t.created_at, t.updated_at,
         u.name AS assigned_user_name,
         u.avatar_color AS assigned_user_avatar_color
@@ -46,11 +46,11 @@ router.get("/projects/:projectId/tasks", async (req, res, next) => {
 /**
  * POST /api/projects/:projectId/tasks
  * Creates a new task. Requires { title } in body.
- * Optional: description, assigned_user_id, parent_task_id.
+ * Optional: description, assigned_user_id.
  */
 router.post("/projects/:projectId/tasks", async (req, res, next) => {
   try {
-    const { title, description, assigned_user_id, parent_task_id } = req.body;
+    const { title, description, assigned_user_id } = req.body;
     if (!title || !title.trim()) {
       return next(createError(400, "Task title is required"));
     }
@@ -63,10 +63,10 @@ router.post("/projects/:projectId/tasks", async (req, res, next) => {
     const nextPos = posRows[0].next_pos;
 
     const { rows } = await getPool().query(
-      `INSERT INTO tasks (project_id, title, description, status, position, assigned_user_id, parent_task_id)
-       VALUES ($1, $2, $3, 'todo', $4, $5, $6)
+      `INSERT INTO tasks (project_id, title, description, status, position, assigned_user_id)
+       VALUES ($1, $2, $3, 'todo', $4, $5)
        RETURNING *`,
-      [req.params.projectId, title.trim(), description || null, nextPos, assigned_user_id || null, parent_task_id || null]
+      [req.params.projectId, title.trim(), description || null, nextPos, assigned_user_id || null]
     );
 
     // Fetch with user details
@@ -200,77 +200,6 @@ router.patch("/tasks/:id/assign", async (req, res, next) => {
     );
 
     res.json(taskRows[0]);
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * GET /api/tasks/:id/subtasks
- * Returns all subtasks of a given parent task.
- */
-router.get("/tasks/:id/subtasks", async (req, res, next) => {
-  try {
-    const { rows } = await getPool().query(
-      `SELECT
-        t.*, u.name AS assigned_user_name, u.avatar_color AS assigned_user_avatar_color
-      FROM tasks t
-      LEFT JOIN users u ON t.assigned_user_id = u.id
-      WHERE t.parent_task_id = $1
-      ORDER BY t.position, t.created_at`,
-      [req.params.id]
-    );
-    res.json(rows);
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * POST /api/tasks/:id/decompose
- * Triggers agent-based task decomposition. Returns 202 with job info.
- */
-router.post("/tasks/:id/decompose", async (req, res, next) => {
-  try {
-    // Verify task exists
-    const { rows: taskRows } = await getPool().query(
-      "SELECT id, project_id FROM tasks WHERE id = $1",
-      [req.params.id]
-    );
-    if (taskRows.length === 0) {
-      return next(createError(404, "Task not found"));
-    }
-
-    const task = taskRows[0];
-
-    // Insert a pending job
-    const { rows: jobRows } = await getPool().query(
-      `INSERT INTO task_jobs (task_id, project_id, job_type, status)
-       VALUES ($1, $2, 'decompose', 'pending')
-       RETURNING *`,
-      [task.id, task.project_id]
-    );
-
-    res.status(202).json(jobRows[0]);
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * GET /api/tasks/:id/decompose/status
- * Returns the latest decomposition job status for a task.
- */
-router.get("/tasks/:id/decompose/status", async (req, res, next) => {
-  try {
-    const { rows } = await getPool().query(
-      `SELECT * FROM task_jobs WHERE task_id = $1 ORDER BY created_at DESC LIMIT 1`,
-      [req.params.id]
-    );
-    if (rows.length === 0) {
-      return next(createError(404, "No decomposition job found for this task"));
-    }
-    res.json(rows[0]);
   } catch (err) {
     next(err);
   }
