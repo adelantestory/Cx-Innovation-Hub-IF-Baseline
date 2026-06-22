@@ -106,10 +106,16 @@ Add an `agent` service to `docker-compose.yml`:
 ### 6. Reset Scripts
 Create `reset-demo.ps1` and `reset-demo.sh` that:
 1. `docker compose down -v`
-2. `git checkout .`
-3. `git clean -fd -e .github/` (preserves the prompt file)
+2. Switch back to the baseline branch (`demo/ui-development`)
+3. Delete the working branch (the current branch, or one passed as argument)
 4. `docker compose up --build -d`
 5. Wait for health check at http://localhost:3000/api/health
+6. Print instructions for re-running the demo (`git checkout -b demo/task-decomposition`)
+
+The expected workflow is:
+- `git checkout -b demo/task-decomposition` (create working branch from baseline)
+- Invoke this prompt → Copilot implements the feature
+- `./reset-demo.sh` (tears down, deletes working branch, returns to baseline)
 
 ## Conventions
 - Follow existing code style (see other route handlers and API client functions)

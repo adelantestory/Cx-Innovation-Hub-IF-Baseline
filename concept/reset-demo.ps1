@@ -2,10 +2,18 @@
 # =============================================================================
 # Taskify Demo Reset Script
 # =============================================================================
-# Tears down all containers, wipes the database volume, reverts all source
-# file changes, removes untracked files (agent container), and restarts
-# the baseline environment.
+# Tears down all containers, wipes the database volume, and switches back
+# to the baseline branch (deleting the working branch if on one).
+#
+# Workflow:
+#   1. git checkout -b demo/task-decomposition   ← create a working branch
+#   2. Run the implement-task-decomposition prompt
+#   3. ./reset-demo.ps1                          ← tear down and delete branch
 # =============================================================================
+
+param(
+    [string]$Branch = ""
+)
 
 Write-Host "`n🔄 Resetting Taskify demo environment..." -ForegroundColor Cyan
 
@@ -13,13 +21,19 @@ Write-Host "`n🔄 Resetting Taskify demo environment..." -ForegroundColor Cyan
 Write-Host "  → Stopping containers and wiping database..." -ForegroundColor Yellow
 docker compose down -v 2>$null
 
-# Revert all modified tracked files
-Write-Host "  → Reverting source files to baseline..." -ForegroundColor Yellow
-git checkout .
+# Determine current and baseline branch
+$currentBranch = git rev-parse --abbrev-ref HEAD
+$baseBranch = "demo/ui-development"
+$branchToDelete = if ($Branch) { $Branch } else { $currentBranch }
 
-# Remove untracked files/folders (apps/agent/, sql/002_*, etc.) but keep .github prompts
-Write-Host "  → Removing untracked files..." -ForegroundColor Yellow
-git clean -fd -e .github/
+if ($branchToDelete -eq $baseBranch) {
+    Write-Host "  → Already on baseline branch ($baseBranch). Nothing to reset." -ForegroundColor Yellow
+} else {
+    Write-Host "  → Switching to baseline branch ($baseBranch)..." -ForegroundColor Yellow
+    git checkout $baseBranch
+    Write-Host "  → Deleting working branch ($branchToDelete)..." -ForegroundColor Yellow
+    git branch -D $branchToDelete
+}
 
 # Rebuild and start baseline
 Write-Host "  → Rebuilding baseline environment..." -ForegroundColor Yellow
@@ -47,4 +61,8 @@ if ($retries -eq 0) {
 Write-Host "`n✅ Demo environment reset and ready!" -ForegroundColor Green
 Write-Host "   Frontend: http://localhost:5173" -ForegroundColor White
 Write-Host "   API:      http://localhost:3000" -ForegroundColor White
+Write-Host ""
+Write-Host "   To re-run the demo:" -ForegroundColor Gray
+Write-Host "     git checkout -b demo/task-decomposition" -ForegroundColor Gray
+Write-Host "     # Then invoke the implement-task-decomposition prompt" -ForegroundColor Gray
 Write-Host ""

@@ -2,9 +2,13 @@
 # =============================================================================
 # Taskify Demo Reset Script
 # =============================================================================
-# Tears down all containers, wipes the database volume, reverts all source
-# file changes, removes untracked files (agent container), and restarts
-# the baseline environment.
+# Tears down all containers, wipes the database volume, and switches back
+# to the baseline branch (deleting the working branch if on one).
+#
+# Workflow:
+#   1. git checkout -b demo/task-decomposition   ← create a working branch
+#   2. Run the implement-task-decomposition prompt
+#   3. ./reset-demo.sh                           ← tear down and delete branch
 # =============================================================================
 
 set -e
@@ -16,13 +20,19 @@ echo "🔄 Resetting Taskify demo environment..."
 echo "  → Stopping containers and wiping database..."
 docker compose down -v 2>/dev/null || true
 
-# Revert all modified tracked files
-echo "  → Reverting source files to baseline..."
-git checkout .
+# Determine current and baseline branch
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+BASE_BRANCH="demo/ui-development"
+BRANCH_TO_DELETE="${1:-$CURRENT_BRANCH}"
 
-# Remove untracked files/folders (apps/agent/, sql/002_*, etc.) but keep .github prompts
-echo "  → Removing untracked files..."
-git clean -fd -e .github/
+if [ "$BRANCH_TO_DELETE" = "$BASE_BRANCH" ]; then
+  echo "  → Already on baseline branch ($BASE_BRANCH). Nothing to reset."
+else
+  echo "  → Switching to baseline branch ($BASE_BRANCH)..."
+  git checkout "$BASE_BRANCH"
+  echo "  → Deleting working branch ($BRANCH_TO_DELETE)..."
+  git branch -D "$BRANCH_TO_DELETE"
+fi
 
 # Rebuild and start baseline
 echo "  → Rebuilding baseline environment..."
@@ -45,4 +55,8 @@ echo ""
 echo "✅ Demo environment reset and ready!"
 echo "   Frontend: http://localhost:5173"
 echo "   API:      http://localhost:3000"
+echo ""
+echo "   To re-run the demo:"
+echo "     git checkout -b demo/task-decomposition"
+echo "     # Then invoke the implement-task-decomposition prompt"
 echo ""
