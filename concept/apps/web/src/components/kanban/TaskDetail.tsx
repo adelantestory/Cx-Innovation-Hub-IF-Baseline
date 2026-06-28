@@ -8,6 +8,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import CommentList from "../comments/CommentList";
+import SubtaskList from "./SubtaskList";
 import {
   fetchComments,
   createComment,
@@ -16,8 +17,9 @@ import {
   updateTask,
   assignTask,
   deleteTask,
+  fetchSubtasks,
 } from "../../api/client";
-import type { Task, Comment, User } from "../../api/types";
+import type { Task, Comment, User, Subtask } from "../../api/types";
 import { STATUS_LABELS } from "../../api/types";
 
 interface TaskDetailProps {
@@ -39,6 +41,8 @@ export default function TaskDetail({
 }: TaskDetailProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loadingComments, setLoadingComments] = useState(true);
+  const [subtasks, setSubtasks] = useState<Subtask[]>([]);
+  const [loadingSubtasks, setLoadingSubtasks] = useState(true);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
@@ -51,9 +55,18 @@ export default function TaskDetail({
       .finally(() => setLoadingComments(false));
   }, [task.id]);
 
+  const loadSubtasks = useCallback(() => {
+    setLoadingSubtasks(true);
+    fetchSubtasks(task.id)
+      .then(setSubtasks)
+      .catch((err: Error) => console.error("Failed to load subtasks:", err.message))
+      .finally(() => setLoadingSubtasks(false));
+  }, [task.id]);
+
   useEffect(() => {
     loadComments();
-  }, [loadComments]);
+    loadSubtasks();
+  }, [loadComments, loadSubtasks]);
 
   async function handleSave() {
     if (!title.trim()) return;
@@ -206,6 +219,19 @@ export default function TaskDetail({
             >
               Delete Task
             </button>
+          </div>
+
+          {/* Subtasks */}
+          <div className="pt-4 border-t border-gray-200">
+            {loadingSubtasks ? (
+              <p className="text-xs text-gray-400">Loading subtasks...</p>
+            ) : (
+              <SubtaskList
+                taskId={task.id}
+                subtasks={subtasks}
+                onSubtasksChanged={setSubtasks}
+              />
+            )}
           </div>
 
           {/* Comments */}

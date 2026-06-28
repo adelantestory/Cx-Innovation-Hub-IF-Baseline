@@ -7,6 +7,12 @@
 // PATCH  /api/tasks/:id/status            - Change task status (drag-and-drop)
 // PATCH  /api/tasks/:id/assign            - Assign/unassign a user
 // DELETE /api/tasks/:id                   - Delete a task
+//
+// Smart Task Decomposition (subtasks):
+// GET    /api/tasks/:taskId/subtasks      - List subtasks for a task
+// POST   /api/tasks/:taskId/subtasks      - Create a subtask
+// PATCH  /api/subtasks/:id               - Update a subtask (title / completion)
+// DELETE /api/subtasks/:id               - Delete a subtask
 // =============================================================================
 
 const { Router } = require("express");
@@ -221,6 +227,116 @@ router.delete("/tasks/:id", async (req, res, next) => {
     }
 
     res.json({ message: "Task deleted", id: rows[0].id });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// =============================================================================
+// Smart Task Decomposition — Subtask Routes
+// =============================================================================
+
+/**
+ * GET /api/tasks/:taskId/subtasks
+ * Returns all subtasks for a task, ordered by position.
+ */
+router.get("/tasks/:taskId/subtasks", async (req, res, next) => {
+  try {
+    const { rows } = await getPool().query(
+      `SELECT id, task_id, title, is_completed, position, created_at, updated_at
+       FROM subtasks
+       WHERE task_id = $1
+       ORDER BY position, created_at`,
+      [req.params.taskId]
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/tasks/:taskId/subtasks
+ * Creates a new subtask. Requires { title } in body.
+ */
+router.post("/tasks/:taskId/subtasks", async (req, res, next) => {
+  try {
+    const { title } = req.body;
+    if (!title || !title.trim()) {
+      return next(createError(400, "Subtask title is required"));
+    }
+
+    // Place the new subtask at the end
+    const { rows: posRows } = await getPool().query(
+      "SELECT COALESCE(MAX(position), -1) + 1 AS next_pos FROM subtasks WHERE task_id = $1",
+      [req.params.taskId]
+    );
+    const nextPos = posRows[0].next_pos;
+
+    const { rows } = await getPool().query(
+      `INSERT INTO subtasks (task_id, title, position)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [req.params.taskId, title.trim(), nextPos]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * PATCH /api/subtasks/:id
+ * Updates a subtask's title and/or completion state.
+ * Accepts { title?, is_completed? } in body.
+ */
+router.patch("/subtasks/:id", async (req, res, next) => {
+  try {
+    const { title, is_completed } = req.body;
+
+    if (title !== undefined && !title.trim()) {
+      return next(createError(400, "Subtask title cannot be empty"));
+    }
+
+    // Fetch current state so we can apply partial updates
+    const { rows: existing } = await getPool().query(
+      "SELECT * FROM subtasks WHERE id = $1",
+      [req.params.id]
+    );
+    if (existing.length === 0) {
+      return next(createError(404, "Subtask not found"));
+    }
+
+    const current = existing[0];
+    const newTitle = title !== undefined ? title.trim() : current.title;
+    const newCompleted = is_completed !== undefined ? is_completed : current.is_completed;
+
+    const { rows } = await getPool().query(
+      `UPDATE subtasks SET title = $1, is_completed = $2, updated_at = NOW()
+       WHERE id = $3
+       RETURNING *`,
+      [newTitle, newCompleted, req.params.id]
+    );
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * DELETE /api/subtasks/:id
+ * Deletes a subtask.
+ */
+router.delete("/subtasks/:id", async (req, res, next) => {
+  try {
+    const { rows } = await getPool().query(
+      "DELETE FROM subtasks WHERE id = $1 RETURNING id",
+      [req.params.id]
+    );
+    if (rows.length === 0) {
+      return next(createError(404, "Subtask not found"));
+    }
+    res.json({ message: "Subtask deleted", id: rows[0].id });
   } catch (err) {
     next(err);
   }

@@ -6,7 +6,7 @@
 // in requests that require user context (comments).
 // =============================================================================
 
-import type { User, Project, Task, Comment, TaskStatus } from "./types";
+import type { User, Project, Task, Comment, TaskStatus, Subtask } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -158,5 +158,41 @@ export function deleteComment(
   return apiFetch<{ message: string; id: string }>(`/api/comments/${id}`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json", "X-User-Id": userId },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Subtasks (Smart Task Decomposition)
+// ---------------------------------------------------------------------------
+
+export function fetchSubtasks(taskId: string): Promise<Subtask[]> {
+  return apiFetch<Subtask[]>(`/api/tasks/${taskId}/subtasks`);
+}
+
+export function createSubtask(
+  taskId: string,
+  title: string
+): Promise<Subtask> {
+  return apiFetch<Subtask>(`/api/tasks/${taskId}/subtasks`, {
+    method: "POST",
+    body: JSON.stringify({ title }),
+  });
+}
+
+export function updateSubtask(
+  id: string,
+  data: { title?: string; is_completed?: boolean }
+): Promise<Subtask> {
+  return apiFetch<Subtask>(`/api/subtasks/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteSubtask(
+  id: string
+): Promise<{ message: string; id: string }> {
+  return apiFetch<{ message: string; id: string }>(`/api/subtasks/${id}`, {
+    method: "DELETE",
   });
 }
