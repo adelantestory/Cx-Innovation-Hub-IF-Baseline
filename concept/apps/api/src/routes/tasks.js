@@ -266,12 +266,12 @@ router.post("/tasks/:taskId/subtasks", async (req, res, next) => {
       return next(createError(400, "Subtask title is required"));
     }
 
-    // Place the new subtask at the end
-    const { rows: posRows } = await getPool().query(
-      "SELECT COALESCE(MAX(position), -1) + 1 AS next_pos FROM subtasks WHERE task_id = $1",
+    // Place the new subtask at the end using the current count as the position
+    const { rows: countRows } = await getPool().query(
+      "SELECT COUNT(*)::int AS total FROM subtasks WHERE task_id = $1",
       [req.params.taskId]
     );
-    const nextPos = posRows[0].next_pos;
+    const nextPos = countRows[0].total;
 
     const { rows } = await getPool().query(
       `INSERT INTO subtasks (task_id, title, position)

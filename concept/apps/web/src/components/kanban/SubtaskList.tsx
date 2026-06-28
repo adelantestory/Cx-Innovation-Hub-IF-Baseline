@@ -28,20 +28,28 @@ export default function SubtaskList({
   const completedCount = subtasks.filter((s) => s.is_completed).length;
 
   async function handleToggle(subtask: Subtask) {
-    const updated = await updateSubtask(subtask.id, {
-      is_completed: !subtask.is_completed,
-    });
-    onSubtasksChanged(
-      subtasks.map((s) => (s.id === updated.id ? updated : s))
-    );
+    try {
+      const updated = await updateSubtask(subtask.id, {
+        is_completed: !subtask.is_completed,
+      });
+      onSubtasksChanged(
+        subtasks.map((s) => (s.id === updated.id ? updated : s))
+      );
+    } catch (err) {
+      console.error("Failed to update subtask:", (err as Error).message);
+    }
   }
 
   async function handleCreate() {
     if (!newTitle.trim()) return;
-    const created = await createSubtask(taskId, newTitle.trim());
-    onSubtasksChanged([...subtasks, created]);
-    setNewTitle("");
-    setAddingNew(false);
+    try {
+      const created = await createSubtask(taskId, newTitle.trim());
+      onSubtasksChanged([...subtasks, created]);
+      setNewTitle("");
+      setAddingNew(false);
+    } catch (err) {
+      console.error("Failed to create subtask:", (err as Error).message);
+    }
   }
 
   function startEdit(subtask: Subtask) {
@@ -51,14 +59,22 @@ export default function SubtaskList({
 
   async function handleEditSave(id: string) {
     if (!editTitle.trim()) return;
-    const updated = await updateSubtask(id, { title: editTitle.trim() });
-    onSubtasksChanged(subtasks.map((s) => (s.id === updated.id ? updated : s)));
-    setEditingId(null);
+    try {
+      const updated = await updateSubtask(id, { title: editTitle.trim() });
+      onSubtasksChanged(subtasks.map((s) => (s.id === updated.id ? updated : s)));
+      setEditingId(null);
+    } catch (err) {
+      console.error("Failed to update subtask:", (err as Error).message);
+    }
   }
 
   async function handleDelete(id: string) {
-    await deleteSubtask(id);
-    onSubtasksChanged(subtasks.filter((s) => s.id !== id));
+    try {
+      await deleteSubtask(id);
+      onSubtasksChanged(subtasks.filter((s) => s.id !== id));
+    } catch (err) {
+      console.error("Failed to delete subtask:", (err as Error).message);
+    }
   }
 
   return (
