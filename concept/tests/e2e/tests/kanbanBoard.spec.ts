@@ -13,6 +13,37 @@ import { test, expect } from '@playwright/test';
 
 const KANBAN_COLUMNS = ['To Do', 'In Progress', 'In Review', 'Done'] as const;
 
+async function resetTaskStatus(
+  page: import('@playwright/test').Page,
+  projectName: string,
+  taskTitle: string,
+  status: 'todo' | 'in_progress' | 'in_review' | 'done' = 'todo'
+) {
+  const projectsResponse = await page.request.get('/api/projects');
+  const projects = await projectsResponse.json();
+  const project = projects.find((item: { name: string; id: string }) => item.name === projectName);
+
+  if (!project) {
+    throw new Error(`Project not found: ${projectName}`);
+  }
+
+  const tasksResponse = await page.request.get(`/api/projects/${project.id}/tasks`);
+  const tasks = await tasksResponse.json();
+  const task = tasks.find((item: { title: string; id: string }) => item.title === taskTitle);
+
+  if (!task) {
+    throw new Error(`Task not found: ${taskTitle}`);
+  }
+
+  const resetResponse = await page.request.patch(`/api/tasks/${task.id}/status`, {
+    data: { status, position: 0 },
+  });
+
+  if (!resetResponse.ok()) {
+    throw new Error(`Failed to reset task status for ${taskTitle}`);
+  }
+}
+
 /**
  * Helper: select a user and open a project board.
  */
@@ -28,6 +59,7 @@ async function navigateToBoard(page: import('@playwright/test').Page) {
 
 test.describe('Kanban Board', () => {
   test.beforeEach(async ({ page }) => {
+    await resetTaskStatus(page, 'Website Redesign', 'Design new homepage layout');
     await navigateToBoard(page);
   });
 
@@ -67,13 +99,13 @@ test.describe('Kanban Board', () => {
 
   test('clicking a card opens the task detail modal', async ({ page }) => {
     // Spec: task cards are interactive — clicking shows detail view
-    await page.getByText('Design new homepage layout').click();
+    await page.getByRole('button', { name: /Design new homepage layout/ }).click();
     // Modal overlay should appear — scope assertions to the modal
     // to avoid matching the board elements behind it
     const modal = page.locator('.fixed.inset-0');
     await expect(modal).toBeVisible();
-    await expect(modal.getByText('To Do')).toBeVisible();
-    await expect(modal.getByText('Design new homepage layout')).toBeVisible();
+    await expect(modal.getByText(/TO DO/i)).toBeVisible();
+    await expect(modal.getByText('Design new homepage layout', { exact: true })).toBeVisible();
   });
 
   test('back button returns to project list', async ({ page }) => {
