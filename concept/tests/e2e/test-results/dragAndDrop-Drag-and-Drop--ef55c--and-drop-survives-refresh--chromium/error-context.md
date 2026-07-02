@@ -1,0 +1,60 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - button "Taskify" [ref=e6] [cursor=pointer]
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - generic [ref=e9]: S
+          - generic [ref=e10]: Sarah Chen
+        - button "Switch User" [ref=e11] [cursor=pointer]
+  - generic [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - button "← Projects" [ref=e15] [cursor=pointer]
+        - heading "Website Redesign" [level=2] [ref=e16]
+      - button "New Task" [ref=e17] [cursor=pointer]
+    - generic [ref=e18]:
+      - generic [ref=e20]:
+        - heading "To Do" [level=3] [ref=e21]
+        - generic [ref=e22]: "0"
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - heading "In Progress" [level=3] [ref=e26]
+          - generic [ref=e27]: "1"
+        - button "Implement responsive navigation bar Build the top navigation component with dropdown menus and mobile hamburger fallback. A Alex Rivera" [ref=e29] [cursor=pointer]:
+          - paragraph [ref=e30]: Implement responsive navigation bar
+          - paragraph [ref=e31]: Build the top navigation component with dropdown menus and mobile hamburger fallback.
+          - generic [ref=e32]:
+            - generic [ref=e33]: A
+            - generic [ref=e34]: Alex Rivera
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - heading "In Review" [level=3] [ref=e37]
+          - generic [ref=e38]: "1"
+        - button "Refactor CSS to Tailwind Migrate existing custom CSS to Tailwind utility classes for consistency. M Morgan Lee" [ref=e40] [cursor=pointer]:
+          - paragraph [ref=e41]: Refactor CSS to Tailwind
+          - paragraph [ref=e42]: Migrate existing custom CSS to Tailwind utility classes for consistency.
+          - generic [ref=e43]:
+            - generic [ref=e44]: M
+            - generic [ref=e45]: Morgan Lee
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - heading "Done" [level=3] [ref=e48]
+          - generic [ref=e49]: "2"
+        - generic [ref=e50]:
+          - button "Set up CI/CD pipeline Configure GitHub Actions for automated build, test, and deploy to staging. T Taylor Patel" [ref=e51] [cursor=pointer]:
+            - paragraph [ref=e52]: Set up CI/CD pipeline
+            - paragraph [ref=e53]: Configure GitHub Actions for automated build, test, and deploy to staging.
+            - generic [ref=e54]:
+              - generic [ref=e55]: T
+              - generic [ref=e56]: Taylor Patel
+          - button "Design new homepage layout Create wireframes and mockups for the new homepage with improved navigation and hero section. J Jordan Kim" [ref=e57] [cursor=pointer]:
+            - paragraph [ref=e58]: Design new homepage layout
+            - paragraph [ref=e59]: Create wireframes and mockups for the new homepage with improved navigation and hero section.
+            - generic [ref=e60]:
+              - generic [ref=e61]: J
+              - generic [ref=e62]: Jordan Kim
+```

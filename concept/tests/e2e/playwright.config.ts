@@ -13,7 +13,7 @@ const skipWebServer = process.env.PLAYWRIGHT_SKIP_WEBSERVER === '1';
  * services instead of launching the Vite/Express dev servers from Playwright.
  */
 export default defineConfig({
-  testDir: '../../tests/e2e/tests',
+  testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 1,
@@ -37,14 +37,14 @@ export default defineConfig({
     ? undefined
     : [
         {
-          command: 'cd ../api && npm run dev',
+          command: 'cd ../../apps/api && npm run dev',
           url: 'http://localhost:3000',
           reuseExistingServer: !process.env.CI,
           stdout: 'ignore',
           stderr: 'pipe',
         },
         {
-          command: 'npm run dev',
+          command: 'cd ../../apps/web && npm run dev',
           url: 'http://localhost:5173',
           reuseExistingServer: !process.env.CI,
           stdout: 'ignore',
