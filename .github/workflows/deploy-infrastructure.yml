@@ -299,6 +299,7 @@ jobs:
 
     outputs:
       acr_login_server: ${{ steps.bicep_deploy.outputs.acr_login_server }}
+      api_url: ${{ steps.bicep_deploy.outputs.api_url }}
       resource_group: ${{ steps.vars.outputs.resource_group }}
       environment: ${{ steps.vars.outputs.environment }}
       location: ${{ steps.vars.outputs.location }}
@@ -343,7 +344,7 @@ jobs:
           ACR="${{ needs.deploy.outputs.acr_login_server }}"
           TAG="${{ vars.API_IMAGE_TAG_PERF || 'latest' }}"
           docker build \
-            --build-arg VITE_API_URL="https://placeholder.azurecontainerapps.io" \
+            --build-arg VITE_API_URL="${{ needs.deploy.outputs.api_url }}" \
             -t "${ACR}/taskify-web:${TAG}" \
             -f concept/apps/web/Dockerfile \
             concept/apps/web/
