@@ -1,0 +1,8 @@
+# Copilot instructions for Cx Innovation Hub IF Baseline
+
+- This repository is centered around the local demo stack in concept/docker-compose.yml. When asked to run the application locally, start the stack from the concept folder and verify the health endpoints before proposing further steps.
+- For performance work, prefer the existing Locust workflow under concept/tests/performance and the repository skill at .github/skills/locust-performance-testing/SKILL.md. Reuse the existing scenario structure in concept/tests/performance/scenarios, the shared base class in concept/tests/performance/scenarios/base.py, and the auto-discovery entry point in concept/tests/performance/locustfile.py.
+- If a request involves load testing or coverage, inspect the existing coverage hooks under .github/hooks/scripts first and treat the missing endpoints as concrete tasks to address.
+- Follow the repo conventions for new scenarios: use the test_*.py naming pattern, register new user classes in concept/tests/performance/scenarios/__init__.py, import them in concept/tests/performance/locustfile.py, and keep the dual-import pattern required by the performance skill.
+- For browser automation, place Playwright specs under concept/tests/e2e/tests/ and keep the shared config in concept/tests/e2e/playwright.config.ts. Use the CLI skill at .github/skills/playwright-cli-testing/SKILL.md for token-efficient demo runs and the MCP skill at .github/skills/playwright-mcp-testing/SKILL.md for browser-assisted authoring demos.
+- Keep changes focused and verify them with the relevant Docker or Playwright command before reporting completion.
