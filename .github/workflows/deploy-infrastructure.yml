@@ -16,7 +16,7 @@
 #
 #   Optional GitHub environment or repository variables (used for push trigger):
 #     DEPLOY_UID_PERF          - Unique identifier for resource naming (e.g., abc12)
-#     DEPLOY_LOCATION_PERF     - Azure region (default: eastus)
+#     DEPLOY_LOCATION_PERF     - Azure region (default: centralus)
 #     DEPLOY_ENVIRONMENT_PERF  - Target environment: dev | stg | prd (default: dev)
 #     API_IMAGE_TAG_PERF       - Container image tag (default: latest)
 #
@@ -48,10 +48,10 @@ on:
           - perf
         default: perf
       location:
-        description: 'Azure region (e.g., eastus, westus3)'
+        description: 'Azure region (e.g., centralus, westus3)'
         required: true
         type: string
-        default: eastus
+        default: centralus
       uid:
         description: 'Unique identifier for resource naming (e.g., abc12)'
         required: true
@@ -88,7 +88,7 @@ jobs:
         id: vars
         run: |
           ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_PERF || 'perf' }}"
-          LOCATION="${{ inputs.location || vars.DEPLOY_LOCATION_PERF || 'eastus' }}"
+          LOCATION="${{ inputs.location || vars.DEPLOY_LOCATION_PERF || 'centralus' }}"
           UID_VAL="${{ inputs.uid || vars.DEPLOY_UID_PERF }}"
           RG="rg-${UID_VAL}-taskify-${ENV}"
           if [[ -z "${UID_VAL}" ]]; then
@@ -148,7 +148,7 @@ jobs:
         id: vars
         run: |
           ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_PERF || 'perf' }}"
-          LOCATION="${{ inputs.location || vars.DEPLOY_LOCATION_PERF || 'eastus' }}"
+          LOCATION="${{ inputs.location || vars.DEPLOY_LOCATION_PERF || 'centralus' }}"
           UID_VAL="${{ inputs.uid || vars.DEPLOY_UID_PERF }}"
           IMAGE_TAG="${{ vars.API_IMAGE_TAG_PERF || 'latest' }}"
           RG="rg-${UID_VAL}-taskify-${ENV}"
