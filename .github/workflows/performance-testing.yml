@@ -35,7 +35,7 @@ on:
   workflow_call:
     inputs:
       deploy_uid:
-        description: 'Unique identifier for resource naming'
+        description: 'Unique identifier for resource naming (leave blank to auto-discover latest deployed perf app)'
         required: false
         default: ''
         type: string
@@ -87,7 +87,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy_uid:
-        description: 'Unique identifier for resource naming'
+        description: 'Unique identifier for resource naming (leave blank to auto-discover latest deployed perf app)'
         required: false
         default: ''
         type: string
@@ -510,7 +510,7 @@ jobs:
       - name: Resolve resource names and API URL
         id: vars
         run: |
-          UID_VAL="${{ inputs.deploy_uid || vars.DEPLOY_UID_PERF }}"
+          UID_VAL="${{ inputs.deploy_uid }}"
           ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_PERF || 'perf' }}"
           RG=""
           FQDN=""
