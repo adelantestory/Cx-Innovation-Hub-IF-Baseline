@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en" data-color-mode="light" data-light-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Copilot, Spec-Driven Development &amp; Playwright — Developer Session Guide</title>
+  <link href="https://unpkg.com/@primer/css@21/dist/primer.css" rel="stylesheet" />
+  <style>
+    :root {
+      --brand-copilot: #6e40c9;
+      --brand-copilot-dark: #553098;
+      --brand-spec: #0078d4;
+      --brand-spec-dark: #005a9e;
+      --brand-playwright: #2da44e;
+      --brand-playwright-dark: #1a7f37;
+      --brand-warning: #9a6700;
+      --brand-danger: #cf222e;
+      --hero-gradient: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1c2333 100%);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; margin: 0; scroll-behavior: smooth; }
+    .hero { background: var(--hero-gradient); color: #f0f6fc; padding: 80px 0 64px; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(110,64,201,0.18) 0%, transparent 70%); border-radius: 50%; }
+    .hero h1 { font-size: 42px; font-weight: 800; line-height: 1.1; max-width: 900px; position: relative; }
+    .hero h1 .highlight { color: var(--brand-copilot); }
+    .hero .subtitle { font-size: 18px; color: #8b949e; max-width: 820px; margin-top: 16px; line-height: 1.6; }
+    .hero .badge-row { margin-top: 24px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .section { padding: 48px 0; }
+    .section-alt { background-color: #f6f8fa; }
+    .section-title { font-size: 30px; font-weight: 700; margin-bottom: 8px; }
+    .section-lead { font-size: 17px; color: #656d76; margin-bottom: 32px; max-width: 820px; line-height: 1.6; }
+    .feature-card { border: 1px solid #d0d7de; border-radius: 12px; padding: 24px; height: 100%; transition: box-shadow 0.2s; background: #fff; }
+    .feature-card:hover { border-color: var(--brand-copilot); box-shadow: 0 4px 12px rgba(110,64,201,0.12); }
+    .feature-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: #656d76; line-height: 1.5; }
+    .code-block { background: #0d1117; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    .code-block code { color: #f0f6fc; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; line-height: 1.6; white-space: pre; }
+    .callout { border-left: 4px solid var(--brand-copilot); background: #f5f0ff; border-radius: 0 8px 8px 0; padding: 20px 24px; margin: 24px 0; }
+    .callout p { font-size: 15px; line-height: 1.6; color: #24292f; margin: 0; }
+    .callout strong { color: var(--brand-copilot-dark); }
+    .callout-blue { border-left-color: var(--brand-spec); background: #ddf4ff; }
+    .callout-blue strong { color: var(--brand-spec-dark); }
+    .callout-warn { border-left-color: var(--brand-warning); background: #fff8c5; }
+    .callout-warn strong { color: var(--brand-warning); }
+    .callout-danger { border-left-color: var(--brand-danger); background: #ffebe9; }
+    .callout-success { border-left-color: var(--brand-playwright); background: #dafbe1; }
+    .callout-success strong { color: var(--brand-playwright-dark); }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    @media (max-width: 768px) { .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; } .hero h1 { font-size: 28px; } }
+    .top-nav { background: #0d1117; border-bottom: 1px solid #30363d; padding: 12px 0; position: sticky; top: 0; z-index: 100; }
+    .top-nav a { color: #f0f6fc; text-decoration: none; font-size: 13px; font-weight: 500; padding: 6px 10px; border-radius: 6px; }
+    .top-nav a:hover { background: #21262d; }
+    .nav-inner { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .nav-logo { font-weight: 700; font-size: 15px; margin-right: 12px; }
+    .footer { background: #0d1117; color: #8b949e; padding: 40px 0; }
+    .footer a { color: var(--brand-copilot); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    table.gov-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0; }
+    table.gov-table th { background: #f6f8fa; border-bottom: 2px solid #d0d7de; padding: 12px; text-align: left; font-weight: 600; }
+    table.gov-table td { padding: 12px; border-bottom: 1px solid #d0d7de; color: #656d76; }
+    table.gov-table tr:hover { background: #f6f8fa; }
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding: 8px 0 8px 28px; position: relative; font-size: 14px; line-height: 1.6; color: #24292f; }
+    .checklist li::before { content: '☐'; position: absolute; left: 0; color: var(--brand-copilot); font-size: 16px; }
+    .agenda-step { display: flex; gap: 16px; padding: 16px; border: 1px solid #d0d7de; border-radius: 8px; margin-bottom: 12px; background: #fff; align-items: flex-start; }
+    .agenda-step:hover { border-color: var(--brand-copilot); }
+    .agenda-time { background: var(--brand-copilot); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 16px; white-space: nowrap; min-width: 56px; text-align: center; margin-top: 2px; }
+    .agenda-time.spec { background: var(--brand-spec); }
+    .agenda-time.pw { background: var(--brand-playwright); }
+    .agenda-time.qa { background: #656d76; }
+    .agenda-content h4 { font-size: 15px; margin: 0 0 4px; }
+    .agenda-content p { font-size: 13px; color: #656d76; margin: 0; line-height: 1.5; }
+    .demo-tag { display: inline-block; background: #ddf4ff; color: var(--brand-spec); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
+    .demo-tag.live { background: #ffebe9; color: var(--brand-danger); }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="top-nav"><div class="container-xl px-3"><div class="nav-inner">
+  <span class="nav-logo">🚀 Developer Session Guide</span>
+  <a href="#agenda">Agenda</a>
+  <a href="#copilot">Copilot</a>
+  <a href="#prompts">Prompt Patterns</a>
+  <a href="#migration">Migration</a>
+  <a href="#sdd">SDD &amp; spec-kit</a>
+  <a href="#playwright">Playwright</a>
+  <a href="#pw-agent">Agent Mode</a>
+  <a href="#pw-workflow">Workflow</a>
+  <a href="#next-steps">Next Steps</a>
+</div></div></nav>
+
+<!-- Hero -->
+<section class="hero"><div class="container-xl px-3">
+  <p style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#8b949e; margin-bottom:12px; font-weight:600;">Hands-On Developer Session &mdash; 2026</p>
+  <h1>GitHub Copilot, <span class="highlight">Spec-Driven Development &amp; Playwright</span></h1>
+  <p class="subtitle">A practical, hands-on guide for developers and engineering leadership getting started with GitHub Copilot. Covers day-to-day use cases, prompt patterns, spec-driven development with spec-kit, and Playwright automated QA &mdash; all tailored for C#.NET teams.</p>
+  <div class="badge-row">
+    <span class="Label Label--accent">GitHub Copilot</span>
+    <span class="Label Label--info">C#.NET</span>
+    <span class="Label Label--success">Playwright QA</span>
+    <span class="Label Label--attention">spec-kit SDD</span>
+    <span class="Label Label--done">Agent Mode</span>
+    <span class="Label Label--danger">Hands-On Demos</span>
+  </div>
+</div></section>
+
+<!-- ═══ AGENDA ═══ -->
+<section id="agenda" class="section">
+<div class="container-xl px-3">
+  <h2 class="section-title">Session Agenda &mdash; 60 Minutes</h2>
+  <p class="section-lead">Four segments with live demos. Each section builds on the previous one, progressing from fundamentals through structured development to automated testing.</p>
+
+  <div style="max-width:720px;">
+    <div class="agenda-step">
+      <span class="agenda-time">15 min</span>
+      <div class="agenda-content">
+        <h4>1. Getting Started with GitHub Copilot <span class="demo-tag live">Live Demo</span></h4>
+        <p>Practical use cases, prompt patterns, interaction surfaces (inline, chat, agent mode), and workflow integration tips for C#.NET day-to-day development. Includes library migration prompt patterns.</p>
+      </div>
+    </div>
+    <div class="agenda-step">
+      <span class="agenda-time spec">15 min</span>
+      <div class="agenda-content">
+        <h4>2. Spec-Driven Development with spec-kit <span class="demo-tag live">Live Demo</span></h4>
+        <p>High-level SDD approach: why specifications beat ad-hoc prompting, spec-kit workflow (<code>/speckit.specify</code> &rarr; <code>/speckit.plan</code> &rarr; <code>/speckit.tasks</code>), and how it applies to library migration.</p>
+      </div>
+    </div>
+    <div class="agenda-step">
+      <span class="agenda-time pw">20 min</span>
+      <div class="agenda-content">
+        <h4>3. Playwright for Automated QA <span class="demo-tag live">Live Demo</span></h4>
+        <p>Test authoring with Copilot agent mode, VS Code extension (codegen, trace viewer), Copilot CLI, and C#.NET test orchestration. No MCP required &mdash; everything works out of the box.</p>
+      </div>
+    </div>
+    <div class="agenda-step">
+      <span class="agenda-time qa">10 min</span>
+      <div class="agenda-content">
+        <h4>4. Q&amp;A and Next Steps</h4>
+        <p>Open discussion, team questions, alignment on follow-up actions, and recommended adoption path.</p>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ═══ COPILOT GETTING STARTED ═══ -->
+<section id="copilot" class="section section-alt">
+<div class="container-xl px-3">
+  <h2 class="section-title">Getting Started with GitHub Copilot</h2>
+  <p class="section-lead">Copilot is an AI pair programmer built into VS Code. It provides inline suggestions, conversational chat, autonomous agent mode, and CLI tools &mdash; all designed to accelerate your daily development workflow.</p>
+
+  <h3 class="h4 mb-3">Five Ways to Interact with Copilot</h3>
+  <div class="grid-5" style="margin-bottom:32px;">
+    <div class="feature-card" style="border-top:4px solid var(--brand-copilot);">
+      <h3>💬 Chat View</h3>
+      <p><strong>Ctrl+Alt+I</strong></p>
+      <p>Full conversations, planning, complex questions. Multi-turn dialogue with file references.</p>
+    </div>
+    <div class="feature-card" style="border-top:4px solid var(--brand-copilot);">
+      <h3>✏️ Inline Chat</h3>
+      <p><strong>Ctrl+I</strong></p>
+      <p>Quick targeted edits directly in the editor. Select code &rarr; ask for changes.</p>
+    </div>
+    <div class="feature-card" style="border-top:4px solid var(--brand-copilot);">
+      <h3>⚡ Quick Chat</h3>
+      <p><strong>Ctrl+Shift+Alt+L</strong></p>
+      <p>Fast one-off questions without context switching. Lightweight overlay.</p>
+    </div>
+    <div class="feature-card" style="border-top:4px solid var(--brand-copilot);">
+      <h3>👻 Inline Suggestions</h3>
+      <p><strong>Tab to accept</strong></p>
+      <p>Ghost text completions as you type. Full method implementations, next edit suggestions.</p>
+    </div>
+    <div class="feature-card" style="border-top:4px solid var(--brand-copilot);">
+      <h3>🤖 Agent Mode</h3>
+      <p><strong>Ctrl+Shift+I</strong></p>
+      <p>Autonomous multi-file tasks. Agent plans, implements, runs tests, and self-corrects.</p>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">Top Use Cases for Day-to-Day C#.NET Development</h3>
+  <div class="grid-3" style="margin-bottom:32px;">
+    <div class="feature-card">
+      <h3>✅ Code Completion</h3>
+      <p>Ghost text suggestions as you type. Start writing a method signature and Copilot generates the full implementation. <strong>Next Edit Suggestions (NES)</strong> predict your next edit location.</p>
+      <p style="font-size:12px;margin-top:8px;color:var(--brand-copilot);"><strong>Tip:</strong> Use meaningful method names to guide better suggestions</p>
+    </div>
+    <div class="feature-card">
+      <h3>📖 Code Explanation</h3>
+      <p>Select unfamiliar code and use <code>/explain</code>. Ideal for understanding legacy code before migration or onboarding to a new codebase.</p>
+      <p style="font-size:12px;margin-top:8px;color:var(--brand-copilot);"><strong>Prompt:</strong> "Explain how this PdfReader code handles encrypted PDFs"</p>
+    </div>
+    <div class="feature-card">
+      <h3>🔄 Refactoring</h3>
+      <p>Select code, open inline chat (<code>Ctrl+I</code>), describe the refactoring. Works for async conversion, pattern matching, SOLID principles, and API migration.</p>
+      <p style="font-size:12px;margin-top:8px;color:var(--brand-copilot);"><strong>Prompt:</strong> "Refactor to use async/await pattern"</p>
+    </div>
+    <div class="feature-card">
+      <h3>🧪 Test Generation</h3>
+      <p>Use <code>/tests</code> slash command with a method selected. Generates xUnit, NUnit, or MSTest tests with edge cases, mocks, and assertions.</p>
+      <p style="font-size:12px;margin-top:8px;color:var(--brand-copilot);"><strong>Prompt:</strong> "Generate xUnit tests for PdfConverter including edge cases"</p>
+    </div>
+    <div class="feature-card">
+      <h3>📝 Documentation</h3>
+      <p>Use <code>/doc</code> from inline chat to generate XML doc comments with <code>&lt;summary&gt;</code>, <code>&lt;param&gt;</code>, <code>&lt;returns&gt;</code>, and <code>&lt;exception&gt;</code> tags.</p>
+      <p style="font-size:12px;margin-top:8px;color:var(--brand-copilot);"><strong>Tip:</strong> Select multiple methods and run <code>/doc</code> to batch-generate</p>
+    </div>
+    <div class="feature-card">
+      <h3>🔍 Code Review</h3>
+      <p>Select code and ask Copilot to review for null references, security vulnerabilities, SOLID violations, or performance issues. Also available in Source Control view.</p>
+      <p style="font-size:12px;margin-top:8px;color:var(--brand-copilot);"><strong>Prompt:</strong> "Review for potential null reference exceptions"</p>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">Essential Keyboard Shortcuts</h3>
+  <table class="gov-table">
+    <thead><tr><th>Shortcut</th><th>Action</th><th>When to Use</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Ctrl+Alt+I</strong></td><td>Open Chat view</td><td>Multi-turn conversations, complex questions</td></tr>
+      <tr><td><strong>Ctrl+I</strong></td><td>Inline Chat</td><td>Quick targeted edits in the editor</td></tr>
+      <tr><td><strong>Ctrl+Shift+I</strong></td><td>Agent Mode</td><td>Autonomous multi-file work</td></tr>
+      <tr><td><strong>Tab</strong></td><td>Accept inline suggestion</td><td>Accept ghost text completion</td></tr>
+      <tr><td><strong>Escape</strong></td><td>Dismiss suggestion</td><td>Reject and continue typing</td></tr>
+      <tr><td><strong>Alt+] / Alt+[</strong></td><td>Cycle alternatives</td><td>Browse different suggestion options</td></tr>
+      <tr><td><strong>Ctrl+Alt+.</strong></td><td>Model picker</td><td>Switch between AI models</td></tr>
+      <tr><td><strong>F2</strong></td><td>AI-powered rename</td><td>Intelligent rename suggestions</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="h4 mt-4 mb-3">Key Slash Commands</h3>
+  <table class="gov-table">
+    <thead><tr><th>Command</th><th>Purpose</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>/explain</code></td><td>Explain selected code</td><td>Select a method &rarr; <code>/explain</code></td></tr>
+      <tr><td><code>/fix</code></td><td>Fix errors in selected code</td><td>Select broken code &rarr; <code>/fix</code></td></tr>
+      <tr><td><code>/tests</code></td><td>Generate unit tests</td><td>Select a class &rarr; <code>/tests</code></td></tr>
+      <tr><td><code>/doc</code></td><td>Generate XML doc comments</td><td>Select a method &rarr; <code>/doc</code></td></tr>
+      <tr><td><code>/init</code></td><td>Auto-generate custom instructions</td><td>Run in Chat to bootstrap <code>copilot-instructions.md</code></td></tr>
+      <tr><td><code>/plan</code></td><td>Create structured implementation plan</td><td>"<code>/plan</code> migrate iText to ABCpdf"</td></tr>
+      <tr><td><code>/setupTests</code></td><td>Configure test framework</td><td>Get framework recommendations</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <p><strong>First Thing to Do:</strong> Run <code>/init</code> in Copilot Chat. It auto-generates a <code>.github/copilot-instructions.md</code> file from your project structure, instantly improving all Copilot interactions for every team member. This is the single highest-impact action for a team getting started.</p>
+  </div>
+</div></section>
+
+<!-- ═══ PROMPT PATTERNS ═══ -->
+<section id="prompts" class="section">
+<div class="container-xl px-3">
+  <h2 class="section-title">Prompt Patterns That Work</h2>
+  <p class="section-lead">Six core principles for writing effective prompts, plus patterns specifically designed for C#.NET library migration scenarios.</p>
+
+  <div class="grid-3" style="margin-bottom:32px;">
+    <div class="feature-card">
+      <h3>1. Start General, Then Specific</h3>
+      <p>Give Copilot a broad description first, then list specific requirements.</p>
+      <div class="code-block"><code>// ✅ Good
+Write a C# method that validates
+an email address. Use regex,
+return bool, handle null input,
+follow RFC 5322.</code></div>
+    </div>
+    <div class="feature-card">
+      <h3>2. Give Examples (Few-Shot)</h3>
+      <p>Provide example input/output to guide Copilot&rsquo;s understanding.</p>
+      <div class="code-block"><code>// Provide examples:
+ConvertPageSize(8.5, 11) =&gt; "Letter"
+ConvertPageSize(8.27, 11.69) =&gt; "A4"
+ConvertPageSize(11, 17) =&gt; "Tabloid"</code></div>
+    </div>
+    <div class="feature-card">
+      <h3>3. Break Down Complex Tasks</h3>
+      <p>Don&rsquo;t ask Copilot to &ldquo;build entire PDF pipeline&rdquo;. Break it into steps.</p>
+      <div class="code-block"><code>// Step 1: Read PDF metadata
+// Step 2: Extract text from page
+// Step 3: Batch process PDFs</code></div>
+    </div>
+    <div class="feature-card">
+      <h3>4. Avoid Ambiguity</h3>
+      <p>Be explicit about the language, framework, and desired behavior.</p>
+      <div class="code-block"><code>// ❌ "Fix this"
+// ✅ "Fix the null reference
+//     exception in ProcessDocument
+//     when input PDF is empty"</code></div>
+    </div>
+    <div class="feature-card">
+      <h3>5. Indicate Relevant Code</h3>
+      <p>Open related files. Use <code>#file</code>, <code>#selection</code>, <code>#class</code> to attach context.</p>
+      <div class="code-block"><code>// Use chat variables:
+#file:PdfService.cs
+#selection
+@workspace</code></div>
+    </div>
+    <div class="feature-card">
+      <h3>6. Iterate and Refine</h3>
+      <p>First response not perfect? Refine. Reference previous outputs.</p>
+      <div class="code-block"><code>// After first response:
+"Make the method async instead"
+"Add error handling for
+ empty documents"</code></div>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">When to Use Each Interaction Surface</h3>
+  <table class="gov-table">
+    <thead><tr><th>Scenario</th><th>Best Surface</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Writing new code, need autocomplete</td><td><strong>Inline Suggestions</strong></td><td>Fastest, stays in flow</td></tr>
+      <tr><td>Quick fix on a specific code block</td><td><strong>Inline Chat</strong> (Ctrl+I)</td><td>Targeted, contextual</td></tr>
+      <tr><td>Understand unfamiliar code</td><td><strong>Chat View</strong> (Ctrl+Alt+I)</td><td>Multi-turn conversation</td></tr>
+      <tr><td>Build a new feature across files</td><td><strong>Agent Mode</strong> (Ctrl+Shift+I)</td><td>Autonomous multi-file</td></tr>
+      <tr><td>Quick one-off question</td><td><strong>Quick Chat</strong></td><td>Non-disruptive</td></tr>
+      <tr><td>Plan a complex migration</td><td><strong>/plan</strong> command</td><td>Structured approach</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-warn">
+    <p><strong>Common Beginner Mistakes:</strong> Accepting suggestions blindly without review &bull; Writing mega-prompts instead of breaking them down &bull; Not using slash commands (<code>/explain</code>, <code>/tests</code>, <code>/fix</code>) &bull; Forgetting to select code before asking inline chat &bull; Not setting up custom instructions with <code>/init</code> &bull; Keeping stale chat history instead of starting fresh sessions</p>
+  </div>
+</div></section>
+
+<!-- ═══ MIGRATION USE CASE ═══ -->
+<section id="migration" class="section section-alt">
+<div class="container-xl px-3">
+  <h2 class="section-title">Use Case: Library Migration with Copilot</h2>
+  <p class="section-lead">Practical prompt patterns for migrating between libraries &mdash; demonstrated with a PDF library swap from Apryse iText to Websupergoo ABCpdf in C#.NET. These patterns apply to any library-to-library migration.</p>
+
+  <div class="grid-2" style="margin-bottom: 32px;">
+    <div class="feature-card" style="border-left:4px solid var(--brand-danger);">
+      <h3>🔴 Current Stack</h3>
+      <p><strong>C#.NET</strong> with <strong>Apryse iText</strong> PDF library</p>
+      <p>Tax statement processing (Sovos), PDF generation, form manipulation, text extraction</p>
+    </div>
+    <div class="feature-card" style="border-left:4px solid var(--brand-playwright);">
+      <h3>🟢 Target Stack</h3>
+      <p><strong>C#.NET</strong> with <strong>Websupergoo ABCpdf</strong> .NET library</p>
+      <p>Same functionality, different library API &mdash; behavioral equivalence required</p>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">Migration Prompt Patterns</h3>
+  <table class="gov-table">
+    <thead><tr><th>Phase</th><th>Pattern</th><th>Example Prompt</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Understand Legacy</strong></td>
+        <td>Use <code>/explain</code> on iText code</td>
+        <td><em>Explain what this iText 5 code does &mdash; how it creates the PDF, adds content, and handles font embedding. I need to understand this before migrating to ABCpdf.</em></td>
+      </tr>
+      <tr>
+        <td><strong>2. API Equivalence</strong></td>
+        <td>Ask for equivalent methods</td>
+        <td><em>I&rsquo;m migrating from iText 5 to ABCpdf 13 for .NET. What ABCpdf methods are equivalent to PdfReader.GetPageContent(), PdfStamper.GetOverContent(), and ColumnText.ShowTextAligned()? List each with a C# usage example.</em></td>
+      </tr>
+      <tr>
+        <td><strong>3. Convert Code</strong></td>
+        <td>Select code &rarr; request conversion</td>
+        <td><em>Convert this iText 5 C# code to use ABCpdf 13. Preserve the same functionality: reading a PDF, extracting form field values, and writing them to a Dictionary&lt;string, string&gt;.</em></td>
+      </tr>
+      <tr>
+        <td><strong>4. Plan Migration</strong></td>
+        <td>Use <code>/plan</code> + <code>@workspace</code></td>
+        <td><em>@workspace Analyze all files that reference iTextSharp. List each file, the specific iText APIs used, and suggest an ABCpdf equivalent. Output as a migration checklist.</em></td>
+      </tr>
+      <tr>
+        <td><strong>5. Validate Tests</strong></td>
+        <td>Generate comparison tests</td>
+        <td><em>Generate xUnit integration tests that verify PDF generation produces the same output after migrating from iText to ABCpdf. Test page count, text content, and form field presence.</em></td>
+      </tr>
+      <tr>
+        <td><strong>6. Document Changes</strong></td>
+        <td>Use <code>/doc</code> on migrated code</td>
+        <td><em>/doc &mdash; Generate XML documentation explaining what changed from iText to ABCpdf, behavioral differences, and the ABCpdf version requirement.</em></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="h4 mt-4 mb-3">Agent Mode for Migration Planning</h3>
+  <div class="code-block"><code>// In Agent Mode (Ctrl+Shift+I), use this prompt:
+
+/plan Create a migration plan to replace iText with ABCpdf in this project.
+Consider:
+- Which files need changes
+- What the ABCpdf equivalents are for each iText API
+- What tests need updating
+- What risks exist (Unicode fonts, RTL text, large tables, embedded images)
+- Suggest an incremental rollout approach (one document type at a time)</code></div>
+
+  <div class="callout callout-blue">
+    <p><strong>Key Takeaway:</strong> Copilot excels at library migration when you break the work into phases: <strong>understand</strong> the legacy code, <strong>discover</strong> API equivalences, <strong>convert</strong> incrementally, <strong>validate</strong> with tests, and <strong>document</strong> the changes. Agent mode can automate multi-file discovery and planning.</p>
+  </div>
+</div></section>
+
+<!-- ═══ SDD & SPEC-KIT ═══ -->
+<section id="sdd" class="section">
+<div class="container-xl px-3">
+  <h2 class="section-title">Spec-Driven Development with spec-kit</h2>
+  <p class="section-lead">Stop &ldquo;vibe coding&rdquo; with ad-hoc prompts. Spec-Driven Development (SDD) uses structured specifications as the foundation for AI-assisted code generation &mdash; producing consistent, reviewable, reproducible results.</p>
+
+  <div class="grid-2" style="margin-bottom:32px;">
+    <div>
+      <h3 class="h4 mb-3">Ad-Hoc Prompting</h3>
+      <ul style="font-size:14px; line-height:2; color:#656d76;">
+        <li>❌ Vague, conversational requests</li>
+        <li>❌ Different results every time</li>
+        <li>❌ Context lost between sessions</li>
+        <li>❌ No quality gates</li>
+        <li>❌ Tech stack leaks into requirements</li>
+        <li>❌ One-shot generation</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="h4 mb-3">Spec-Driven Development</h3>
+      <ul style="font-size:14px; line-height:2; color:#656d76;">
+        <li>✅ Structured, detailed specifications</li>
+        <li>✅ Consistent, reproducible output</li>
+        <li>✅ Persistent spec files in repo</li>
+        <li>✅ Built-in validation checklists</li>
+        <li>✅ Separation of what vs how</li>
+        <li>✅ Multi-step refinement</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">What is spec-kit?</h3>
+  <div class="callout callout-blue">
+    <p><strong>spec-kit</strong> is GitHub&rsquo;s official open-source SDD toolkit (<a href="https://github.com/github/spec-kit" target="_blank">github/spec-kit</a> &mdash; 83,700+ stars, MIT license). It provides templates, slash commands, a CLI (<code>specify</code>), and extensions for structured specification-driven development. Fully supports <strong>GitHub Copilot</strong> as an AI agent and <strong>Windows/PowerShell</strong> as a first-class platform.</p>
+  </div>
+
+  <h3 class="h4 mt-4 mb-3">The SDD Workflow</h3>
+  <div class="grid-5" style="margin-bottom:32px;">
+    <div class="feature-card" style="border-top:4px solid var(--brand-spec); text-align: center;">
+      <h3>1️⃣ Constitution</h3>
+      <p><code>/speckit.constitution</code></p>
+      <p style="font-size:12px;">Define project principles and constraints</p>
+    </div>
+    <div class="feature-card" style="border-top:4px solid var(--brand-spec); text-align: center;">
+      <h3>2️⃣ Specify</h3>
+      <p><code>/speckit.specify</code></p>
+      <p style="font-size:12px;">Describe WHAT to build in natural language</p>
+    </div>
+    <div class="feature-card" style="border-top:4px solid var(--brand-spec); text-align: center;">
+      <h3>3️⃣ Plan</h3>
+      <p><code>/speckit.plan</code></p>
+      <p style="font-size:12px;">Provide tech stack, get implementation plan</p>
+    </div>
+    <div class="feature-card" style="border-top:4px solid var(--brand-spec); text-align: center;">
+      <h3>4️⃣ Tasks</h3>
+      <p><code>/speckit.tasks</code></p>
+      <p style="font-size:12px;">Break plan into actionable task list</p>
+    </div>
+    <div class="feature-card" style="border-top:4px solid var(--brand-spec); text-align: center;">
+      <h3>5️⃣ Implement</h3>
+      <p><code>/speckit.implement</code></p>
+      <p style="font-size:12px;">Execute all tasks with AI assistance</p>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">Time Savings: Traditional vs SDD</h3>
+  <div class="grid-2" style="margin-bottom:32px;">
+    <div class="feature-card">
+      <h3>📋 Traditional Approach (~12 hours)</h3>
+      <ul style="font-size:13px;line-height:1.8;color:#656d76;">
+        <li>Write a PRD (2&ndash;3 hours)</li>
+        <li>Create design documents (2&ndash;3 hours)</li>
+        <li>Set up project structure (30 minutes)</li>
+        <li>Write technical specs (3&ndash;4 hours)</li>
+        <li>Create test plans (2 hours)</li>
+      </ul>
+    </div>
+    <div class="feature-card" style="border: 2px solid var(--brand-spec);">
+      <h3>🚀 SDD with spec-kit (~15 minutes)</h3>
+      <ul style="font-size:13px;line-height:1.8;color:#656d76;">
+        <li><code>/speckit.specify</code> (5 minutes)</li>
+        <li><code>/speckit.plan</code> (5 minutes)</li>
+        <li><code>/speckit.tasks</code> (5 minutes)</li>
+        <li style="color:var(--brand-spec);font-weight:600;">~48x faster documentation</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">SDD Applied to Library Migration (iText &rarr; ABCpdf)</h3>
+  <div class="code-block"><code>// Step 1: Define principles
+/speckit.constitution This project migrates PDF generation from iText to ABCpdf
+in a C#.NET application. Principles: maintain behavioral equivalence, preserve
+existing API contracts, all unit tests must continue to pass, no rendering
+regression, support incremental migration (both libraries coexist during transition).
+
+// Step 2: Specify WHAT to migrate
+/speckit.specify Migrate the PDF generation layer from iText to ABCpdf. The system
+generates invoices, reports, and shipping labels. Each document type uses iText APIs
+for text layout, table rendering, image embedding, and barcode generation. The
+migration must produce visually identical output and allow incremental rollout.
+
+// Step 3: Plan HOW to implement
+/speckit.plan Using C#.NET 8, ABCpdf 14, xUnit for testing. Create an abstraction
+layer (IPdfGenerator) that both iText and ABCpdf implement. Migrate one document
+type at a time with feature flags. Include visual regression testing.
+
+// Step 4: Generate tasks &amp; implement
+/speckit.tasks
+/speckit.implement</code></div>
+
+  <h3 class="h4 mt-4 mb-3">Spec File Structure</h3>
+  <table class="gov-table">
+    <thead><tr><th>Section</th><th>Purpose</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>User Scenarios</strong></td><td>Who uses it and how</td><td>"Finance team generates quarterly tax statements as PDFs"</td></tr>
+      <tr><td><strong>Functional Requirements</strong></td><td>What the system must do</td><td>"System must render tables with merged cells identically across both libraries"</td></tr>
+      <tr><td><strong>Key Entities</strong></td><td>Data models involved</td><td>"TaxStatement, PdfTemplate, RenderOptions"</td></tr>
+      <tr><td><strong>Success Criteria</strong></td><td>Measurable outcomes</td><td>"Invoices generated by ABCpdf are pixel-identical to iText output within 2% tolerance"</td></tr>
+      <tr><td><strong>Assumptions</strong></td><td>Constraints and dependencies</td><td>"ABCpdf 14 license is available; all existing test fixtures are reusable"</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="h4 mt-4 mb-3">Benefits for Engineering Leadership</h3>
+  <div class="grid-3">
+    <div class="feature-card">
+      <h3>📐 Consistency</h3>
+      <p>Every developer follows the same structured workflow. Specs are committed to the repo and reviewable in PRs. Templates enforce completeness.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🔄 Reproducibility</h3>
+      <p>Same spec produces similar code regardless of developer or AI session. Specifications persist across sessions &mdash; unlike chat history.</p>
+    </div>
+    <div class="feature-card">
+      <h3>📊 Governance</h3>
+      <p>Constitution defines organizational standards. Code reviews validate against specs. Verify extension detects drift between specs and implementation.</p>
+    </div>
+  </div>
+
+  <h3 class="h4 mt-4 mb-3">Getting Started with spec-kit</h3>
+  <div class="code-block"><code># Prerequisites: Python 3.11+, uv (Python package manager)
+
+# Install spec-kit CLI
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@vX.Y.Z
+
+# Initialize in your project (with GitHub Copilot + PowerShell)
+specify init . --ai copilot --script ps
+
+# Verify setup
+specify check
+
+# Then use slash commands in Copilot Chat:
+# /speckit.constitution  → define project principles
+# /speckit.specify       → describe what to build
+# /speckit.plan          → get implementation plan
+# /speckit.tasks         → break into task list
+# /speckit.implement     → execute tasks</code></div>
+</div></section>
+
+<!-- ═══ PLAYWRIGHT ═══ -->
+<section id="playwright" class="section section-alt">
+<div class="container-xl px-3">
+  <h2 class="section-title">Playwright for Automated QA</h2>
+  <p class="section-lead">Microsoft&rsquo;s open-source end-to-end testing framework. Cross-browser, auto-waiting, resilient locators, built-in codegen and trace viewer. First-class C#.NET support via NuGet &mdash; and everything works without MCP.</p>
+
+  <div class="callout callout-success">
+    <p><strong>No MCP Required:</strong> All Playwright + Copilot features demonstrated in this session work out of the box via the Playwright NuGet package, VS Code extension, Copilot agent mode, and Copilot CLI. MCP is not needed for any core testing workflow.</p>
+  </div>
+
+  <h3 class="h4 mb-3">Key Features</h3>
+  <div class="grid-4" style="margin-bottom:32px;">
+    <div class="feature-card">
+      <h3>🌐 Cross-Browser</h3>
+      <p>Chromium, Firefox, WebKit &mdash; one test suite covers all browsers including Edge and Safari.</p>
+    </div>
+    <div class="feature-card">
+      <h3>⏳ Auto-Waiting</h3>
+      <p>Every action auto-waits for elements to be visible, enabled, and stable. No manual waits or sleeps.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🎯 Resilient Locators</h3>
+      <p><code>GetByRole</code>, <code>GetByLabel</code>, <code>GetByText</code> &mdash; user-facing locators that survive UI refactors.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🎥 Codegen &amp; Trace</h3>
+      <p>Record user flows &rarr; generate C# test code. Trace viewer for step-by-step debugging with DOM snapshots.</p>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">Setup for C#.NET (MSTest)</h3>
+  <div class="code-block"><code># 1. Create a new MSTest project
+dotnet new mstest -n PlaywrightTests
+cd PlaywrightTests
+
+# 2. Install Playwright MSTest NuGet package
+dotnet add package Microsoft.Playwright.MSTest
+
+# 3. Build to generate playwright.ps1
+dotnet build
+
+# 4. Install browsers
+pwsh bin/Debug/net8.0/playwright.ps1 install --with-deps</code></div>
+
+  <h3 class="h4 mt-4 mb-3">First Test (C# MSTest)</h3>
+  <div class="code-block"><code>using System.Text.RegularExpressions;
+using Microsoft.Playwright;
+using Microsoft.Playwright.MSTest;
+
+namespace PlaywrightTests;
+
+[TestClass]
+public class ExampleTest : PageTest
+{
+    [TestMethod]
+    public async Task HasTitle()
+    {
+        await Page.GotoAsync("https://playwright.dev");
+        await Expect(Page).ToHaveTitleAsync(new Regex("Playwright"));
+    }
+
+    [TestMethod]
+    public async Task GetStartedLink()
+    {
+        await Page.GotoAsync("https://playwright.dev");
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Get started" }).ClickAsync();
+        await Expect(Page.GetByRole(AriaRole.Heading,
+            new() { Name = "Installation" })).ToBeVisibleAsync();
+    }
+}</code></div>
+
+  <h3 class="h4 mt-4 mb-3">C# Locators &amp; Assertions Cheat Sheet</h3>
+  <div class="grid-2">
+    <div>
+      <h4 style="font-size:14px;font-weight:600;margin-bottom:8px;">User-Facing Locators (Recommended)</h4>
+      <div class="code-block"><code>// Role locators (default choice)
+Page.GetByRole(AriaRole.Button,
+    new() { Name = "Submit" })
+Page.GetByRole(AriaRole.Link,
+    new() { Name = "Get started" })
+
+// Label locators (form controls)
+Page.GetByLabel("Email")
+Page.GetByLabel("Password")
+
+// Text and placeholder locators
+Page.GetByText("Welcome, John")
+Page.GetByPlaceholder("name@example.com")
+
+// Test ID locators
+Page.GetByTestId("submit-button")</code></div>
+    </div>
+    <div>
+      <h4 style="font-size:14px;font-weight:600;margin-bottom:8px;">Auto-Retrying Assertions</h4>
+      <div class="code-block"><code>// Page-level
+await Expect(Page)
+  .ToHaveTitleAsync(new Regex("Playwright"));
+await Expect(Page)
+  .ToHaveURLAsync(new Regex("dashboard"));
+
+// Element-level
+await Expect(Page.GetByRole(AriaRole.Button))
+  .ToBeVisibleAsync();
+await Expect(Page.GetByRole(AriaRole.Button))
+  .ToBeEnabledAsync();
+await Expect(Page.GetByTestId("status"))
+  .ToHaveTextAsync("Submitted");
+await Expect(Page.GetByLabel("Email"))
+  .ToHaveValueAsync("user@test.com");</code></div>
+    </div>
+  </div>
+
+  <h3 class="h4 mt-4 mb-3">Running Tests</h3>
+  <div class="code-block"><code>dotnet test                                                  # All tests, headless
+dotnet test -- Playwright.BrowserName=firefox                 # Specific browser
+dotnet test -- Playwright.LaunchOptions.Headless=false        # Headed mode (see browser)
+dotnet test -- Playwright.LaunchOptions.Channel=msedge        # Microsoft Edge
+dotnet test --settings:.runsettings                           # Use config file</code></div>
+
+  <h3 class="h4 mt-4 mb-3">VS Code Extension Features</h3>
+  <table class="gov-table">
+    <thead><tr><th>Feature</th><th>How to Access</th><th>What It Does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Run a Test</strong></td><td>Click green play icon next to test</td><td>Execute individual tests with pass/fail status</td></tr>
+      <tr><td><strong>Debug a Test</strong></td><td>Set breakpoint &rarr; right-click &rarr; Debug</td><td>Step through test with live browser</td></tr>
+      <tr><td><strong>Record New Test</strong></td><td>&ldquo;Record new&rdquo; in Playwright sidebar</td><td>Browser opens, interactions generate C# code</td></tr>
+      <tr><td><strong>Pick Locator</strong></td><td>&ldquo;Pick locator&rdquo; in sidebar</td><td>Click any element &rarr; best locator copied</td></tr>
+      <tr><td><strong>Trace Viewer</strong></td><td>Enable &ldquo;Show Trace Viewer&rdquo; in sidebar</td><td>Step-by-step analysis with DOM snapshots</td></tr>
+      <tr><td><strong>Fix with AI</strong></td><td>Sparkle icon next to test failure</td><td>Copilot analyzes error and suggests code fix</td></tr>
+    </tbody>
+  </table>
+</div></section>
+
+<!-- ═══ AGENT MODE + PLAYWRIGHT ═══ -->
+<section id="pw-agent" class="section">
+<div class="container-xl px-3">
+  <h2 class="section-title">Copilot Agent Mode + Playwright</h2>
+  <p class="section-lead">Agent mode is the most powerful tool for Playwright test generation. It reads your project, generates C# test classes, runs <code>dotnet test</code>, reads failures, and self-corrects &mdash; all autonomously, no MCP needed.</p>
+
+  <h3 class="h4 mb-3">What Agent Mode Can Do (Without MCP)</h3>
+  <div class="grid-3" style="margin-bottom:32px;">
+    <div class="feature-card">
+      <h3>📄 Read Project Context</h3>
+      <p>Agent reads existing <code>.cs</code> test files, NuGet packages, solution structure, and <code>.runsettings</code> to match your coding patterns.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🏗️ Generate Complete Tests</h3>
+      <p>Creates full C# test classes with test methods, locators, assertions, Page Object Models, and test initialization.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🔄 Run &amp; Self-Correct</h3>
+      <p>Executes <code>dotnet test</code>, reads failure output, adjusts locators and assertions, and iterates until tests pass.</p>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">Best Prompts for Agent Mode + Playwright</h3>
+  <table class="gov-table">
+    <thead><tr><th>Goal</th><th>Agent Mode Prompt</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Generate test class</strong></td>
+        <td><em>Write a Playwright MSTest class for the login page at /login using C#. Test successful login, invalid credentials error, and empty form validation. Use GetByRole and GetByLabel locators. Extend PageTest.</em></td>
+      </tr>
+      <tr>
+        <td><strong>Create Page Object Model</strong></td>
+        <td><em>Create a Page Object Model for LoginPage in C# with: email/password input locators, SignIn method, GetErrorMessage method. Constructor takes IPage. Match patterns in tests/Pages/.</em></td>
+      </tr>
+      <tr>
+        <td><strong>Fix failing test</strong></td>
+        <td><em>This Playwright test fails with TimeoutException on GetByRole(AriaRole.Button, &ldquo;Submit&rdquo;). The button is inside a modal dialog that appears after clicking &ldquo;Add Item&rdquo;. Fix the test to wait for the dialog first.</em></td>
+      </tr>
+      <tr>
+        <td><strong>Generate from patterns</strong></td>
+        <td><em>Look at the existing Playwright tests in Tests/E2E/ and generate similar tests for the /settings page. Follow the same C# patterns for locators, assertions, and organization.</em></td>
+      </tr>
+      <tr>
+        <td><strong>Add edge cases</strong></td>
+        <td><em>Based on the TodoPage page object, generate additional MSTest methods for: long text (255+ chars), special characters, empty input, and toggling all items.</em></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="h4 mt-4 mb-3">Example: Page Object Model Pattern (C#)</h3>
+  <div class="code-block"><code>using Microsoft.Playwright;
+
+namespace PlaywrightTests.Pages;
+
+public class LoginPage
+{
+    private readonly IPage _page;
+
+    public LoginPage(IPage page) =&gt; _page = page;
+
+    // Locators
+    private ILocator EmailInput =&gt; _page.GetByLabel("Email");
+    private ILocator PasswordInput =&gt; _page.GetByLabel("Password");
+    private ILocator SignInButton =&gt;
+        _page.GetByRole(AriaRole.Button, new() { Name = "Sign In" });
+    private ILocator ErrorMessage =&gt; _page.GetByRole(AriaRole.Alert);
+
+    // Actions
+    public async Task GotoAsync() =&gt; await _page.GotoAsync("/login");
+
+    public async Task LoginAsync(string email, string password)
+    {
+        await EmailInput.FillAsync(email);
+        await PasswordInput.FillAsync(password);
+        await SignInButton.ClickAsync();
+    }
+
+    // Assertions
+    public async Task ExpectErrorMessageAsync(string text) =&gt;
+        await Assertions.Expect(ErrorMessage).ToContainTextAsync(text);
+}
+
+// Usage in tests:
+[TestClass]
+public class LoginTests : PageTest
+{
+    private LoginPage _loginPage = null!;
+
+    [TestInitialize]
+    public async Task Setup()
+    {
+        _loginPage = new LoginPage(Page);
+        await _loginPage.GotoAsync();
+    }
+
+    [TestMethod]
+    public async Task ValidLogin_NavigatesToDashboard()
+    {
+        await _loginPage.LoginAsync("admin@example.com", "password123");
+        await Expect(Page).ToHaveURLAsync(new Regex("/dashboard"));
+    }
+
+    [TestMethod]
+    public async Task InvalidLogin_ShowsError()
+    {
+        await _loginPage.LoginAsync("admin@example.com", "wrong");
+        await _loginPage.ExpectErrorMessageAsync("Invalid credentials");
+    }
+}</code></div>
+
+  <h3 class="h4 mt-4 mb-3">Copilot CLI for Playwright</h3>
+  <div class="callout callout-blue">
+    <p><strong>GitHub Copilot CLI</strong> (<code>copilot</code> command) is a standalone AI agent for the terminal. Interactive mode starts a conversation; <code>Shift+Tab</code> switches to Plan mode for structured analysis. It can set up Playwright, run tests, debug failures, and create CI workflows &mdash; all from the command line.</p>
+  </div>
+
+  <div class="code-block"><code># Interactive mode — start a conversation
+copilot
+&gt; Set up Playwright in this .NET project with MSTest. Install the NuGet
+  package, build, install browsers, and create a first test for the homepage.
+
+# Run and fix tests
+copilot
+&gt; Run the Playwright tests with dotnet test and fix any failures you find
+
+# Create CI workflow (single prompt)
+copilot -p "Create a GitHub Actions workflow that runs .NET Playwright tests
+on push to main. Include dotnet build, browser install, dotnet test, and
+upload playwright trace artifacts." --allow-tool='shell(dotnet)'</code></div>
+</div></section>
+
+<!-- ═══ WORKFLOW ═══ -->
+<section id="pw-workflow" class="section section-alt">
+<div class="container-xl px-3">
+  <h2 class="section-title">Test Authoring Workflow with Copilot</h2>
+  <p class="section-lead">A recommended end-to-end workflow that combines recording, AI generation, refinement, and CI/CD &mdash; using the tools available without MCP.</p>
+
+  <div style="max-width:720px; margin-bottom:32px;">
+    <div class="agenda-step">
+      <span class="agenda-time pw">1</span>
+      <div class="agenda-content">
+        <h4>Record Baseline with Codegen</h4>
+        <p>Use VS Code extension (&ldquo;Record new&rdquo;) or CLI (<code>pwsh playwright.ps1 codegen</code>) to record user flows. Generates C# test code with best locators.</p>
+      </div>
+    </div>
+    <div class="agenda-step">
+      <span class="agenda-time">2</span>
+      <div class="agenda-content">
+        <h4>Refine with Copilot Agent Mode</h4>
+        <p>Open generated test, ask Copilot to replace CSS selectors with <code>GetByRole</code>/<code>GetByLabel</code>, add meaningful assertions, add test cleanup.</p>
+      </div>
+    </div>
+    <div class="agenda-step">
+      <span class="agenda-time">3</span>
+      <div class="agenda-content">
+        <h4>Extract Page Object Models</h4>
+        <p>Ask agent mode to extract locators and actions into Page Object classes. Keeps tests clean and maintainable.</p>
+      </div>
+    </div>
+    <div class="agenda-step">
+      <span class="agenda-time">4</span>
+      <div class="agenda-content">
+        <h4>Generate Edge Cases &amp; Negative Tests</h4>
+        <p>Use agent mode to generate additional test methods: boundary values, special characters, empty inputs, error flows, accessibility checks.</p>
+      </div>
+    </div>
+    <div class="agenda-step">
+      <span class="agenda-time pw">5</span>
+      <div class="agenda-content">
+        <h4>Create CI/CD Pipeline</h4>
+        <p>Use Copilot CLI or agent mode to generate GitHub Actions workflow with <code>dotnet build</code>, browser install, <code>dotnet test</code>, and trace artifact upload.</p>
+      </div>
+    </div>
+    <div class="agenda-step">
+      <span class="agenda-time pw">6</span>
+      <div class="agenda-content">
+        <h4>Debug with Trace Viewer</h4>
+        <p>Analyze failures with step-by-step trace viewer. DOM snapshots, network monitoring, console logs, and source mapping. Use &ldquo;Fix with AI&rdquo; sparkle icon for Copilot-assisted fixes.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="h4 mb-3">Copilot Across the Testing Lifecycle</h3>
+  <table class="gov-table">
+    <thead><tr><th>Phase</th><th>How Copilot Helps</th><th>Tool</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Write tests</strong></td><td>Generate complete C# test classes from natural language</td><td>Agent mode</td></tr>
+      <tr><td><strong>Record tests</strong></td><td>Codegen generates C# code from browser interactions</td><td>VS Code extension</td></tr>
+      <tr><td><strong>Debug failures</strong></td><td>&ldquo;Fix with AI&rdquo; sparkle icon analyzes errors and suggests fixes</td><td>VS Code extension</td></tr>
+      <tr><td><strong>Refactor</strong></td><td>Extract Page Object Models, shared fixtures, test helpers</td><td>Agent mode</td></tr>
+      <tr><td><strong>Maintain</strong></td><td>Update locators when UI changes, fix broken assertions</td><td>Agent mode</td></tr>
+      <tr><td><strong>CI/CD</strong></td><td>Generate GitHub Actions workflows, optimize configuration</td><td>Copilot CLI</td></tr>
+      <tr><td><strong>Review</strong></td><td>Explain what a test does, suggest missing assertions</td><td>Inline chat</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="h4 mt-4 mb-3">GitHub Actions CI for .NET Playwright</h3>
+  <div class="code-block"><code>name: Playwright Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 8.0.x
+    - name: Build &amp; Install
+      run: dotnet build
+    - name: Install browsers
+      run: pwsh bin/Debug/net8.0/playwright.ps1 install --with-deps
+    - name: Run tests
+      run: dotnet test
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-traces
+        path: '**/playwright-traces/'
+        retention-days: 30</code></div>
+</div></section>
+
+<!-- ═══ NEXT STEPS ═══ -->
+<section id="next-steps" class="section">
+<div class="container-xl px-3">
+  <h2 class="section-title">Next Steps &amp; Getting Started Checklist</h2>
+  <p class="section-lead">Recommended actions for your team to hit the ground running with GitHub Copilot, spec-kit, and Playwright.</p>
+
+  <div class="grid-2">
+    <div>
+      <h3 class="h4 mb-3">Week 1: Foundation</h3>
+      <ul class="checklist">
+        <li>Run <code>/init</code> in Copilot Chat to generate custom instructions for your repos</li>
+        <li>Learn the five interaction surfaces: inline suggestions, inline chat, chat panel, quick chat, agent mode</li>
+        <li>Practice the six prompt principles on daily coding tasks</li>
+        <li>Use <code>/explain</code> on unfamiliar legacy code before modifying it</li>
+        <li>Use <code>/tests</code> to generate unit tests for existing methods</li>
+        <li>Try agent mode for one multi-file task</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="h4 mb-3">Week 2: Level Up</h3>
+      <ul class="checklist">
+        <li>Install spec-kit (<code>uv tool install specify-cli</code>) and run <code>specify init . --ai copilot --script ps</code></li>
+        <li>Write your first spec with <code>/speckit.specify</code> for a small feature</li>
+        <li>Set up Playwright in a .NET project and write first test</li>
+        <li>Use Copilot agent mode to generate Playwright tests for an existing page</li>
+        <li>Install the Playwright VS Code extension and try codegen recording</li>
+        <li>Use Copilot CLI (<code>copilot</code>) for terminal-based Playwright workflows</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;">
+    <h3 class="h4 mb-3">Ongoing: Team Adoption</h3>
+    <ul class="checklist">
+      <li>Create a team <code>.github/copilot-instructions.md</code> with your coding standards and conventions</li>
+      <li>Establish SDD workflow for new features: constitution &rarr; specify &rarr; plan &rarr; tasks &rarr; implement</li>
+      <li>Build a Playwright test suite for critical user flows</li>
+      <li>Integrate Playwright tests into CI/CD pipeline (GitHub Actions)</li>
+      <li>Use <code>/plan</code> for migration planning on the iText &rarr; ABCpdf effort</li>
+      <li>Share prompt patterns &mdash; create <code>.prompt.md</code> files for common team tasks</li>
+      <li>Review Copilot adoption metrics and identify areas for deeper training</li>
+    </ul>
+  </div>
+
+  <div class="callout" style="margin-top:32px;">
+    <p><strong>Need Help?</strong> Reach out for follow-up sessions on specific topics: advanced agent mode workflows, SDD presets for your team, Playwright test architecture patterns, or Copilot governance and administration.</p>
+  </div>
+</div></section>
+
+<!-- Footer -->
+<footer class="footer"><div class="container-xl px-3">
+  <h3 style="color:#f0f6fc;font-size:18px;margin-bottom:16px;">References &amp; Documentation</h3>
+  <div class="grid-3" style="font-size:13px;">
+    <div>
+      <p><strong style="color:#f0f6fc;">GitHub Copilot</strong></p>
+      <p><a href="https://docs.github.com/en/copilot/using-github-copilot/getting-started-with-github-copilot">Getting Started with Copilot</a></p>
+      <p><a href="https://docs.github.com/en/copilot/using-github-copilot/prompt-engineering-for-github-copilot">Prompt Engineering Guide</a></p>
+      <p><a href="https://code.visualstudio.com/docs/copilot/overview">Copilot in VS Code</a></p>
+      <p><a href="https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent">Copilot Coding Agent</a></p>
+      <p><a href="https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot">Custom Instructions</a></p>
+    </div>
+    <div>
+      <p><strong style="color:#f0f6fc;">Spec-Driven Development</strong></p>
+      <p><a href="https://github.com/github/spec-kit">spec-kit (GitHub Official)</a></p>
+      <p><a href="https://github.github.io/spec-kit/">spec-kit Documentation</a></p>
+      <p><a href="https://github.com/github/spec-kit/blob/main/spec-driven.md">SDD Methodology</a></p>
+      <p><a href="https://github.com/mnriem/spec-kit-aspnet-brownfield-demo">ASP.NET Brownfield Demo</a></p>
+      <p><a href="https://github.com/mnriem/spec-kit-dotnet-cli-demo">.NET CLI Demo</a></p>
+    </div>
+    <div>
+      <p><strong style="color:#f0f6fc;">Playwright</strong></p>
+      <p><a href="https://playwright.dev/dotnet/docs/intro">Playwright for .NET</a></p>
+      <p><a href="https://playwright.dev/dotnet/docs/writing-tests">Writing Tests (C#)</a></p>
+      <p><a href="https://playwright.dev/dotnet/docs/codegen-intro">Codegen (Test Recording)</a></p>
+      <p><a href="https://playwright.dev/dotnet/docs/ci-intro">CI Setup (GitHub Actions)</a></p>
+      <p><a href="https://playwright.dev/docs/getting-started-vscode">VS Code Extension</a></p>
+    </div>
+  </div>
+  <hr style="border-color:#30363d;margin:24px 0;">
+  <p style="font-size:12px;text-align:center;">GitHub Copilot, Spec-Driven Development &amp; Playwright &mdash; Developer Session Guide &mdash; 2026</p>
+</div></footer>
+
+</body>
+</html>
