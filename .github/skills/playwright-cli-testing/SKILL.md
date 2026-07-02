@@ -1,15 +1,16 @@
 ---
 name: playwright-cli-testing
-description: "Use the Playwright CLI and Playwright test runner to explore, author, and validate browser flows for the Taskify app in a token-efficient way."
+description: "Use the Playwright CLI Skill for common Playwright actions in this repo: inspect selectors, take screenshots, record interactions, and turn them into deterministic specs under concept/tests/e2e/tests."
 ---
 
 # Playwright CLI Testing
 
 ## When to Use
 
+- You want a token-efficient browser workflow that avoids large MCP payloads.
 - You want to inspect or drive the Taskify UI in a real browser session.
 - You want to turn a manual flow into a deterministic Playwright spec under concept/tests/e2e/tests.
-- You want a lightweight workflow that works well in local development and GitHub Actions.
+- You want a workflow that works well in both local development and GitHub Actions.
 
 ## Quick Start
 
@@ -36,36 +37,16 @@ npx playwright test --list
 ## Core Workflow
 
 1. Start or reuse the local stack.
-2. Open the app in a browser session and inspect the page.
-3. Capture the interaction as a focused Playwright spec.
-4. Run the spec and refine selectors or waits until it is stable.
+2. Open the Taskify app in a browser session and inspect the UI.
+3. Capture the interaction with lightweight CLI actions such as snapshot, click, type, and screenshot.
+4. Convert the flow into a focused Playwright spec and refine selectors or waits until it is stable.
 
-## Common Commands
+#
 
-```bash
-# list discovered tests
-npx playwright test --list
+## CLI Patterns to Prefer
 
-# run a single spec
-npx playwright test tests/userSelect.spec.ts
-
-# run a single browser project
-npx playwright test --project=chromium
-
-# generate a new test from a browser session
-npx playwright codegen http://localhost:3000
-```
-
-## Demo Flow
-
-- Begin with a user journey such as selecting a user, viewing the board, or adding a comment.
-- Use the browser to capture the exact steps.
-- Convert the flow into a spec with concise selectors and stable waits.
-- Re-run the spec from the CLI and explain the output.
-
-## Tips
-
-- Prefer deterministic selectors such as data-testid or accessible roles.
+- Use snapshots and targeted interactions to inspect the page before writing assertions.
+- Prefer deterministic selectors such as data-testid, accessible roles, and stable text.
 - Keep waits short and explicit.
 - Reuse the running Docker stack in CI by setting PLAYWRIGHT_SKIP_WEBSERVER=1.
 - Keep each spec focused on one behavior at a time.

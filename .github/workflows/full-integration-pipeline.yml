@@ -1,0 +1,72 @@
+name: Full Integration Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_cloud_performance_tests:
+        description: 'Run Azure cloud load tests in performance stage'
+        required: false
+        default: false
+        type: boolean
+      combined_users:
+        description: 'Combined Locust users'
+        required: false
+        default: '50'
+        type: string
+      combined_duration:
+        description: 'Combined Locust duration (e.g., 2m, 5m)'
+        required: false
+        default: '3m'
+        type: string
+      combined_ramp_rate:
+        description: 'Combined Locust spawn rate'
+        required: false
+        default: '10'
+        type: string
+      scenario_users:
+        description: 'Per-scenario Locust users'
+        required: false
+        default: '50'
+        type: string
+      scenario_duration:
+        description: 'Per-scenario Locust duration (e.g., 2m, 5m)'
+        required: false
+        default: '3m'
+        type: string
+      scenario_ramp_rate:
+        description: 'Per-scenario Locust spawn rate'
+        required: false
+        default: '10'
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: full-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: Stage 1 - Unit Tests
+    uses: ./.github/workflows/unit-testing.yml
+
+  playwright-e2e:
+    name: Stage 2 - Playwright E2E
+    needs: unit-tests
+    uses: ./.github/workflows/web-e2e-testing.yml
+
+  performance-tests:
+    name: Stage 3 - Load and Performance Tests
+    needs: playwright-e2e
+    uses: ./.github/workflows/performance-testing.yml
+    with:
+      run_cloud_tests: ${{ inputs.run_cloud_performance_tests }}
+      combined_users: ${{ inputs.combined_users }}
+      combined_duration: ${{ inputs.combined_duration }}
+      combined_ramp_rate: ${{ inputs.combined_ramp_rate }}
+      scenario_users: ${{ inputs.scenario_users }}
+      scenario_duration: ${{ inputs.scenario_duration }}
+      scenario_ramp_rate: ${{ inputs.scenario_ramp_rate }}
+    secrets: inherit

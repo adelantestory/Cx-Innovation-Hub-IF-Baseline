@@ -32,6 +32,58 @@
 name: Performance Testing
 
 on:
+  workflow_call:
+    inputs:
+      deploy_uid:
+        description: 'Unique identifier for resource naming'
+        required: false
+        default: 'perfv2'
+        type: string
+      environment:
+        description: 'Environment'
+        required: false
+        default: 'perf'
+        type: string
+      target_url:
+        description: 'Override API URL (leave empty to auto-detect from Azure)'
+        required: false
+        default: ''
+        type: string
+      run_cloud_tests:
+        description: 'Run Azure Load Testing (requires deployed infrastructure)'
+        required: false
+        default: false
+        type: boolean
+      combined_users:
+        description: 'Virtual users for combined verification run'
+        required: false
+        default: '50'
+        type: string
+      combined_duration:
+        description: 'Duration for combined verification run (e.g., 2m, 5m, 10m)'
+        required: false
+        default: '3m'
+        type: string
+      combined_ramp_rate:
+        description: 'User spawn rate per second for combined run'
+        required: false
+        default: '10'
+        type: string
+      scenario_users:
+        description: 'Virtual users per individual scenario test'
+        required: false
+        default: '50'
+        type: string
+      scenario_duration:
+        description: 'Duration per individual scenario test (e.g., 2m, 5m, 10m)'
+        required: false
+        default: '3m'
+        type: string
+      scenario_ramp_rate:
+        description: 'User spawn rate per second for scenario tests'
+        required: false
+        default: '10'
+        type: string
   workflow_dispatch:
     inputs:
       deploy_uid:
@@ -433,7 +485,7 @@ jobs:
   cloud-load-test:
     name: "Azure Load Test — ${{ matrix.scenario.description }}"
     needs: [discover-scenarios, local-scenario-tests]
-    if: github.event.inputs.run_cloud_tests == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/demo/performance-testing')
+    if: inputs.run_cloud_tests == true || (github.event_name == 'push' && github.ref == 'refs/heads/demo/performance-testing')
     runs-on: ubuntu-latest
 
     strategy:
