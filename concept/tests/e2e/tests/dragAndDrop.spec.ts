@@ -25,28 +25,29 @@ async function resetTaskStatus(
   taskTitle: string,
   status: 'todo' | 'in_progress' | 'in_review' | 'done' = 'todo'
 ) {
-  await page.evaluate(
-    async ({ projectName, taskTitle, status }) => {
-      const projects = await fetch('/api/projects').then((response) => response.json());
-      const project = projects.find((item: { name: string; id: string }) => item.name === projectName);
-      if (!project) {
-        throw new Error(`Project not found: ${projectName}`);
-      }
+  const projectsResponse = await page.request.get('/api/projects');
+  const projects = await projectsResponse.json();
+  const project = projects.find((item: { name: string; id: string }) => item.name === projectName);
 
-      const tasks = await fetch(`/api/projects/${project.id}/tasks`).then((response) => response.json());
-      const task = tasks.find((item: { title: string; id: string }) => item.title === taskTitle);
-      if (!task) {
-        throw new Error(`Task not found: ${taskTitle}`);
-      }
+  if (!project) {
+    throw new Error(`Project not found: ${projectName}`);
+  }
 
-      await fetch(`/api/tasks/${task.id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, position: 0 }),
-      });
-    },
-    { projectName, taskTitle, status }
-  );
+  const tasksResponse = await page.request.get(`/api/projects/${project.id}/tasks`);
+  const tasks = await tasksResponse.json();
+  const task = tasks.find((item: { title: string; id: string }) => item.title === taskTitle);
+
+  if (!task) {
+    throw new Error(`Task not found: ${taskTitle}`);
+  }
+
+  const resetResponse = await page.request.patch(`/api/tasks/${task.id}/status`, {
+    data: { status, position: 0 },
+  });
+
+  if (!resetResponse.ok()) {
+    throw new Error(`Failed to reset task status for ${taskTitle}`);
+  }
 }
 
 async function navigateToBoard(page: import('@playwright/test').Page) {
@@ -108,8 +109,9 @@ test.describe('Drag and Drop', () => {
 
     // Reload and re-navigate to confirm persistence
     await page.reload();
-    await page.getByText('Website Redesign').click();
-    await expect(page.getByText('To Do')).toBeVisible();
-    await expect(targetColumn).toContainText('Design new homepage layout');
+    await navigateToBoard(page);
+    await expect(page.locator('[data-rfd-droppable-id="in_progress"]')).toContainText(
+      'Design new homepage layout'
+    );
   });
 });
