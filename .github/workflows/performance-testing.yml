@@ -37,7 +37,7 @@ on:
       deploy_uid:
         description: 'Unique identifier for resource naming'
         required: false
-        default: 'perfv2'
+        default: ''
         type: string
       environment:
         description: 'Environment'
@@ -89,7 +89,7 @@ on:
       deploy_uid:
         description: 'Unique identifier for resource naming'
         required: false
-        default: 'perfv2'
+        default: ''
         type: string
       environment:
         description: 'Environment'
@@ -510,9 +510,34 @@ jobs:
       - name: Resolve resource names and API URL
         id: vars
         run: |
-          UID_VAL="${{ inputs.deploy_uid || vars.DEPLOY_UID_PERF || 'perfv2' }}"
+          UID_VAL="${{ inputs.deploy_uid || vars.DEPLOY_UID_PERF }}"
           ENV="${{ inputs.environment || vars.DEPLOY_ENVIRONMENT_PERF || 'perf' }}"
-          RG="rg-${UID_VAL}-taskify-${ENV}"
+          RG=""
+          FQDN=""
+
+          if [ -z "$UID_VAL" ]; then
+            echo "Auto-detecting latest deployed API Container App for environment '${ENV}'..."
+            DISCOVERY=$(az containerapp list \
+              --query "[?ends_with(name, '-taskify-api') && contains(resourceGroup, '-taskify-${ENV}')].{name:name,rg:resourceGroup,fqdn:properties.configuration.ingress.fqdn}" \
+              -o json)
+
+            APP_NAME=$(echo "$DISCOVERY" | jq -r 'sort_by(.name) | last // empty | .name')
+            RG=$(echo "$DISCOVERY" | jq -r 'sort_by(.name) | last // empty | .rg')
+            FQDN=$(echo "$DISCOVERY" | jq -r 'sort_by(.name) | last // empty | .fqdn')
+
+            if [ -n "$APP_NAME" ] && [ "$APP_NAME" != "null" ]; then
+              UID_VAL=$(echo "$APP_NAME" | sed -E 's/^ca-(.*)-taskify-api$/\1/')
+              echo "Discovered API app ${APP_NAME} in ${RG}"
+            else
+              echo "::error::Could not auto-discover a deployed API Container App for environment '${ENV}'. Provide deploy_uid or target_url explicitly."
+              exit 1
+            fi
+          fi
+
+          if [ -z "$RG" ] || [ "$RG" = "null" ]; then
+            RG="rg-${UID_VAL}-taskify-${ENV}"
+          fi
+
           LT_NAME="lt-${UID_VAL}-taskify-${ENV}"
           AI_NAME="appi-${UID_VAL}-taskify-${ENV}"
 
@@ -525,11 +550,13 @@ jobs:
           TARGET_URL="${{ inputs.target_url }}"
           if [ -z "$TARGET_URL" ]; then
             echo "Auto-detecting API URL from Container App ca-${UID_VAL}-taskify-api..."
-            FQDN=$(az containerapp show \
-              --name "ca-${UID_VAL}-taskify-api" \
-              --resource-group "$RG" \
-              --query "properties.configuration.ingress.fqdn" \
-              -o tsv 2>/dev/null || true)
+            if [ -z "$FQDN" ] || [ "$FQDN" = "null" ]; then
+              FQDN=$(az containerapp show \
+                --name "ca-${UID_VAL}-taskify-api" \
+                --resource-group "$RG" \
+                --query "properties.configuration.ingress.fqdn" \
+                -o tsv 2>/dev/null || true)
+            fi
             if [ -n "$FQDN" ]; then
               TARGET_URL="https://${FQDN}"
             else
