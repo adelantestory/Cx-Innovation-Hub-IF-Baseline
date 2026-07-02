@@ -38,6 +38,17 @@ on:
         required: false
         default: '10'
         type: string
+  pull_request:
+    paths:
+      - 'concept/apps/api/**'
+      - 'concept/apps/web/**'
+      - 'concept/tests/unit/**'
+      - 'concept/tests/e2e/**'
+      - 'concept/tests/performance/**'
+      - '.github/workflows/unit-testing.yml'
+      - '.github/workflows/web-e2e-testing.yml'
+      - '.github/workflows/performance-testing.yml'
+      - '.github/workflows/full-integration-pipeline.yml'
 
 permissions:
   contents: read
