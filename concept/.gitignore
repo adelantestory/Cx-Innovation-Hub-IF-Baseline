@@ -19,3 +19,7 @@ __pycache__/
 
 # Performance test results (generated)
 tests/performance/results/
+
+# E2E test artifacts (generated)
+tests/e2e/playwright-report/
+tests/e2e/test-results/

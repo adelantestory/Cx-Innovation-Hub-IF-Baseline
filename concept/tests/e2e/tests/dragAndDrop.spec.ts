@@ -12,6 +12,13 @@
 
 import { test, expect } from '@playwright/test';
 
+function cardLocator(page: import('@playwright/test').Page, title: string) {
+  return page
+    .locator('[data-rfd-draggable-id]')
+    .filter({ hasText: title })
+    .first();
+}
+
 async function navigateToBoard(page: import('@playwright/test').Page) {
   await page.goto('/');
   await page.getByText('Sarah Chen').click();
@@ -32,22 +39,15 @@ test.describe('Drag and Drop', () => {
     // We drag "Design new homepage layout" (seeded in To Do)
     // into the In Progress column.
 
-    const card = page.getByText('Design new homepage layout');
+    const card = cardLocator(page, 'Design new homepage layout');
     const sourceColumn = page.locator('[data-rfd-droppable-id="todo"]');
     const targetColumn = page.locator('[data-rfd-droppable-id="in_progress"]');
 
     // Confirm card is currently in the To Do column
     await expect(sourceColumn).toContainText('Design new homepage layout');
 
-    // @hello-pangea/dnd uses keyboard-based drag as a reliable alternative
-    // to pointer-based drag in Playwright.
-    //
-    // Steps:  Focus card → Space (lift) → ArrowRight (move to next column)
-    //         → Space (drop)
-    await card.focus();
-    await page.keyboard.press('Space');        // lift
-    await page.keyboard.press('ArrowRight');   // move one column right → In Progress
-    await page.keyboard.press('Space');        // drop
+    // Drag the draggable card container into the target droppable column.
+    await card.dragTo(targetColumn);
 
     // Verify the card now lives in the In Progress column
     await expect(targetColumn).toContainText('Design new homepage layout');
@@ -60,16 +60,14 @@ test.describe('Drag and Drop', () => {
     //        columns in the Kanban work board"
     // The API PATCH /api/tasks/:id/status persists the change.
 
-    const card = page.getByText('Design new homepage layout');
+    const card = cardLocator(page, 'Design new homepage layout');
+    const todoColumn = page.locator('[data-rfd-droppable-id="todo"]');
+    const targetColumn = page.locator('[data-rfd-droppable-id="in_progress"]');
 
     // Drag To Do → In Progress
-    await card.focus();
-    await page.keyboard.press('Space');
-    await page.keyboard.press('ArrowRight');
-    await page.keyboard.press('Space');
+    await card.dragTo(targetColumn);
 
     // Wait for optimistic update AND network persist
-    const targetColumn = page.locator('[data-rfd-droppable-id="in_progress"]');
     await expect(targetColumn).toContainText('Design new homepage layout');
 
     // Reload and re-navigate to confirm persistence
@@ -77,5 +75,9 @@ test.describe('Drag and Drop', () => {
     await page.getByText('Website Redesign').click();
     await expect(page.getByText('To Do')).toBeVisible();
     await expect(targetColumn).toContainText('Design new homepage layout');
+
+    // Cleanup: move card back to To Do so subsequent tests keep seeded state.
+    await cardLocator(page, 'Design new homepage layout').dragTo(todoColumn);
+    await expect(todoColumn).toContainText('Design new homepage layout');
   });
 });

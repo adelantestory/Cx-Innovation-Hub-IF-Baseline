@@ -12,10 +12,11 @@ import type { Task } from "../../api/types";
 interface CardProps {
   task: Task;
   index: number;
+  isAssignedToCurrentUser: boolean;
   onClick: (task: Task) => void;
 }
 
-export default function Card({ task, index, onClick }: CardProps) {
+export default function Card({ task, index, isAssignedToCurrentUser, onClick }: CardProps) {
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -24,10 +25,13 @@ export default function Card({ task, index, onClick }: CardProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => onClick(task)}
+          data-own={isAssignedToCurrentUser ? "true" : "false"}
           className={`bg-white rounded-lg shadow-sm border p-3 mb-2 cursor-pointer transition-shadow ${
             snapshot.isDragging
               ? "shadow-lg border-blue-300"
-              : "border-gray-200 hover:shadow-md"
+              : isAssignedToCurrentUser
+                ? "border-blue-300 ring-2 ring-blue-200 hover:shadow-md"
+                : "border-gray-200 hover:shadow-md"
           }`}
         >
           <p className="text-sm font-medium text-gray-900 mb-2">{task.title}</p>
