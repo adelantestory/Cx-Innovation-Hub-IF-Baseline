@@ -19,6 +19,36 @@ function cardLocator(page: import('@playwright/test').Page, title: string) {
     .first();
 }
 
+async function resetTaskStatus(
+  page: import('@playwright/test').Page,
+  projectName: string,
+  taskTitle: string,
+  status: 'todo' | 'in_progress' | 'in_review' | 'done' = 'todo'
+) {
+  await page.evaluate(
+    async ({ projectName, taskTitle, status }) => {
+      const projects = await fetch('/api/projects').then((response) => response.json());
+      const project = projects.find((item: { name: string; id: string }) => item.name === projectName);
+      if (!project) {
+        throw new Error(`Project not found: ${projectName}`);
+      }
+
+      const tasks = await fetch(`/api/projects/${project.id}/tasks`).then((response) => response.json());
+      const task = tasks.find((item: { title: string; id: string }) => item.title === taskTitle);
+      if (!task) {
+        throw new Error(`Task not found: ${taskTitle}`);
+      }
+
+      await fetch(`/api/tasks/${task.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, position: 0 }),
+      });
+    },
+    { projectName, taskTitle, status }
+  );
+}
+
 async function navigateToBoard(page: import('@playwright/test').Page) {
   await page.goto('/');
   await page.getByText('Sarah Chen').click();
@@ -28,6 +58,7 @@ async function navigateToBoard(page: import('@playwright/test').Page) {
 
 test.describe('Drag and Drop', () => {
   test.beforeEach(async ({ page }) => {
+    await resetTaskStatus(page, 'Website Redesign', 'Design new homepage layout');
     await navigateToBoard(page);
   });
 
@@ -46,8 +77,11 @@ test.describe('Drag and Drop', () => {
     // Confirm card is currently in the To Do column
     await expect(sourceColumn).toContainText('Design new homepage layout');
 
-    // Drag the draggable card container into the target droppable column.
-    await card.dragTo(targetColumn);
+    // Keyboard drag is the reliable interaction for this DnD implementation.
+    await card.focus();
+    await page.keyboard.press('Space');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Space');
 
     // Verify the card now lives in the In Progress column
     await expect(targetColumn).toContainText('Design new homepage layout');
@@ -61,11 +95,13 @@ test.describe('Drag and Drop', () => {
     // The API PATCH /api/tasks/:id/status persists the change.
 
     const card = cardLocator(page, 'Design new homepage layout');
-    const todoColumn = page.locator('[data-rfd-droppable-id="todo"]');
     const targetColumn = page.locator('[data-rfd-droppable-id="in_progress"]');
 
     // Drag To Do → In Progress
-    await card.dragTo(targetColumn);
+    await card.focus();
+    await page.keyboard.press('Space');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Space');
 
     // Wait for optimistic update AND network persist
     await expect(targetColumn).toContainText('Design new homepage layout');
@@ -75,9 +111,5 @@ test.describe('Drag and Drop', () => {
     await page.getByText('Website Redesign').click();
     await expect(page.getByText('To Do')).toBeVisible();
     await expect(targetColumn).toContainText('Design new homepage layout');
-
-    // Cleanup: move card back to To Do so subsequent tests keep seeded state.
-    await cardLocator(page, 'Design new homepage layout').dragTo(todoColumn);
-    await expect(todoColumn).toContainText('Design new homepage layout');
   });
 });
