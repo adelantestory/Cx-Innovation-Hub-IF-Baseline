@@ -17,10 +17,29 @@ const { createError } = require("../middleware/errorHandler");
 const router = Router();
 
 /**
- * GET /api/tasks/:taskId/comments
- * Returns all comments for a task, ordered by creation time.
- * Includes author details via JOIN. Threading is handled client-side
- * using parent_comment_id.
+ * @openapi
+ * /tasks/{taskId}/comments:
+ *   get:
+ *     tags: [Comments]
+ *     summary: List comments for a task
+ *     description: Returns all comments for a task ordered by creation time (oldest first). Includes author details. Threading is resolved client-side via `parent_comment_id`.
+ *     parameters:
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The task UUID.
+ *     responses:
+ *       200:
+ *         description: Array of comments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Comment'
  */
 router.get("/tasks/:taskId/comments", async (req, res, next) => {
   try {
@@ -43,10 +62,50 @@ router.get("/tasks/:taskId/comments", async (req, res, next) => {
 });
 
 /**
- * POST /api/tasks/:taskId/comments
- * Creates a new comment on a task. Requires { content } in body.
- * Optional: parent_comment_id for threading.
- * Requires X-User-Id header for author identification.
+ * @openapi
+ * /tasks/{taskId}/comments:
+ *   post:
+ *     tags: [Comments]
+ *     summary: Add a comment to a task
+ *     description: Creates a new comment on a task. `X-User-Id` header identifies the author.
+ *     parameters:
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The task UUID.
+ *       - $ref: '#/components/parameters/XUserId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [content]
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 example: "Looks good to me!"
+ *               parent_comment_id:
+ *                 type: string
+ *                 format: uuid
+ *                 nullable: true
+ *                 description: Set to thread this as a reply.
+ *     responses:
+ *       201:
+ *         description: Comment created.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Missing content or X-User-Id header.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post("/tasks/:taskId/comments", async (req, res, next) => {
   try {
@@ -87,9 +146,57 @@ router.post("/tasks/:taskId/comments", async (req, res, next) => {
 });
 
 /**
- * PUT /api/comments/:id
- * Edits a comment. Only the original author (matched by X-User-Id) can edit.
- * Requires { content } in body.
+ * @openapi
+ * /comments/{id}:
+ *   put:
+ *     tags: [Comments]
+ *     summary: Edit a comment
+ *     description: Updates the content of a comment. Only the original author (identified via `X-User-Id`) may edit.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The comment UUID.
+ *       - $ref: '#/components/parameters/XUserId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [content]
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 example: "Updated comment text"
+ *     responses:
+ *       200:
+ *         description: Updated comment.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Missing content or X-User-Id header.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Caller is not the comment author.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Comment not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.put("/comments/:id", async (req, res, next) => {
   try {
@@ -144,9 +251,53 @@ router.put("/comments/:id", async (req, res, next) => {
 });
 
 /**
- * DELETE /api/comments/:id
- * Deletes a comment. Only the original author (matched by X-User-Id) can delete.
- * Child comments are also deleted via CASCADE.
+ * @openapi
+ * /comments/{id}:
+ *   delete:
+ *     tags: [Comments]
+ *     summary: Delete a comment
+ *     description: Deletes a comment. Only the original author (identified via `X-User-Id`) may delete. Child (threaded) comments are also deleted via CASCADE.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The comment UUID.
+ *       - $ref: '#/components/parameters/XUserId'
+ *     responses:
+ *       200:
+ *         description: Comment deleted.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Comment deleted
+ *                 id:
+ *                   type: string
+ *                   format: uuid
+ *       400:
+ *         description: Missing X-User-Id header.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Caller is not the comment author.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Comment not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete("/comments/:id", async (req, res, next) => {
   try {

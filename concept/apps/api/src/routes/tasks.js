@@ -18,9 +18,29 @@ const router = Router();
 const VALID_STATUSES = ["todo", "in_progress", "in_review", "done"];
 
 /**
- * GET /api/projects/:projectId/tasks
- * Returns all tasks for a project, ordered by status and position.
- * Includes assigned user details via LEFT JOIN.
+ * @openapi
+ * /projects/{projectId}/tasks:
+ *   get:
+ *     tags: [Tasks]
+ *     summary: List tasks for a project
+ *     description: Returns all tasks in a project ordered by position and creation date. Includes assigned user details.
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The project UUID.
+ *     responses:
+ *       200:
+ *         description: Array of tasks.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Task'
  */
 router.get("/projects/:projectId/tasks", async (req, res, next) => {
   try {
@@ -44,9 +64,51 @@ router.get("/projects/:projectId/tasks", async (req, res, next) => {
 });
 
 /**
- * POST /api/projects/:projectId/tasks
- * Creates a new task. Requires { title } in body.
- * Optional: description, assigned_user_id.
+ * @openapi
+ * /projects/{projectId}/tasks:
+ *   post:
+ *     tags: [Tasks]
+ *     summary: Create a task in a project
+ *     description: Creates a new task placed at the end of the `todo` column.
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The project UUID.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title]
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Implement login page"
+ *               description:
+ *                 type: string
+ *                 example: "Build the login page UI and hook up auth"
+ *               assigned_user_id:
+ *                 type: string
+ *                 format: uuid
+ *                 nullable: true
+ *     responses:
+ *       201:
+ *         description: Task created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Task'
+ *       400:
+ *         description: Validation error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post("/projects/:projectId/tasks", async (req, res, next) => {
   try {
@@ -86,8 +148,53 @@ router.post("/projects/:projectId/tasks", async (req, res, next) => {
 });
 
 /**
- * PUT /api/tasks/:id
- * Updates a task's title and/or description.
+ * @openapi
+ * /tasks/{id}:
+ *   put:
+ *     tags: [Tasks]
+ *     summary: Update a task
+ *     description: Updates a task's `title` and/or `description`.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The task UUID.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title]
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Implement login page"
+ *               description:
+ *                 type: string
+ *                 example: "Build the login page UI and hook up auth"
+ *     responses:
+ *       200:
+ *         description: Updated task.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Task'
+ *       400:
+ *         description: Validation error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Task not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.put("/tasks/:id", async (req, res, next) => {
   try {
@@ -124,9 +231,55 @@ router.put("/tasks/:id", async (req, res, next) => {
 });
 
 /**
- * PATCH /api/tasks/:id/status
- * Changes task status and position (used by Kanban drag-and-drop).
- * Requires { status, position } in body.
+ * @openapi
+ * /tasks/{id}/status:
+ *   patch:
+ *     tags: [Tasks]
+ *     summary: Change task status
+ *     description: Updates the status and position of a task. Used by the Kanban drag-and-drop feature.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The task UUID.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status, position]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [todo, in_progress, in_review, done]
+ *                 example: in_progress
+ *               position:
+ *                 type: integer
+ *                 minimum: 0
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Updated task.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Task'
+ *       400:
+ *         description: Validation error (invalid status or missing position).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Task not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.patch("/tasks/:id/status", async (req, res, next) => {
   try {
@@ -170,9 +323,45 @@ router.patch("/tasks/:id/status", async (req, res, next) => {
 });
 
 /**
- * PATCH /api/tasks/:id/assign
- * Assigns or unassigns a user to a task.
- * Requires { assigned_user_id } in body (null to unassign).
+ * @openapi
+ * /tasks/{id}/assign:
+ *   patch:
+ *     tags: [Tasks]
+ *     summary: Assign or unassign a user
+ *     description: Assigns a user to a task. Send `null` for `assigned_user_id` to unassign.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The task UUID.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assigned_user_id:
+ *                 type: string
+ *                 format: uuid
+ *                 nullable: true
+ *                 example: "3f1d2c4a-5678-90ab-cdef-1234567890ab"
+ *     responses:
+ *       200:
+ *         description: Updated task.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Task'
+ *       404:
+ *         description: Task not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.patch("/tasks/:id/assign", async (req, res, next) => {
   try {
@@ -206,8 +395,40 @@ router.patch("/tasks/:id/assign", async (req, res, next) => {
 });
 
 /**
- * DELETE /api/tasks/:id
- * Deletes a task and its associated comments (via CASCADE).
+ * @openapi
+ * /tasks/{id}:
+ *   delete:
+ *     tags: [Tasks]
+ *     summary: Delete a task
+ *     description: Deletes a task and all its associated comments (via CASCADE).
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The task UUID.
+ *     responses:
+ *       200:
+ *         description: Task deleted.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Task deleted
+ *                 id:
+ *                   type: string
+ *                   format: uuid
+ *       404:
+ *         description: Task not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete("/tasks/:id", async (req, res, next) => {
   try {

@@ -13,8 +13,21 @@ const { createError } = require("../middleware/errorHandler");
 const router = Router();
 
 /**
- * GET /api/projects
- * Returns all projects with task count per status.
+ * @openapi
+ * /projects:
+ *   get:
+ *     tags: [Projects]
+ *     summary: List all projects
+ *     description: Returns all projects with total and completed task counts, ordered by creation date (newest first).
+ *     responses:
+ *       200:
+ *         description: Array of projects.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Project'
  */
 router.get("/", async (req, res, next) => {
   try {
@@ -35,8 +48,33 @@ router.get("/", async (req, res, next) => {
 });
 
 /**
- * GET /api/projects/:id
- * Returns a single project with its tasks grouped by status.
+ * @openapi
+ * /projects/{id}:
+ *   get:
+ *     tags: [Projects]
+ *     summary: Get a project by ID
+ *     description: Returns a single project by its UUID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The project UUID.
+ *     responses:
+ *       200:
+ *         description: The requested project.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Project'
+ *       404:
+ *         description: Project not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get("/:id", async (req, res, next) => {
   try {
@@ -54,8 +92,39 @@ router.get("/:id", async (req, res, next) => {
 });
 
 /**
- * POST /api/projects
- * Creates a new project. Requires { name } in request body.
+ * @openapi
+ * /projects:
+ *   post:
+ *     tags: [Projects]
+ *     summary: Create a project
+ *     description: Creates a new project. `name` is required.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Website Redesign"
+ *               description:
+ *                 type: string
+ *                 example: "Full redesign of the company website"
+ *     responses:
+ *       201:
+ *         description: Project created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Project'
+ *       400:
+ *         description: Missing or invalid request body.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post("/", async (req, res, next) => {
   try {

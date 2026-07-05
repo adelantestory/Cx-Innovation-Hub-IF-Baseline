@@ -12,8 +12,21 @@ const { createError } = require("../middleware/errorHandler");
 const router = Router();
 
 /**
- * GET /api/users
- * Returns all users ordered by name.
+ * @openapi
+ * /users:
+ *   get:
+ *     tags: [Users]
+ *     summary: List all users
+ *     description: Returns all users ordered alphabetically by name.
+ *     responses:
+ *       200:
+ *         description: Array of users.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
  */
 router.get("/", async (req, res, next) => {
   try {
@@ -27,8 +40,33 @@ router.get("/", async (req, res, next) => {
 });
 
 /**
- * GET /api/users/:id
- * Returns a single user by UUID.
+ * @openapi
+ * /users/{id}:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get a user by ID
+ *     description: Returns a single user by their UUID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The user UUID.
+ *     responses:
+ *       200:
+ *         description: The requested user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get("/:id", async (req, res, next) => {
   try {
