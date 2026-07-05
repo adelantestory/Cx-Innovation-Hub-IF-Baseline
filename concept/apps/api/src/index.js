@@ -18,6 +18,8 @@
 
 const express = require("express");
 const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
 const { initializePool } = require("./services/database");
 const { errorHandler } = require("./middleware/errorHandler");
 const usersRouter = require("./routes/users");
@@ -46,6 +48,41 @@ async function start() {
   // ---------------------------------------------------------------------------
   // Health Check
   // ---------------------------------------------------------------------------
+  /**
+   * @openapi
+   * /health:
+   *   get:
+   *     tags: [Health]
+   *     summary: API health check
+   *     description: Returns the API and database connection status.
+   *     responses:
+   *       200:
+   *         description: API and database are healthy.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: string
+   *                   example: ok
+   *                 database:
+   *                   type: string
+   *                   example: connected
+   *       503:
+   *         description: Database connection is unavailable.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: string
+   *                   example: error
+   *                 database:
+   *                   type: string
+   *                   example: disconnected
+   */
   app.get("/api/health", async (req, res) => {
     try {
       const { getPool } = require("./services/database");
@@ -54,6 +91,17 @@ async function start() {
     } catch {
       res.status(503).json({ status: "error", database: "disconnected" });
     }
+  });
+
+  // ---------------------------------------------------------------------------
+  // Swagger UI
+  // ---------------------------------------------------------------------------
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: "Taskify API Docs",
+  }));
+  app.get("/api/docs.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(swaggerSpec);
   });
 
   // ---------------------------------------------------------------------------
@@ -75,6 +123,7 @@ async function start() {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Taskify API listening on port ${PORT}`);
     console.log(`Health check: http://localhost:${PORT}/api/health`);
+    console.log(`Swagger UI:   http://localhost:${PORT}/api/docs`);
   });
 }
 
