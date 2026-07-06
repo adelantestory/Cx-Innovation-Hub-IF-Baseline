@@ -1,0 +1,794 @@
+openapi: 3.0.3
+info:
+  title: Taskify API
+  version: 1.0.0
+  description: REST API for the Taskify Kanban application.
+servers:
+  - url: http://localhost:3000
+    description: Local development
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      tags: [Health]
+      responses:
+        '200':
+          description: API and database are available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthConnected'
+        '503':
+          description: Database is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthDisconnected'
+
+  /api/users:
+    get:
+      summary: List users
+      tags: [Users]
+      responses:
+        '200':
+          description: Users returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/{id}:
+    get:
+      summary: Get a user by ID
+      tags: [Users]
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/projects:
+    get:
+      summary: List projects
+      tags: [Projects]
+      responses:
+        '200':
+          description: Projects returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectSummary'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create project
+      tags: [Projects]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/ProjectNameRequired'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/projects/{id}:
+    get:
+      summary: Get project by ID
+      tags: [Projects]
+      parameters:
+        - $ref: '#/components/parameters/ProjectPathId'
+      responses:
+        '200':
+          description: Project returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          $ref: '#/components/responses/ProjectNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/projects/{projectId}/tasks:
+    get:
+      summary: List tasks for a project
+      tags: [Tasks]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Tasks returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create task
+      tags: [Tasks]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/TaskTitleRequired'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tasks/{id}:
+    put:
+      summary: Update task title/description
+      tags: [Tasks]
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/TaskTitleRequired'
+        '404':
+          $ref: '#/components/responses/TaskNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete task
+      tags: [Tasks]
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Task deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteTaskResponse'
+        '404':
+          $ref: '#/components/responses/TaskNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tasks/{id}/status:
+    patch:
+      summary: Update task status and position
+      tags: [Tasks]
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskStatusRequest'
+      responses:
+        '200':
+          description: Task status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/InvalidTaskStatusOrPosition'
+        '404':
+          $ref: '#/components/responses/TaskNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tasks/{id}/assign:
+    patch:
+      summary: Assign or unassign user on task
+      tags: [Tasks]
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignTaskRequest'
+      responses:
+        '200':
+          description: Task assignment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/responses/TaskNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tasks/{taskId}/comments:
+    get:
+      summary: List comments for task
+      tags: [Comments]
+      parameters:
+        - $ref: '#/components/parameters/TaskIdFromTaskPath'
+      responses:
+        '200':
+          description: Comments returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Add comment to task
+      tags: [Comments]
+      parameters:
+        - $ref: '#/components/parameters/TaskIdFromTaskPath'
+        - $ref: '#/components/parameters/XUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/CommentCreateBadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/comments/{id}:
+    put:
+      summary: Edit comment
+      tags: [Comments]
+      parameters:
+        - $ref: '#/components/parameters/CommentId'
+        - $ref: '#/components/parameters/XUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommentRequest'
+      responses:
+        '200':
+          description: Comment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/CommentUpdateBadRequest'
+        '403':
+          $ref: '#/components/responses/CommentForbidden'
+        '404':
+          $ref: '#/components/responses/CommentNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete comment
+      tags: [Comments]
+      parameters:
+        - $ref: '#/components/parameters/CommentId'
+        - $ref: '#/components/parameters/XUserId'
+      responses:
+        '200':
+          description: Comment deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteCommentResponse'
+        '400':
+          $ref: '#/components/responses/XUserIdRequired'
+        '403':
+          $ref: '#/components/responses/CommentForbidden'
+        '404':
+          $ref: '#/components/responses/CommentNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProjectPathId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TaskId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TaskIdFromTaskPath:
+      name: taskId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CommentId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    XUserId:
+      name: X-User-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User ID used for comment ownership checks.
+
+  responses:
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UserNotFound:
+      description: User not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 404
+              message: User not found
+    ProjectNotFound:
+      description: Project not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 404
+              message: Project not found
+    TaskNotFound:
+      description: Task not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 404
+              message: Task not found
+    CommentNotFound:
+      description: Comment not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 404
+              message: Comment not found
+    ProjectNameRequired:
+      description: Project name is required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 400
+              message: Project name is required
+    TaskTitleRequired:
+      description: Task title is required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 400
+              message: Task title is required
+    InvalidTaskStatusOrPosition:
+      description: Invalid status or missing position
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalidStatus:
+              value:
+                error:
+                  status: 400
+                  message: "Invalid status. Must be one of: todo, in_progress, in_review, done"
+            missingPosition:
+              value:
+                error:
+                  status: 400
+                  message: Position is required
+    XUserIdRequired:
+      description: X-User-Id header is required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 400
+              message: X-User-Id header is required
+    CommentCreateBadRequest:
+      description: Missing header or invalid content
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missingHeader:
+              value:
+                error:
+                  status: 400
+                  message: X-User-Id header is required
+            missingContent:
+              value:
+                error:
+                  status: 400
+                  message: Comment content is required
+    CommentUpdateBadRequest:
+      description: Missing header or invalid content
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missingHeader:
+              value:
+                error:
+                  status: 400
+                  message: X-User-Id header is required
+            missingContent:
+              value:
+                error:
+                  status: 400
+                  message: Comment content is required
+    CommentForbidden:
+      description: User does not own the comment
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            editForbidden:
+              value:
+                error:
+                  status: 403
+                  message: You can only edit your own comments
+            deleteForbidden:
+              value:
+                error:
+                  status: 403
+                  message: You can only delete your own comments
+
+  schemas:
+    HealthConnected:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        database:
+          type: string
+          example: connected
+      required: [status, database]
+
+    HealthDisconnected:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        database:
+          type: string
+          example: disconnected
+      required: [status, database]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            status:
+              type: integer
+            message:
+              type: string
+          required: [status, message]
+      required: [error]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        role:
+          type: string
+        avatar_color:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required: [id, name, role, avatar_color, created_at]
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, name, created_at, updated_at]
+
+    ProjectSummary:
+      allOf:
+        - $ref: '#/components/schemas/Project'
+        - type: object
+          properties:
+            task_count:
+              type: integer
+            done_count:
+              type: integer
+          required: [task_count, done_count]
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [todo, in_progress, in_review, done]
+        position:
+          type: integer
+        assigned_user_id:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        assigned_user_name:
+          type: string
+          nullable: true
+        assigned_user_avatar_color:
+          type: string
+          nullable: true
+      required:
+        - id
+        - project_id
+        - title
+        - status
+        - position
+        - created_at
+        - updated_at
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        task_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        parent_comment_id:
+          type: string
+          format: uuid
+          nullable: true
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        author_name:
+          type: string
+        author_avatar_color:
+          type: string
+      required:
+        - id
+        - task_id
+        - user_id
+        - content
+        - created_at
+        - updated_at
+        - author_name
+        - author_avatar_color
+
+    CreateProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required: [name]
+
+    CreateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        assigned_user_id:
+          type: string
+          format: uuid
+          nullable: true
+      required: [title]
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required: [title]
+
+    UpdateTaskStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [todo, in_progress, in_review, done]
+        position:
+          type: integer
+      required: [status, position]
+
+    AssignTaskRequest:
+      type: object
+      properties:
+        assigned_user_id:
+          type: string
+          format: uuid
+          nullable: true
+      required: [assigned_user_id]
+
+    CreateCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        parent_comment_id:
+          type: string
+          format: uuid
+          nullable: true
+      required: [content]
+
+    UpdateCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+      required: [content]
+
+    DeleteTaskResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Task deleted
+        id:
+          type: string
+          format: uuid
+      required: [message, id]
+
+    DeleteCommentResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Comment deleted
+        id:
+          type: string
+          format: uuid
+      required: [message, id]
