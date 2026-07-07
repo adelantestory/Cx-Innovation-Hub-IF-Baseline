@@ -27,17 +27,15 @@ services:
     image: postgres:16-alpine
     container_name: taskify-db
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: taskify
+    env_file:
+      - .env.docker
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./sql:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d taskify"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-taskify}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -53,16 +51,13 @@ services:
       dockerfile: Dockerfile.dev
     container_name: taskify-api
     restart: unless-stopped
+    env_file:
+      - .env.docker
     environment:
       NODE_ENV: development
       PORT: 3000
       # Local PostgreSQL connection (bypasses Key Vault)
       PGHOST: db
-      PGUSER: postgres
-      PGPASSWORD: postgres
-      PGDATABASE: taskify
-      PGPORT: 5432
-      PGSSLMODE: disable
       # Disable Azure Key Vault in local development
       AZURE_KEY_VAULT_URL: ""
       # CORS - allow the Vite dev server origin

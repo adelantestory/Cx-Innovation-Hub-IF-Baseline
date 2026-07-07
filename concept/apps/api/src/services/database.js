@@ -71,7 +71,7 @@ async function initializePool() {
     password,
     database: process.env.PGDATABASE || "taskify",
     port: parseInt(process.env.PGPORT || "5432", 10),
-    ssl: sslMode === "require" ? { rejectUnauthorized: false } : false,
+    ssl: sslMode === "require" ? { rejectUnauthorized: true } : false,
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
