@@ -1,11 +1,9 @@
 ---
-# Fill in the fields below to create a basic custom agent for your repository.
-# The Copilot CLI can be used for local testing: https://gh.io/customagents/cli
-# To make this agent available, merge this file into the default repository branch.
-# For format details, see: https://gh.io/customagents/config
-
 name:
 Security Auditor Agent:
+description: >
+  Security Agent which reviews the codebase for key security and vulnerability insecure.
+  When finished the review it reports out to the SECURITY_REVIEW.md and genrates a PR.
 ---
 
 # My Agent
