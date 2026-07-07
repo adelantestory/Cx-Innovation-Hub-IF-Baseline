@@ -3,7 +3,8 @@ import cors from "cors";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
+import rateLimit from "express-rate-limit";
 import { discoverTests } from "./testDiscovery.js";
 import { runTest, writeContinueSignal } from "./testRunner.js";
 
@@ -22,6 +23,15 @@ const CI_WORKFLOW = "playwright-tests.yml";
 
 app.use(cors({ origin: "http://localhost:5174" }));
 app.use(express.json());
+
+// Rate limit CI routes that execute system commands (10 requests/minute)
+const ciRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again in a minute." },
+});
 
 // Serve recorded test videos
 app.use("/api/videos", express.static(TEST_RESULTS_DIR));
@@ -104,6 +114,16 @@ app.get("/api/tests/run", (req, res) => {
   const testNames = testsParam ? testsParam.split(",").filter(Boolean) : null;
   const headed = headedParam === "true";
 
+  // Validate spec files against the discovered allowlist to prevent command injection
+  const discoveredSuites = discoverTests(TESTS_DIR);
+  const validSpecFiles = new Set(discoveredSuites.map((s) => s.specFile));
+  for (const spec of specFiles) {
+    if (!validSpecFiles.has(spec)) {
+      res.status(400).json({ error: `Invalid spec file: ${spec}` });
+      return;
+    }
+  }
+
   runTest(specFiles, testNames, res, headed);
 });
 
@@ -116,10 +136,10 @@ app.post("/api/tests/continue", (_req, res) => {
 // ── CI Test Execution routes ────────────────────────────────────
 
 function ghApi(endpoint: string): string {
-  return execSync(
-    `gh api ${endpoint}`,
-    { encoding: "utf-8", timeout: 30000 }
-  );
+  return execFileSync("gh", ["api", endpoint], {
+    encoding: "utf-8",
+    timeout: 30000,
+  });
 }
 
 // Workflow summary — static step descriptions from the YAML
@@ -187,14 +207,25 @@ app.get("/api/ci/runs", (_req, res) => {
 });
 
 // Trigger a workflow dispatch (optionally filtered to specific tests)
-app.post("/api/ci/dispatch", (req, res) => {
+app.post("/api/ci/dispatch", ciRateLimit, (req, res) => {
   try {
     const testFilter: string = req.body?.testFilter ?? "";
-    let cmd = `gh api -X POST /repos/${CI_OWNER}/${CI_REPO}/actions/workflows/${CI_WORKFLOW}/dispatches -f ref=demo/playwright-testing`;
-    if (testFilter.trim()) {
-      cmd += ` -f "inputs[test_filter]=${testFilter.trim()}"`;
+
+    // Validate testFilter to prevent command injection
+    if (testFilter.trim() && !/^[\w\s.\-,:]+$/.test(testFilter.trim())) {
+      res.status(400).json({ error: "Invalid test filter: contains disallowed characters" });
+      return;
     }
-    execSync(cmd, { encoding: "utf-8", timeout: 15000 });
+
+    const args = [
+      "api", "-X", "POST",
+      `/repos/${CI_OWNER}/${CI_REPO}/actions/workflows/${CI_WORKFLOW}/dispatches`,
+      "-f", "ref=demo/playwright-testing",
+    ];
+    if (testFilter.trim()) {
+      args.push("-f", `inputs[test_filter]=${testFilter.trim()}`);
+    }
+    execFileSync("gh", args, { encoding: "utf-8", timeout: 15000 });
     res.json({ ok: true, message: "Workflow dispatch triggered" });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -203,9 +234,15 @@ app.post("/api/ci/dispatch", (req, res) => {
 });
 
 // Failure analysis for a specific run
-app.get("/api/ci/failures/:runId", (req, res) => {
+app.get("/api/ci/failures/:runId", ciRateLimit, (req, res) => {
   try {
     const runId = req.params.runId;
+
+    // Validate runId is a positive integer to prevent command injection
+    if (!/^\d+$/.test(runId)) {
+      res.status(400).json({ error: "Invalid run ID: must be a positive integer" });
+      return;
+    }
 
     // Get jobs for this run
     const jobsRaw = ghApi(
@@ -246,8 +283,9 @@ app.get("/api/ci/failures/:runId", (req, res) => {
       // Get job logs
       let logText = "";
       try {
-        logText = execSync(
-          `gh api /repos/${CI_OWNER}/${CI_REPO}/actions/jobs/${job.id}/logs`,
+        logText = execFileSync(
+          "gh",
+          ["api", `/repos/${CI_OWNER}/${CI_REPO}/actions/jobs/${job.id}/logs`],
           { encoding: "utf-8", timeout: 30000 }
         );
       } catch {

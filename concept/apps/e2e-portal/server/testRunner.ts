@@ -243,10 +243,8 @@ export function runTest(specFiles: string[], testNames: string[] | null, res: Re
 
   const args = ["playwright", "test", ...specFiles, `--reporter=${REPORTER_PATH}`, "--retries=0"];
   if (testNames && testNames.length > 0) {
-    // Replace double quotes with '.' (regex any-char) to avoid breaking
-    // cmd.exe shell quoting when the pattern is wrapped in double quotes
-    const pattern = testNames.map((n) => escapeRegex(n).replace(/"/g, ".")).join("|");
-    args.push("--grep", `"${pattern}"`);
+    const pattern = testNames.map((n) => escapeRegex(n)).join("|");
+    args.push("--grep", pattern);
   }
   if (headed) {
     args.push("--headed", "--workers=1");
@@ -287,7 +285,7 @@ export function runTest(specFiles: string[], testNames: string[] | null, res: Re
 
   const child = spawn("npx", args, {
     cwd: WEB_APP_DIR,
-    shell: true,
+    shell: false,
     env,
   });
 
