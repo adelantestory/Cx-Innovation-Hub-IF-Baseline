@@ -296,6 +296,8 @@ This dual-mode pattern allows the same application code to run in both environme
 
 ### API Endpoints
 
+Swagger/OpenAPI documentation is available at `concept/apps/api/swagger.yaml`.
+
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | /api/health | Health check |
