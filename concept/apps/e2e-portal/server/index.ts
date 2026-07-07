@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { execFileSync } from "child_process";
+import rateLimit from "express-rate-limit";
 import { discoverTests } from "./testDiscovery.js";
 import { runTest, writeContinueSignal } from "./testRunner.js";
 
@@ -22,6 +23,15 @@ const CI_WORKFLOW = "playwright-tests.yml";
 
 app.use(cors({ origin: "http://localhost:5174" }));
 app.use(express.json());
+
+// Rate limit CI routes that execute system commands (10 requests/minute)
+const ciRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again in a minute." },
+});
 
 // Serve recorded test videos
 app.use("/api/videos", express.static(TEST_RESULTS_DIR));
@@ -197,12 +207,12 @@ app.get("/api/ci/runs", (_req, res) => {
 });
 
 // Trigger a workflow dispatch (optionally filtered to specific tests)
-app.post("/api/ci/dispatch", (req, res) => {
+app.post("/api/ci/dispatch", ciRateLimit, (req, res) => {
   try {
     const testFilter: string = req.body?.testFilter ?? "";
 
     // Validate testFilter to prevent command injection
-    if (testFilter.trim() && !/^[\w\s.\-,|:]+$/.test(testFilter.trim())) {
+    if (testFilter.trim() && !/^[\w\s.\-,:]+$/.test(testFilter.trim())) {
       res.status(400).json({ error: "Invalid test filter: contains disallowed characters" });
       return;
     }
@@ -224,7 +234,7 @@ app.post("/api/ci/dispatch", (req, res) => {
 });
 
 // Failure analysis for a specific run
-app.get("/api/ci/failures/:runId", (req, res) => {
+app.get("/api/ci/failures/:runId", ciRateLimit, (req, res) => {
   try {
     const runId = req.params.runId;
 
