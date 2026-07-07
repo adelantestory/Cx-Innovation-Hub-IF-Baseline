@@ -20,6 +20,7 @@ const express = require("express");
 const cors = require("cors");
 const { initializePool } = require("./services/database");
 const { errorHandler } = require("./middleware/errorHandler");
+const { rateLimit } = require("./middleware/rateLimit");
 const usersRouter = require("./routes/users");
 const projectsRouter = require("./routes/projects");
 const tasksRouter = require("./routes/tasks");
@@ -37,11 +38,25 @@ async function start() {
   // Middleware
   // ---------------------------------------------------------------------------
   app.use(cors({
-    origin: process.env.CORS_ORIGIN || "*",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "X-User-Id"],
+    maxAge: 86400,
   }));
-  app.use(express.json());
+  app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "no-referrer");
+    res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:3000 http://localhost:5173; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none';"
+    );
+    next();
+  });
+  app.use(express.json({ limit: "100kb" }));
+  app.use(express.urlencoded({ extended: false, limit: "100kb" }));
+  app.use("/api", rateLimit({ windowMs: 60_000, maxRequests: 120 }));
 
   // ---------------------------------------------------------------------------
   // Health Check

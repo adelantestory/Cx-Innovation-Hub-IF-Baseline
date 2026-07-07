@@ -12,17 +12,37 @@
 const { Router } = require("express");
 const { getPool } = require("../services/database");
 const { createError } = require("../middleware/errorHandler");
+const { rateLimit } = require("../middleware/rateLimit");
+const { isUuid, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH, requireUuidParam, sanitizeText } = require("../middleware/security");
 
 const router = Router();
 
 const VALID_STATUSES = ["todo", "in_progress", "in_review", "done"];
+const apiRateLimit = rateLimit({ windowMs: 60_000, maxRequests: 120 });
+
+async function validateAssignedUserId(assignedUserId) {
+  if (!assignedUserId) {
+    return null;
+  }
+
+  const { rows: userRows } = await getPool().query(
+    "SELECT id FROM users WHERE id = $1",
+    [assignedUserId]
+  );
+
+  if (userRows.length === 0) {
+    throw createError(400, "assigned_user_id does not reference a valid user");
+  }
+
+  return assignedUserId;
+}
 
 /**
  * GET /api/projects/:projectId/tasks
  * Returns all tasks for a project, ordered by status and position.
  * Includes assigned user details via LEFT JOIN.
  */
-router.get("/projects/:projectId/tasks", async (req, res, next) => {
+router.get("/projects/:projectId/tasks", requireUuidParam("projectId"), apiRateLimit, async (req, res, next) => {
   try {
     const { rows } = await getPool().query(
       `SELECT
@@ -48,11 +68,32 @@ router.get("/projects/:projectId/tasks", async (req, res, next) => {
  * Creates a new task. Requires { title } in body.
  * Optional: description, assigned_user_id.
  */
-router.post("/projects/:projectId/tasks", async (req, res, next) => {
+router.post("/projects/:projectId/tasks", requireUuidParam("projectId"), apiRateLimit, async (req, res, next) => {
   try {
-    const { title, description, assigned_user_id } = req.body;
-    if (!title || !title.trim()) {
-      return next(createError(400, "Task title is required"));
+    const title = sanitizeText(req.body?.title, { fieldName: "Task title", maxLength: MAX_TITLE_LENGTH });
+    const description = sanitizeText(req.body?.description, {
+      fieldName: "Task description",
+      maxLength: MAX_TEXT_LENGTH,
+      allowEmpty: true,
+    });
+    const assignedUserId = req.body?.assigned_user_id;
+    let normalizedAssignedUserId = null;
+
+    if (assignedUserId !== undefined && assignedUserId !== null) {
+      const assignedValue = typeof assignedUserId === "string" ? assignedUserId.trim() : "";
+      if (!assignedValue) {
+        return next(createError(400, "assigned_user_id cannot be empty"));
+      }
+      if (!isUuid(assignedValue)) {
+        return next(createError(400, "assigned_user_id must be a valid UUID"));
+      }
+      normalizedAssignedUserId = assignedValue;
+    }
+
+    try {
+      normalizedAssignedUserId = await validateAssignedUserId(normalizedAssignedUserId);
+    } catch (err) {
+      return next(err);
     }
 
     // Get the next position for new tasks in the "todo" column
@@ -66,7 +107,7 @@ router.post("/projects/:projectId/tasks", async (req, res, next) => {
       `INSERT INTO tasks (project_id, title, description, status, position, assigned_user_id)
        VALUES ($1, $2, $3, 'todo', $4, $5)
        RETURNING *`,
-      [req.params.projectId, title.trim(), description || null, nextPos, assigned_user_id || null]
+      [req.params.projectId, title, description || null, nextPos, normalizedAssignedUserId]
     );
 
     // Fetch with user details
@@ -89,18 +130,20 @@ router.post("/projects/:projectId/tasks", async (req, res, next) => {
  * PUT /api/tasks/:id
  * Updates a task's title and/or description.
  */
-router.put("/tasks/:id", async (req, res, next) => {
+router.put("/tasks/:id", requireUuidParam("id"), apiRateLimit, async (req, res, next) => {
   try {
-    const { title, description } = req.body;
-    if (!title || !title.trim()) {
-      return next(createError(400, "Task title is required"));
-    }
+    const title = sanitizeText(req.body?.title, { fieldName: "Task title", maxLength: MAX_TITLE_LENGTH });
+    const description = sanitizeText(req.body?.description, {
+      fieldName: "Task description",
+      maxLength: MAX_TEXT_LENGTH,
+      allowEmpty: true,
+    });
 
     const { rows } = await getPool().query(
       `UPDATE tasks SET title = $1, description = $2, updated_at = NOW()
        WHERE id = $3
        RETURNING *`,
-      [title.trim(), description || null, req.params.id]
+      [title, description || null, req.params.id]
     );
 
     if (rows.length === 0) {
@@ -128,7 +171,7 @@ router.put("/tasks/:id", async (req, res, next) => {
  * Changes task status and position (used by Kanban drag-and-drop).
  * Requires { status, position } in body.
  */
-router.patch("/tasks/:id/status", async (req, res, next) => {
+router.patch("/tasks/:id/status", requireUuidParam("id"), apiRateLimit, async (req, res, next) => {
   try {
     const { status, position } = req.body;
 
@@ -138,15 +181,15 @@ router.patch("/tasks/:id/status", async (req, res, next) => {
       );
     }
 
-    if (position === undefined || position === null) {
-      return next(createError(400, "Position is required"));
+    if (position === undefined || position === null || !Number.isInteger(Number(position)) || Number(position) < 0) {
+      return next(createError(400, "Position must be a non-negative integer"));
     }
 
     const { rows } = await getPool().query(
       `UPDATE tasks SET status = $1, position = $2, updated_at = NOW()
        WHERE id = $3
        RETURNING *`,
-      [status, position, req.params.id]
+      [status, Number(position), req.params.id]
     );
 
     if (rows.length === 0) {
@@ -174,15 +217,33 @@ router.patch("/tasks/:id/status", async (req, res, next) => {
  * Assigns or unassigns a user to a task.
  * Requires { assigned_user_id } in body (null to unassign).
  */
-router.patch("/tasks/:id/assign", async (req, res, next) => {
+router.patch("/tasks/:id/assign", requireUuidParam("id"), apiRateLimit, async (req, res, next) => {
   try {
     const { assigned_user_id } = req.body;
+    let normalizedAssignedUserId = null;
+
+    if (assigned_user_id !== undefined && assigned_user_id !== null) {
+      const assignedValue = typeof assigned_user_id === "string" ? assigned_user_id.trim() : "";
+      if (!assignedValue) {
+        return next(createError(400, "assigned_user_id cannot be empty"));
+      }
+      if (!isUuid(assignedValue)) {
+        return next(createError(400, "assigned_user_id must be a valid UUID"));
+      }
+      normalizedAssignedUserId = assignedValue;
+    }
+
+    try {
+      normalizedAssignedUserId = await validateAssignedUserId(normalizedAssignedUserId);
+    } catch (err) {
+      return next(err);
+    }
 
     const { rows } = await getPool().query(
       `UPDATE tasks SET assigned_user_id = $1, updated_at = NOW()
        WHERE id = $2
        RETURNING *`,
-      [assigned_user_id || null, req.params.id]
+      [normalizedAssignedUserId, req.params.id]
     );
 
     if (rows.length === 0) {
@@ -209,7 +270,7 @@ router.patch("/tasks/:id/assign", async (req, res, next) => {
  * DELETE /api/tasks/:id
  * Deletes a task and its associated comments (via CASCADE).
  */
-router.delete("/tasks/:id", async (req, res, next) => {
+router.delete("/tasks/:id", requireUuidParam("id"), apiRateLimit, async (req, res, next) => {
   try {
     const { rows } = await getPool().query(
       "DELETE FROM tasks WHERE id = $1 RETURNING id",
