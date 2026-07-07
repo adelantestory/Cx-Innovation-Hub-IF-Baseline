@@ -51,7 +51,7 @@ The `id` (or any arbitrary command) executes in the server's shell context.
 
 **Fix applied:**
 - Replaced `execSync` with `execFileSync("gh", args)` where `args` is a proper array — shell metacharacters are never interpreted.
-- Added an allowlist regex validation for `testFilter` (`/^[\w\s.\-,|:]+$/`) before use.
+- Added an allowlist regex validation for `testFilter` (`/^[\w\s.\-,:]+$/`) before use.
 
 ---
 
