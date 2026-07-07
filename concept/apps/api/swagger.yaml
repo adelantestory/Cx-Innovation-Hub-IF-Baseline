@@ -751,7 +751,6 @@ components:
           type: string
           format: uuid
           nullable: true
-      required: [assigned_user_id]
 
     CreateCommentRequest:
       type: object
