@@ -48,11 +48,11 @@ test.describe('Kanban Board', () => {
     //        change the current status of the task between the different
     //        columns in the Kanban work board."
     //
-    // Actual database state for "Website Redesign":
+    // Actual database state for "Website Redesign" (005_seed_data.sql):
     //   To Do       → "Design new homepage layout"
     //   In Progress → "Implement responsive navigation bar"
-    //   In Review   → "ensure ci/cd pipelines exist"
-    //   Done        → "Refactor CSS to Tailwind"
+    //   In Review   → "Refactor CSS to Tailwind"
+    //   Done        → "Set up CI/CD pipeline"
 
     // Each column is a droppable identified by status id.
     // Column wrapper has the column header text inside it.
@@ -61,8 +61,8 @@ test.describe('Kanban Board', () => {
 
     await expect(colLocator('todo')).toContainText('Design new homepage layout');
     await expect(colLocator('in_progress')).toContainText('Implement responsive navigation bar');
-    await expect(colLocator('in_review')).toContainText('ensure ci/cd pipelines exist');
-    await expect(colLocator('done')).toContainText('Refactor CSS to Tailwind');
+    await expect(colLocator('in_review')).toContainText('Refactor CSS to Tailwind');
+    await expect(colLocator('done')).toContainText('Set up CI/CD pipeline');
   });
 
   test('clicking a card opens the task detail modal', async ({ page }) => {
