@@ -287,7 +287,6 @@ export function runTest(specFiles: string[], testNames: string[] | null, res: Re
 
   const child = spawn("npx", args, {
     cwd: WEB_APP_DIR,
-    shell: true,
     env,
   });
 
