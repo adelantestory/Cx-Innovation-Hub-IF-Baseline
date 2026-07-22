@@ -1,19 +1,18 @@
-# Azure Innovation Factory - Claude Code Starter Kit
+# Azure Innovation Factory - Starter Kit
 
-This starter kit provides Claude Code agents, templates, and context for implementing Azure solutions through Microsoft's Innovation Factory program. Engagements are **limited to 10 days** and deliver **functional prototypes**, not production systems.
+This starter kit provides agents, templates, and context for implementing Azure solutions through Microsoft's Innovation Factory program. Engagements are **limited to 10 days** and deliver **functional prototypes**, not production systems.
 
 ## Quick Start
 
 1. Copy the contents to your project root
-2. Start Claude Code — agents load automatically
+2. Start the agent environment — agents load automatically
 3. When prompted, indicate the current process stage (1-12)
-4. Read `CLAUDE.md` for the complete process and agent delegation rules
+4. Review the process and agent delegation rules in the project documentation
 
 ## Structure
 
 ```
 .
-├── CLAUDE.md                           # Main instructions (READ THIS FIRST)
 ├── artifacts/                          # Customer-provided discovery materials
 ├── deliverables/                       # Client-facing deliverables
 │   ├── SCOPE_OF_WORK.md
@@ -21,20 +20,15 @@ This starter kit provides Claude Code agents, templates, and context for impleme
 │   ├── POST_MORTEM.md
 │   ├── COST_ESTIMATE.md
 │   └── FINAL_DELIVERY.pptx
-├── concept/                            # Solution code (under git)
-│   ├── .specify/                       # Spec Kit documentation
-│   │   └── memory/
-│   │       └── constitution.md         # Non-negotiable project principles
-│   ├── AZURE_CONFIG.json               # Central configuration
-│   ├── docs/                           # Technical documentation
-│   ├── apps/                           # Application source code
-│   ├── infrastructure/                 # Terraform/Bicep modules
-│   └── sql/                            # Database scripts
-└── .claude/
-    ├── agents/                         # 71 agent definitions
-    ├── context/
-    │   └── INNOVATION_FACTORY.md       # Program context (agents must read)
-    └── templates/                      # Document templates
+└── concept/                            # Solution code (under git)
+    ├── .specify/                       # Spec Kit documentation
+    │   └── memory/
+    │       └── constitution.md         # Non-negotiable project principles
+    ├── AZURE_CONFIG.json               # Central configuration
+    ├── docs/                           # Technical documentation
+    ├── apps/                           # Application source code
+    ├── infrastructure/                 # Terraform/Bicep modules
+    └── sql/                            # Database scripts
 ```
 
 ## Delivery Pipeline
@@ -58,7 +52,7 @@ This starter kit provides Claude Code agents, templates, and context for impleme
 
 ## Templates
 
-All deliverables use templates from `.claude/templates/`:
+All deliverables use templates from `templates/`:
 
 | Document | Purpose |
 |----------|---------|
@@ -112,11 +106,7 @@ Each of 16 Azure services has 4 agents: `-architect`, `-developer`, `-terraform`
 
 | File | Purpose | Owner |
 |------|---------|-------|
-| `CLAUDE.md` | Process and agent rules | — |
-| `.claude/context/INNOVATION_FACTORY.md` | Program principles | — |
 | `concept/.specify/memory/constitution.md` | Technical constraints | — |
 | `concept/AZURE_CONFIG.json` | Resource configuration | `cloud-architect` |
 
 ---
-
-**See `CLAUDE.md` for complete instructions.**
