@@ -622,6 +622,17 @@ flowchart LR
 | CORS | Frontend origin only | Strict origin allowlist |
 | TLS | Enforced (HTTPS for web, SSL for PostgreSQL) | Same, with custom domain certificates |
 
+### Known Limitation: End-User Authentication
+
+The API identifies the active user solely via a client-supplied `X-User-Id` header (set by the frontend from a user picker; see `UserSelect.tsx`). The header value is **not verified against any credential** — the API trusts whatever value the client sends. This is used only to attribute comment authorship and to determine "assigned to me" styling in the UI; it is not a security boundary.
+
+This is a deliberate, documented scope decision for this POC engagement, not an oversight:
+
+- Implementing real end-user authentication (e.g., Entra ID / OAuth2 with verified tokens) is a fundamental architectural decision that affects the frontend, API, and infrastructure, and is out of scope for a time-boxed prototype intended to demonstrate functionality rather than production-grade security.
+- **Any client can currently impersonate any user** by changing the `X-User-Id` header value. There is no session, token, or password involved anywhere in the application.
+
+**Production Recommendation:** Replace the `X-User-Id` header with a verified identity, such as Microsoft Entra ID authentication in front of the frontend (e.g., Easy Auth / App Service authentication or MSAL), with the API validating a signed access token (JWT) on every request and deriving the user identity from validated token claims instead of a client-supplied header.
+
 ---
 
 *Last updated: 2026-02-12*

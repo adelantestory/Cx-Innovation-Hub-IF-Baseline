@@ -883,6 +883,19 @@ Complete list of RBAC role assignments required for the Taskify deployment:
 | Backend to Key Vault | HTTPS (TLS 1.2+) | Enforced by Azure SDK |
 | Container Apps to ACR | HTTPS (TLS 1.2+) | Enforced by Azure platform |
 
+### 6.6 End-User Authentication (Documented, Not Implemented)
+
+**Known Limitation:** The backend API does not authenticate end users. The frontend sends the active user's ID in a plain `X-User-Id` request header (`allowedHeaders: ['Content-Type', 'X-User-Id']` in CORS config), and the API trusts this value without verification. It is used only to attribute comment authorship and to drive "assigned to me" UI styling — it is **not** an access-control mechanism. Any client can impersonate any user by supplying a different header value.
+
+This gap is a deliberate, time-boxed POC scope decision (see `deliverables/SCOPE_OF_WORK.md`, Section 9 — Limitations & Disclaimers) and is not implemented as part of this engagement.
+
+| Aspect | POC Setting | Production Recommendation |
+|--------|-------------|---------------------------|
+| User identity | Client-supplied `X-User-Id` header, unverified | Verified identity via Microsoft Entra ID (e.g., App Service/Container Apps built-in auth or MSAL in the SPA) |
+| API authorization | None — any header value accepted | Validate a signed Entra ID access token (JWT) on every request; derive user identity from validated token claims |
+| Session/token handling | None | Short-lived access tokens with refresh, validated server-side (issuer, audience, signature, expiry) |
+| CORS `allowedHeaders` | `Content-Type`, `X-User-Id` | `Content-Type`, `Authorization` |
+
 ---
 
 ## 7. Networking Configuration
