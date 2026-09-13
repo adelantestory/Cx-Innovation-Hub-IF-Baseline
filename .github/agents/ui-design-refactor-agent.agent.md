@@ -12,7 +12,6 @@ tools:
   - edit
 user-invocable: true
 disable-model-invocation: false
-model: Gemini 3.1 Pro (Preview) (copilot)
 handoffs:
   - label: Run accessibility audit first
     agent: accessibility-audit-agent

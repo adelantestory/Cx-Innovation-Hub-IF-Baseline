@@ -20,10 +20,6 @@ import { test, expect } from '@playwright/test';
 // ---------------------------------------------------------------------------
 let uid: string;
 
-test.beforeEach(() => {
-  uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-});
-
 /**
  * Helper: select a user, open a project, and click a task card to open
  * the detail modal where comments live.
@@ -43,6 +39,10 @@ async function openTaskDetail(
 }
 
 test.describe('Comments', () => {
+  test.beforeEach(() => {
+    uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  });
+
   test('add a new comment to a task', async ({ page }) => {
     // Spec: "leave an unlimited number of comments for a particular card"
     await openTaskDetail(page, 'Sarah Chen', 'Design new homepage layout');

@@ -277,21 +277,22 @@ export function runTest(specFiles: string[], testNames: string[] | null, res: Re
   if (headed) {
     env.SLOW_MO = "1000";
     env.RECORD_VIDEO = "1";
-    env.PAUSE_ON_FAILURE = "1";
-    env.TEST_TIMEOUT = "300000"; // 5 minutes to allow pause-on-failure inspection
-    // Create a unique signal file path for pause-on-failure
-    const signalFile = path.join(os.tmpdir(), `pw-continue-${Date.now()}.signal`);
-    env.CONTINUE_SIGNAL_FILE = signalFile;
-    currentSignalFile = signalFile;
+    console.log(`[testRunner] Headed mode: setting SLOW_MO=${env.SLOW_MO}`);
   }
 
+  console.log(`[testRunner] Spawning: npx ${args.join(" ")}`);
+  console.log(`[testRunner] Env SLOW_MO: ${env.SLOW_MO}`);
+  console.log(`[testRunner] Env RECORD_VIDEO: ${env.RECORD_VIDEO}`);
+  
   const child = spawn("npx", args, {
     cwd: WEB_APP_DIR,
     shell: true,
     env,
   });
 
-  // Parse stderr JSONL lines in real-time
+  // Parse stderr JSONL lines in real-time. Non-JSON lines are Playwright's own
+  // human-readable output (browser install prompts, launch errors, stack traces).
+  // Tee those to the portal server console so real failures are visible.
   const rl = createInterface({ input: child.stderr });
 
   rl.on("line", (line: string) => {
@@ -299,7 +300,11 @@ export function runTest(specFiles: string[], testNames: string[] | null, res: Re
     try {
       event = JSON.parse(line);
     } catch {
-      return; // Ignore non-JSON stderr output
+      // Not a reporter JSONL event — surface it so we can see real Playwright errors.
+      if (line.trim().length > 0) {
+        console.error(`[playwright stderr] ${line}`);
+      }
+      return;
     }
 
     switch (event.event) {
@@ -426,9 +431,13 @@ export function runTest(specFiles: string[], testNames: string[] | null, res: Re
     }
   });
 
-  // Handle stdout (not used with streaming reporter, but capture for debugging)
-  child.stdout.on("data", () => {
-    // Streaming reporter writes to stderr; stdout is unused
+  // Handle stdout — Playwright and npx use stdout for install prompts,
+  // "Downloading Chromium…" messages, and other diagnostics. Tee to console.
+  child.stdout.on("data", (chunk: Buffer) => {
+    const text = chunk.toString().trimEnd();
+    if (text.length > 0) {
+      console.log(`[playwright stdout] ${text}`);
+    }
   });
 
   child.on("error", (err) => {
