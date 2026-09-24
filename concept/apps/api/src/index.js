@@ -13,6 +13,8 @@
 //   PORT                 - HTTP listen port (default: 3000)
 //   AZURE_KEY_VAULT_URL  - Key Vault URI (empty = local mode)
 //   CORS_ORIGIN          - Allowed CORS origin (default: *)
+//   RATE_LIMIT_WINDOW_MS - Rate-limit window in milliseconds (default: 900000)
+//   RATE_LIMIT_MAX_REQUESTS - Requests per window and client IP (default: 100)
 //   See CONFIGURATION.md for full list.
 // =============================================================================
 
@@ -20,6 +22,7 @@ const express = require("express");
 const cors = require("cors");
 const { initializePool } = require("./services/database");
 const { errorHandler } = require("./middleware/errorHandler");
+const { createApiRateLimiter } = require("./middleware/rateLimiter");
 const usersRouter = require("./routes/users");
 const projectsRouter = require("./routes/projects");
 const tasksRouter = require("./routes/tasks");
@@ -27,10 +30,17 @@ const commentsRouter = require("./routes/comments");
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
-async function start() {
-  // Initialize database connection
-  await initializePool();
+async function checkDatabaseHealth(_req, res) {
+  try {
+    const { getPool } = require("./services/database");
+    await getPool().query("SELECT 1");
+    res.json({ status: "ok", database: "connected" });
+  } catch {
+    res.status(503).json({ status: "error", database: "disconnected" });
+  }
+}
 
+function createApp({ healthCheck = checkDatabaseHealth } = {}) {
   const app = express();
 
   // ---------------------------------------------------------------------------
@@ -42,19 +52,12 @@ async function start() {
     allowedHeaders: ["Content-Type", "X-User-Id"],
   }));
   app.use(express.json());
+  app.use("/api", createApiRateLimiter());
 
   // ---------------------------------------------------------------------------
   // Health Check
   // ---------------------------------------------------------------------------
-  app.get("/api/health", async (req, res) => {
-    try {
-      const { getPool } = require("./services/database");
-      await getPool().query("SELECT 1");
-      res.json({ status: "ok", database: "connected" });
-    } catch {
-      res.status(503).json({ status: "error", database: "disconnected" });
-    }
-  });
+  app.get("/api/health", healthCheck);
 
   // ---------------------------------------------------------------------------
   // Routes
@@ -69,6 +72,14 @@ async function start() {
   // ---------------------------------------------------------------------------
   app.use(errorHandler);
 
+  return app;
+}
+
+async function start() {
+  // Initialize database connection before accepting requests.
+  await initializePool();
+  const app = createApp();
+
   // ---------------------------------------------------------------------------
   // Start Server
   // ---------------------------------------------------------------------------
@@ -78,7 +89,11 @@ async function start() {
   });
 }
 
-start().catch((err) => {
-  console.error("Failed to start Taskify API:", err.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  start().catch((err) => {
+    console.error("Failed to start Taskify API:", err.message);
+    process.exit(1);
+  });
+}
+
+module.exports = { createApp, start };
